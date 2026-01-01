@@ -1,21 +1,5 @@
 /* Immersive Landing Page Styles */
-:root {
-    --bg-deep: #000000;
-    --accent-primary: #6366f1;
-    --accent-secondary: #a855f7;
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.6);
-}
-
-body {
-    background-color: var(--bg-deep);
-    color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-    margin: 0;
-}
+/* Note: Core variables and global responsive styles are in theme.css */
 
 /* 3D Canvas Container */
 #canvas-container {
@@ -35,129 +19,17 @@ body {
     z-index: 1;
 }
 
-/* Typography */
-.display-1 {
-    font-size: 5rem;
-    letter-spacing: -0.02em;
-    line-height: 1;
-}
-
-.text-stroke {
-    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
-    color: transparent;
-}
-
-.tracking-tight {
-    letter-spacing: -0.03em;
-}
-
-/* Hero Section */
+/* Hero Section Specifics */
 .immersive-hero {
     min-height: 100vh;
     padding-top: 4rem;
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.hero-badge {
-    display: inline-block;
-}
-
-.badge-glass {
-    background: rgba(99, 102, 241, 0.1);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    color: #818cf8;
-    padding: 0.5rem 1.5rem;
-    border-radius: 50px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    backdrop-filter: blur(10px);
-}
-
-/* Buttons */
-.btn-glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 1rem 2.5rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    transition: all 0.3s ease;
-    border-radius: 0;
-    /* Sharp edges for futuristic look */
-}
-
-.btn-glass:hover {
-    background: white;
-    color: black;
-    transform: translateY(-2px);
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-}
-
-.btn-glass-outline {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 1rem 2.5rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    transition: all 0.3s ease;
-    border-radius: 0;
-}
-
-.btn-glass-outline:hover {
-    border-color: white;
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.btn-xl {
-    font-size: 1.25rem;
-    padding: 1.25rem 3.5rem;
-}
-
-/* Scroll Indicator */
-.scroll-indicator {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    opacity: 0.5;
-}
-
-.mouse {
-    width: 26px;
-    height: 40px;
-    border: 2px solid white;
-    border-radius: 20px;
-    margin: 0 auto 10px;
-    position: relative;
-}
-
-.mouse::before {
-    content: '';
-    position: absolute;
-    top: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background: white;
-    border-radius: 50%;
-    animation: scrollMouse 2s infinite;
-}
-
-@keyframes scrollMouse {
-    0% {
-        top: 6px;
-        opacity: 1;
-    }
-
-    100% {
-        top: 20px;
-        opacity: 0;
-    }
+.hero-content {
+    width: 100%;
 }
 
 /* Features Section */
@@ -171,6 +43,7 @@ body {
     transition: transform 0.4s ease, border-color 0.4s ease;
     position: relative;
     overflow: hidden;
+    border-radius: 1.5rem;
 }
 
 .glass-card-feature:hover {
@@ -216,7 +89,7 @@ body {
 }
 
 .stat-number {
-    font-size: 3.5rem;
+    font-size: clamp(2.5rem, 6vw, 3.5rem);
     font-weight: 700;
     background: linear-gradient(to right, #fff, #a5b4fc);
     -webkit-background-clip: text;
@@ -231,57 +104,45 @@ body {
     font-size: 0.875rem;
 }
 
-/* Animations */
-.fade-in-up {
-    opacity: 0;
-    transform: translateY(30px);
-    animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.fade-in-on-scroll {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.fade-in-on-scroll.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.delay-100 {
-    animation-delay: 0.1s;
-    transition-delay: 0.1s;
-}
-
-.delay-200 {
-    animation-delay: 0.2s;
-    transition-delay: 0.2s;
-}
-
-.delay-300 {
-    animation-delay: 0.3s;
-    transition-delay: 0.3s;
-}
-
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Responsive */
+/* Responsive Overrides */
 @media (max-width: 768px) {
-    .display-1 {
-        font-size: 3rem;
-    }
-
     .immersive-hero {
         padding-top: 6rem;
+        min-height: auto;
+        padding-bottom: 4rem;
     }
 
     .glass-card-feature {
         padding: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .feature-number {
+        font-size: 3rem;
+        top: 0.5rem;
+        right: 1rem;
+    }
+
+    .glass-strip {
+        padding: 3rem 0;
+    }
+
+    .stat-item {
+        margin-bottom: 2rem;
+    }
+
+    .stat-item:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .display-1 {
+        font-size: 2.5rem;
+    }
+
+    .btn-xl {
+        font-size: 1.1rem;
+        padding: 1rem 2rem;
     }
 }

@@ -41,6 +41,49 @@ body {
     border-color: var(--bs-primary);
 }
 
+/* Bootstrap Overrides & Custom Styles */
+
+:root {
+    --bs-body-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --bs-primary: #6366f1;
+    --bs-primary-rgb: 99, 102, 241;
+    --bs-body-bg: #020617;
+    /* Deep dark background */
+    --bs-body-color: #f8fafc;
+}
+
+body {
+    background-image:
+        radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.08), transparent 25%);
+    background-attachment: fixed;
+}
+
+/* Glassmorphism for Cards */
+.card {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: rgba(30, 41, 59, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Navbar Tweaks */
+.navbar {
+    background: rgba(15, 23, 42, 0.8) !important;
+    backdrop-filter: blur(12px);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
 .btn-primary:hover {
     background-color: #4f46e5;
     border-color: #4f46e5;
@@ -49,20 +92,29 @@ body {
 /* Chat Interface Specifics */
 .chat-container {
     height: calc(100vh - 160px);
-    min-height: 500px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        height: calc(100vh - 120px);
+    }
 }
 
 .chat-box {
-    height: 100%;
+    flex-grow: 1;
     overflow-y: auto;
-    padding-right: 10px;
+    padding-right: 5px;
 }
 
 .chat-message {
-    max-width: 80%;
+    max-width: 90%;
     margin-bottom: 1rem;
-    padding: 1rem;
+    padding: 0.875rem;
     border-radius: 1rem;
+    font-size: 0.95rem;
 }
 
 .chat-message.user {
@@ -93,10 +145,23 @@ body {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
+/* Responsive Grids */
+@media (max-width: 768px) {
+    .row.g-4 {
+        --bs-gutter-y: 1rem;
+    }
+
+    .glass-card {
+        margin-bottom: 0.5rem;
+    }
+}
+
 /* Quiz Styles */
 .option-card {
     cursor: pointer;
     transition: all 0.2s;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .option-card:hover:not(.disabled) {
@@ -121,7 +186,7 @@ body {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -131,8 +196,4 @@ body {
 ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
 }
