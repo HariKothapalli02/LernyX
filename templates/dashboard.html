@@ -51,259 +51,229 @@
                     </div>
                     <p class="mt-2">Loading statistics...</p>
                 </div>
-            </div>
-        </div>
-    </div>
+                {% extends "base.html" %}
 
-    <!-- Navigation Tabs -->
-    <ul class="nav nav-tabs nav-fill mb-4" id="dashboardTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-semibold" id="chats-tab-btn" data-bs-toggle="tab"
-                data-bs-target="#chats-tab" type="button" role="tab" aria-controls="chats-tab" aria-selected="true"
-                onclick="loadTab('chats')">
-                💬 Past Chats
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="quizzes-tab-btn" data-bs-toggle="tab" data-bs-target="#quizzes-tab"
-                type="button" role="tab" aria-controls="quizzes-tab" aria-selected="false" onclick="loadTab('quizzes')">
-                🎥 Past Quizzes
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="custom-tab-btn" data-bs-toggle="tab" data-bs-target="#custom-tab"
-                type="button" role="tab" aria-controls="custom-tab" aria-selected="false" onclick="loadTab('custom')">
-                🧩 My Custom Quizzes
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="settings-tab-btn" data-bs-toggle="tab"
-                data-bs-target="#settings-tab" type="button" role="tab" aria-controls="settings-tab"
-                aria-selected="false">
-                ⚙️ Settings
-            </button>
-        </li>
-    </ul>
+                {% block title %}My Dashboard - LernyX{% endblock %}
 
-    <!-- Tab Content -->
-    <div class="tab-content" id="dashboardTabsContent">
+                {% block content %}
+                <div class="container py-4">
+                    <style>
+                        /* Settings Section Styles */
+                        .settings-form {
+                            padding: 20px;
+                        }
 
-        <!-- Chats Tab -->
-        <div class="tab-pane fade show active" id="chats-tab" role="tabpanel" aria-labelledby="chats-tab-btn">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="h5 mb-0 text-white">Chatbot Conversations</h3>
-                </div>
-                <div class="card-body" id="chats-container">
-                    <div class="text-center py-5 text-muted">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2">Loading your conversations...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        .form-group {
+                            margin-bottom: 15px;
+                        }
 
-        <!-- Quizzes Tab -->
-        <div class="tab-pane fade" id="quizzes-tab" role="tabpanel" aria-labelledby="quizzes-tab-btn">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="h5 mb-0 text-white">Generated Quizzes</h3>
-                </div>
-                <div class="card-body" id="quizzes-container">
-                    <div class="text-center py-5 text-muted">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2">Loading your quizzes...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        .form-label {
+                            display: block;
+                            margin-bottom: 5px;
+                            font-weight: 500;
+                            color: #374151;
+                        }
 
-        <!-- Custom Quizzes Tab -->
-        <div class="tab-pane fade" id="custom-tab" role="tabpanel" aria-labelledby="custom-tab-btn">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="h5 mb-0 text-white">My Custom Quiz Codes</h3>
-                </div>
-                <div class="card-body" id="custom-quizzes-container">
-                    <div class="text-center py-5 text-muted">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2">Loading your custom quizzes...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        .form-input {
+                            width: 100%;
+                            padding: 10px;
+                            border: 1px solid #d1d5db;
+                            border-radius: 6px;
+                            font-size: 0.95rem;
+                        }
 
-        <!-- Settings Tab -->
-        <div class="tab-pane fade" id="settings-tab" role="tabpanel" aria-labelledby="settings-tab-btn">
-            <!-- API Key Settings -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="h5 mb-0 text-white">API Configuration</h3>
-                </div>
-                <div class="card-body">
-                    <form action="{{ url_for('update_api_key') }}" method="POST">
-                        <div class="form-group">
-                            <label for="api_key" class="form-label">Gemini API Key</label>
-                            <input type="password" id="api_key" name="api_key" class="form-input"
-                                placeholder="Enter your Gemini API Key"
-                                value="{{ current_user.api_key if current_user.api_key else '' }}">
-                            <p class="form-text">
-                                Add your own API key to ensure uninterrupted service.
-                                Your key is stored securely and used only for your requests.
-                            </p>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            Save API Key
-                        </button>
-                    </form>
-                </div>
-            </div>
-            <div class="card border-danger bg-danger bg-opacity-10">
-                <div class="card-body">
-                    <h3 class="h5 text-danger mb-3">⚠️ Danger Zone</h3>
-                    <p class="text-muted mb-3">
-                        Deleting your account will permanently remove all your data including:
-                    </p>
-                    <ul class="text-muted mb-3">
-                        <li>Your account information</li>
-                        <li>All chat conversations</li>
-                        <li>All quiz history and scores</li>
-                        <li>All custom quizzes you created</li>
-                        <li>All custom quiz attempts</li>
-                    </ul>
-                    <p class="text-danger fw-bold mb-3">
-                        This action cannot be undone!
-                    </p>
-                    <button class="btn btn-danger" onclick="deleteAccount()">
-                        Delete My Account
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    window.chatsLoaded = false;
-    window.quizzesLoaded = false;
-    window.customQuizzesLoaded = false;
-    window.aptitudeLoaded = false;
-
-    // Load initial data
-    document.addEventListener('DOMContentLoaded', () => {
-        loadChats();
-        loadStatusBar();
-    });
-
-    function loadTab(tabName) {
-        if (tabName === 'chats' && !window.chatsLoaded) {
-            loadChats();
-        } else if (tabName === 'quizzes' && !window.quizzesLoaded) {
-            loadQuizzes();
-        } else if (tabName === 'custom' && !window.customQuizzesLoaded) {
-            loadMyCustomQuizzes();
-        }
-    }
-
-    async function loadChats() {
-        const container = document.getElementById('chats-container');
-        try {
-            const resp = await fetch('/api/user-chats?t=' + new Date().getTime());
-            if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
-            const data = await resp.json();
-
-            if (data.error) {
-                container.innerHTML = `<div class="text-center text-danger p-4">Error: ${escapeHtml(data.error)}</div>`;
-                return;
-            }
-
-            if (data.conversations && data.conversations.length > 0) {
-                container.innerHTML = data.conversations.map(conv => {
-                    const date = new Date(conv.timestamp).toLocaleString();
-                    const fullUserMsg = (conv.user_message || '').trim();
-                    let title = conv.title;
-                    if (!title || title === '(no title)') {
-                        title = 'New Chat';
-                    }
-                    const botResponse = conv.bot_response || '';
-                    const chatId = conv._id || (conv.timestamp || '').replace(/[^0-9]/g, '');
-
-                    let attachmentHtml = '';
-                    if (conv.attachment) {
-                        const icon = conv.attachment.type === 'pdf' ? 'bi-file-pdf' : 'bi-file-image';
-                        attachmentHtml = `<div class="mt-1 small text-muted"><i class="bi ${icon} me-1"></i> ${escapeHtml(conv.attachment.filename)}</div>`;
-                    }
-
-                    const displayTitle = title === '(no message)' && conv.attachment ? `Analysis of ${conv.attachment.filename}` : title;
-
-                    return `
-                        <div class="card mb-3 border-start border-4 border-success bg-light bg-opacity-10">
-                            <div class="card-body p-3 cursor-pointer" onclick="toggleChatDetails('${chatId}')" style="cursor: pointer;">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <small class="text-muted">${date}</small>
-                                    <div>
-                                        <button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="deleteChat(event, '${chatId}')">Delete</button>
-                                        <span class="ms-2 text-muted" id="chevron-${chatId}">▼</span>
+                        .form-text {
+                            font-size: 0.85rem;
+                            color: #6b7280;
+                            margin-top: 5px;
+                        }
+                    </style>
+                    <!-- Status Bar -->
+                    <div class="card border-0 shadow-lg mb-4"
+                        style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);">
+                        <div class="card-body text-white p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h2 class="h4 mb-0">📊 Aptitude Practice Progress</h2>
+                                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-light text-primary fw-bold">
+                                    Start Practice
+                                </a>
+                            </div>
+                            <div id="status-content">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-light" role="status">
+                                        <span class="visually-hidden">Loading...</span>
                                     </div>
-                                </div>
-                                <div class="fw-semibold text-body">You: ${escapeHtml(displayTitle)}</div>
-                                
-                                <div class="mt-3 pt-3 border-top d-none" id="chat-details-${chatId}">
-                                    <div class="mb-2 fw-bold text-primary">
-                                        You: ${escapeHtml(fullUserMsg)}
-                                        ${attachmentHtml}
-                                    </div>
-                                    <div class="ps-3 border-start border-2">Bot: ${botResponse}</div>
+                                    <p class="mt-2">Loading statistics...</p>
                                 </div>
                             </div>
                         </div>
-                    `;
-                }).join('');
-            } else {
-                container.innerHTML = `
-                    <div class="text-center py-5">
-                        <h4 class="text-muted">No conversations yet</h4>
-                        <p class="text-muted">Start chatting with the bot to see your history here!</p>
-                    </div>`;
-            }
-            window.chatsLoaded = true;
-        } catch (error) {
-            console.error('Error loading chats:', error);
-            container.innerHTML = `<div class="text-center text-danger p-4">Error loading conversations: ${escapeHtml(error.message)}</div>`;
-        }
-    }
+                    </div>
 
-    async function loadQuizzes() {
-        const container = document.getElementById('quizzes-container');
-        try {
-            const [respStandard, respCustom] = await Promise.all([
-                fetch('/api/user-quizzes'),
-                fetch('/api/user-custom-attempts')
-            ]);
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs nav-fill mb-4" id="dashboardTabs" role="tablist">
 
-            const dataStandard = await respStandard.json();
-            const dataCustom = await respCustom.json();
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-semibold" id="quizzes-tab-btn" data-bs-toggle="tab"
+                                data-bs-target="#quizzes-tab" type="button" role="tab" aria-controls="quizzes-tab"
+                                aria-selected="true" onclick="loadTab('quizzes')">
+                                🎥 Past Quizzes
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-semibold" id="custom-tab-btn" data-bs-toggle="tab"
+                                data-bs-target="#custom-tab" type="button" role="tab" aria-controls="custom-tab"
+                                aria-selected="false" onclick="loadTab('custom')">
+                                🧩 My Custom Quizzes
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-semibold" id="settings-tab-btn" data-bs-toggle="tab"
+                                data-bs-target="#settings-tab" type="button" role="tab" aria-controls="settings-tab"
+                                aria-selected="false">
+                                ⚙️ Settings
+                            </button>
+                        </li>
+                    </ul>
 
-            if (!respStandard.ok || dataStandard.error) {
-                container.innerHTML = `<div class="text-center text-danger p-4">Error: ${escapeHtml(dataStandard.error || `HTTP ${respStandard.status}`)}</div>`;
-                return;
-            }
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="dashboardTabsContent">
 
-            let htmlParts = [];
 
-            if (dataStandard.quizzes && dataStandard.quizzes.length > 0) {
-                const standardHtml = dataStandard.quizzes.map(quiz => {
-                    const date = new Date(quiz.generated_at).toLocaleString();
-                    const difficultyColors = { 'easy': 'success', 'medium': 'warning', 'hard': 'danger' };
-                    const difficultyBadge = difficultyColors[quiz.difficulty] || 'primary';
 
-                    let scoreHtml = quiz.score !== null && quiz.score !== undefined
-                        ? `<span class="badge bg-success">Score: ${quiz.score}/${quiz.total_questions} (${quiz.percentage}%)</span>`
-                        : `<span class="badge bg-warning text-dark">Not completed</span>`;
+                        <!-- Quizzes Tab -->
+                        <div class="tab-pane fade show active" id="quizzes-tab" role="tabpanel"
+                            aria-labelledby="quizzes-tab-btn">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="h5 mb-0 text-white">Generated Quizzes</h3>
+                                </div>
+                                <div class="card-body" id="quizzes-container">
+                                    <div class="text-center py-5 text-muted">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                        <p class="mt-2">Loading your quizzes...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    return `
+                        <!-- Custom Quizzes Tab -->
+                        <div class="tab-pane fade" id="custom-tab" role="tabpanel" aria-labelledby="custom-tab-btn">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="h5 mb-0 text-white">My Custom Quiz Codes</h3>
+                                </div>
+                                <div class="card-body" id="custom-quizzes-container">
+                                    <div class="text-center py-5 text-muted">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                        <p class="mt-2">Loading your custom quizzes...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Tab -->
+                        <div class="tab-pane fade" id="settings-tab" role="tabpanel" aria-labelledby="settings-tab-btn">
+                            <!-- API Key Settings -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h3 class="h5 mb-0 text-white">API Configuration</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form action="{{ url_for('update_api_key') }}" method="POST">
+                                        <div class="form-group">
+                                            <label for="api_key" class="form-label">Gemini API Key</label>
+                                            <input type="password" id="api_key" name="api_key" class="form-input"
+                                                placeholder="Enter your Gemini API Key"
+                                                value="{{ current_user.api_key if current_user.api_key else '' }}">
+                                            <p class="form-text">
+                                                Add your own API key to ensure uninterrupted service.
+                                                Your key is stored securely and used only for your requests.
+                                            </p>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            Save API Key
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="card border-danger bg-danger bg-opacity-10">
+                                <div class="card-body">
+                                    <h3 class="h5 text-danger mb-3">⚠️ Danger Zone</h3>
+                                    <p class="text-muted mb-3">
+                                        Deleting your account will permanently remove all your data including:
+                                    </p>
+                                    <ul class="text-muted mb-3">
+                                        <li>Your account information</li>
+                                        <li>All chat conversations</li>
+                                        <li>All quiz history and scores</li>
+                                        <li>All custom quizzes you created</li>
+                                        <li>All custom quiz attempts</li>
+                                    </ul>
+                                    <p class="text-danger fw-bold mb-3">
+                                        This action cannot be undone!
+                                    </p>
+                                    <button class="btn btn-danger" onclick="deleteAccount()">
+                                        Delete My Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endblock %}
+
+                {% block scripts %}
+                <script>
+
+                    window.quizzesLoaded = false;
+                    window.customQuizzesLoaded = false;
+                    window.aptitudeLoaded = false;
+
+                    // Load initial data
+                    document.addEventListener('DOMContentLoaded', () => {
+                        loadQuizzes();
+                        loadStatusBar();
+                    });
+
+                    function loadTab(tabName) {
+                        if (tabName === 'quizzes' && !window.quizzesLoaded) {
+                            loadQuizzes();
+                        } else if (tabName === 'custom' && !window.customQuizzesLoaded) {
+                            loadMyCustomQuizzes();
+                        }
+                    }
+
+
+
+                    async function loadQuizzes() {
+                        const container = document.getElementById('quizzes-container');
+                        try {
+                            const [respStandard, respCustom] = await Promise.all([
+                                fetch('/api/user-quizzes'),
+                                fetch('/api/user-custom-attempts')
+                            ]);
+
+                            const dataStandard = await respStandard.json();
+                            const dataCustom = await respCustom.json();
+
+                            if (!respStandard.ok || dataStandard.error) {
+                                container.innerHTML = `<div class="text-center text-danger p-4">Error: ${escapeHtml(dataStandard.error || `HTTP ${respStandard.status}`)}</div>`;
+                                return;
+                            }
+
+                            let htmlParts = [];
+
+                            if (dataStandard.quizzes && dataStandard.quizzes.length > 0) {
+                                const standardHtml = dataStandard.quizzes.map(quiz => {
+                                    const date = new Date(quiz.generated_at).toLocaleString();
+                                    const difficultyColors = { 'easy': 'success', 'medium': 'warning', 'hard': 'danger' };
+                                    const difficultyBadge = difficultyColors[quiz.difficulty] || 'primary';
+
+                                    let scoreHtml = quiz.score !== null && quiz.score !== undefined
+                                        ? `<span class="badge bg-success">Score: ${quiz.score}/${quiz.total_questions} (${quiz.percentage}%)</span>`
+                                        : `<span class="badge bg-warning text-dark">Not completed</span>`;
+
+                                    return `
                         <div class="card mb-3 border-start border-4 border-warning bg-light bg-opacity-10">
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
@@ -320,17 +290,17 @@
                             </div>
                         </div>
                     `;
-                }).join('');
-                htmlParts.push(standardHtml);
-            } else {
-                htmlParts.push(`<div class="text-center py-4"><p class="text-muted">No video quizzes generated yet.</p></div>`);
-            }
+                                }).join('');
+                                htmlParts.push(standardHtml);
+                            } else {
+                                htmlParts.push(`<div class="text-center py-4"><p class="text-muted">No video quizzes generated yet.</p></div>`);
+                            }
 
-            if (respCustom.ok && !dataCustom.error && dataCustom.attempts && dataCustom.attempts.length > 0) {
-                const customHtmlHeader = '<h4 class="mt-4 mb-3 text-white">Custom Exam Attempts</h4>';
-                const attemptsHtml = dataCustom.attempts.map(att => {
-                    const date = att.submitted_at ? new Date(att.submitted_at).toLocaleString() : '';
-                    return `
+                            if (respCustom.ok && !dataCustom.error && dataCustom.attempts && dataCustom.attempts.length > 0) {
+                                const customHtmlHeader = '<h4 class="mt-4 mb-3 text-white">Custom Exam Attempts</h4>';
+                                const attemptsHtml = dataCustom.attempts.map(att => {
+                                    const date = att.submitted_at ? new Date(att.submitted_at).toLocaleString() : '';
+                                    return `
                         <div class="card mb-3 border-start border-4 border-info bg-light bg-opacity-10">
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between mb-2">
@@ -347,37 +317,37 @@
                             </div>
                         </div>
                     `;
-                }).join('');
-                htmlParts.push(customHtmlHeader + attemptsHtml);
-            }
+                                }).join('');
+                                htmlParts.push(customHtmlHeader + attemptsHtml);
+                            }
 
-            container.innerHTML = htmlParts.join('');
-            window.quizzesLoaded = true;
-        } catch (error) {
-            container.innerHTML = `<div class="text-center text-danger p-4">Error loading quizzes: ${escapeHtml(error.message)}</div>`;
-        }
-    }
+                            container.innerHTML = htmlParts.join('');
+                            window.quizzesLoaded = true;
+                        } catch (error) {
+                            container.innerHTML = `<div class="text-center text-danger p-4">Error loading quizzes: ${escapeHtml(error.message)}</div>`;
+                        }
+                    }
 
-    async function loadMyCustomQuizzes() {
-        const container = document.getElementById('custom-quizzes-container');
-        try {
-            const resp = await fetch('/api/my-custom-quizzes');
-            if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
-            const data = await resp.json();
+                    async function loadMyCustomQuizzes() {
+                        const container = document.getElementById('custom-quizzes-container');
+                        try {
+                            const resp = await fetch('/api/my-custom-quizzes');
+                            if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+                            const data = await resp.json();
 
-            if (data.error) {
-                container.innerHTML = `<div class="text-center text-danger p-4">Error: ${escapeHtml(data.error)}</div>`;
-                return;
-            }
+                            if (data.error) {
+                                container.innerHTML = `<div class="text-center text-danger p-4">Error: ${escapeHtml(data.error)}</div>`;
+                                return;
+                            }
 
-            if (data.quizzes && data.quizzes.length > 0) {
-                container.innerHTML = data.quizzes.map(quiz => {
-                    const created = quiz.created_at ? new Date(quiz.created_at).toLocaleString() : '';
-                    const active = quiz.active !== false;
-                    const attempts = quiz.attempts || [];
+                            if (data.quizzes && data.quizzes.length > 0) {
+                                container.innerHTML = data.quizzes.map(quiz => {
+                                    const created = quiz.created_at ? new Date(quiz.created_at).toLocaleString() : '';
+                                    const active = quiz.active !== false;
+                                    const attempts = quiz.attempts || [];
 
-                    const attemptList = attempts.length
-                        ? attempts.map(att => `
+                                    const attemptList = attempts.length
+                                        ? attempts.map(att => `
                             <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
                                 <span>${escapeHtml(att.username || 'Anonymous')}</span>
                                 <div>
@@ -386,9 +356,9 @@
                                 </div>
                             </div>
                           `).join('')
-                        : '<div class="text-muted py-2">No attempts yet.</div>';
+                                        : '<div class="text-muted py-2">No attempts yet.</div>';
 
-                    return `
+                                    return `
                         <div class="card mb-3 bg-light bg-opacity-10">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
@@ -423,32 +393,32 @@
                             </div>
                         </div>
                     `;
-                }).join('');
-            } else {
-                container.innerHTML = `
+                                }).join('');
+                            } else {
+                                container.innerHTML = `
                     <div class="text-center py-5">
                         <h4 class="text-muted">No custom quizzes yet</h4>
                         <p class="text-muted">Create a quiz code from the quiz builder to see it here.</p>
                     </div>`;
-            }
-            window.customQuizzesLoaded = true;
-        } catch (error) {
-            console.error('Error loading custom quizzes:', error);
-            container.innerHTML = `<div class="text-center text-danger p-4">Error loading custom quizzes: ${escapeHtml(error.message)}</div>`;
-        }
-    }
+                            }
+                            window.customQuizzesLoaded = true;
+                        } catch (error) {
+                            console.error('Error loading custom quizzes:', error);
+                            container.innerHTML = `<div class="text-center text-danger p-4">Error loading custom quizzes: ${escapeHtml(error.message)}</div>`;
+                        }
+                    }
 
-    async function loadStatusBar() {
-        try {
-            const resp = await fetch('/api/aptitude/stats?t=' + new Date().getTime());
-            const data = await resp.json();
+                    async function loadStatusBar() {
+                        try {
+                            const resp = await fetch('/api/aptitude/stats?t=' + new Date().getTime());
+                            const data = await resp.json();
 
-            if (data.error) {
-                document.getElementById('status-content').innerHTML = '<p class="text-white-50">Unable to load statistics.</p>';
-                return;
-            }
+                            if (data.error) {
+                                document.getElementById('status-content').innerHTML = '<p class="text-white-50">Unable to load statistics.</p>';
+                                return;
+                            }
 
-            const statusHtml = `
+                            const statusHtml = `
                 <div class="row g-4 mb-4 text-center">
                     <div class="col-md-4">
                         <div class="bg-white bg-opacity-10 rounded p-3 h-100">
@@ -502,147 +472,113 @@
                     </div>
                 </div>
             `;
-            document.getElementById('status-content').innerHTML = statusHtml;
-        } catch (error) {
-            console.error('Error loading status:', error);
-            document.getElementById('status-content').innerHTML = '<p class="text-white-50">Error loading statistics.</p>';
-        }
-    }
+                            document.getElementById('status-content').innerHTML = statusHtml;
+                        } catch (error) {
+                            console.error('Error loading status:', error);
+                            document.getElementById('status-content').innerHTML = '<p class="text-white-50">Error loading statistics.</p>';
+                        }
+                    }
 
-    function toggleChatDetails(id) {
-        const details = document.getElementById('chat-details-' + id);
-        const chevron = document.getElementById('chevron-' + id);
-        if (!details) return;
 
-        if (details.classList.contains('d-none')) {
-            details.classList.remove('d-none');
-            if (chevron) chevron.textContent = '▲';
-        } else {
-            details.classList.add('d-none');
-            if (chevron) chevron.textContent = '▼';
-        }
-    }
 
-    function copyCode(code) {
-        navigator.clipboard.writeText(code);
-        alert('Code copied to clipboard');
-    }
+                    function copyCode(code) {
+                        navigator.clipboard.writeText(code);
+                        alert('Code copied to clipboard');
+                    }
 
-    async function toggleQuizActive(code, currentlyActive) {
-        try {
-            const resp = await fetch(`/api/custom-quizzes/${code}/toggle-active`, { method: 'POST' });
-            const data = await resp.json();
-            if (!resp.ok || data.error) {
-                alert(data.error || 'Unable to update quiz status');
-                return;
-            }
-            window.customQuizzesLoaded = false;
-            loadMyCustomQuizzes();
-        } catch (error) {
-            alert('Error updating quiz status: ' + error.message);
-        }
-    }
+                    async function toggleQuizActive(code, currentlyActive) {
+                        try {
+                            const resp = await fetch(`/api/custom-quizzes/${code}/toggle-active`, { method: 'POST' });
+                            const data = await resp.json();
+                            if (!resp.ok || data.error) {
+                                alert(data.error || 'Unable to update quiz status');
+                                return;
+                            }
+                            window.customQuizzesLoaded = false;
+                            loadMyCustomQuizzes();
+                        } catch (error) {
+                            alert('Error updating quiz status: ' + error.message);
+                        }
+                    }
 
-    async function deleteChat(evt, chatId) {
-        evt.stopPropagation();
-        if (!confirm('Delete this chat conversation?')) return;
-        try {
-            const resp = await fetch(`/api/user-chats/${chatId}`, { method: 'DELETE' });
-            const data = await resp.json();
-            if (!resp.ok || data.error) {
-                alert(data.error || 'Unable to delete chat');
-                return;
-            }
-            window.chatsLoaded = false;
-            loadChats();
-        } catch (error) {
-            alert('Error deleting chat: ' + error.message);
-        }
-    }
 
-    async function removeAttempt(code, attemptId) {
-        if (!attemptId) return;
-        if (!confirm('Remove this attempt so the student can re-attempt this quiz?')) return;
-        try {
-            const resp = await fetch(`/api/custom-quizzes/${code}/attempts/${attemptId}`, { method: 'DELETE' });
-            const data = await resp.json();
-            if (!resp.ok || data.error) {
-                alert(data.error || 'Unable to remove attempt');
-                return;
-            }
-            window.customQuizzesLoaded = false;
-            loadMyCustomQuizzes();
-        } catch (error) {
-            alert('Error removing attempt: ' + error.message);
-        }
-    }
 
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+                    async function removeAttempt(code, attemptId) {
+                        if (!attemptId) return;
+                        if (!confirm('Remove this attempt so the student can re-attempt this quiz?')) return;
+                        try {
+                            const resp = await fetch(`/api/custom-quizzes/${code}/attempts/${attemptId}`, { method: 'DELETE' });
+                            const data = await resp.json();
+                            if (!resp.ok || data.error) {
+                                alert(data.error || 'Unable to remove attempt');
+                                return;
+                            }
+                            window.customQuizzesLoaded = false;
+                            loadMyCustomQuizzes();
+                        } catch (error) {
+                            alert('Error removing attempt: ' + error.message);
+                        }
+                    }
 
-    async function deleteAccount() {
-        if (!confirm('Are you absolutely sure you want to delete your account?\n\nThis will permanently delete ALL your data.\n\nThis action CANNOT be undone!')) return;
+                    function escapeHtml(text) {
+                        const div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    }
 
-        const confirmation = prompt('Type "DELETE" (all caps) to confirm account deletion:');
-        if (confirmation !== 'DELETE') {
-            alert('Account deletion cancelled.');
-            return;
-        }
+                    async function deleteAccount() {
+                        if (!confirm('Are you absolutely sure you want to delete your account?\n\nThis will permanently delete ALL your data.\n\nThis action CANNOT be undone!')) return;
 
-        try {
-            const resp = await fetch('/delete-account', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await resp.json();
+                        const confirmation = prompt('Type "DELETE" (all caps) to confirm account deletion:');
+                        if (confirmation !== 'DELETE') {
+                            alert('Account deletion cancelled.');
+                            return;
+                        }
 
-            if (!resp.ok || data.error) {
-                alert('Error: ' + (data.error || 'Failed to delete account'));
-                return;
-            }
+                        try {
+                            const resp = await fetch('/delete-account', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+                            const data = await resp.json();
 
-            alert('Your account has been deleted successfully.');
-            window.location.href = '/login';
-        } catch (error) {
-            alert('Error deleting account: ' + error.message);
-        }
-    }
-</script>
-<!-- MathJax Configuration -->
-<script>
-    window.MathJax = {
-        tex: {
-            inlineMath: [['$', '$'], ['\\(', '\\)']],
-            displayMath: [['$$', '$$'], ['\\[', '\\]']],
-            processEscapes: true
-        },
-        svg: {
-            fontCache: 'global'
-        }
-    };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script>
-    // Hook into loadChats to trigger MathJax
-    const originalLoadChats = loadChats;
-    loadChats = async function () {
-        await originalLoadChats();
-        if (window.MathJax) {
-            MathJax.typesetPromise();
-        }
-    };
+                            if (!resp.ok || data.error) {
+                                alert('Error: ' + (data.error || 'Failed to delete account'));
+                                return;
+                            }
 
-    // Also trigger on tab switch if needed, though loadChats covers the main case
-    const originalLoadTab = loadTab;
-    loadTab = function (tabName) {
-        originalLoadTab(tabName);
-        if (tabName === 'chats' && window.chatsLoaded && window.MathJax) {
-            setTimeout(() => MathJax.typesetPromise(), 100);
-        }
-    };
-</script>
-{% endblock %}
+                            alert('Your account has been deleted successfully.');
+                            window.location.href = '/login';
+                        } catch (error) {
+                            alert('Error deleting account: ' + error.message);
+                        }
+                    }
+                </script>
+                <!-- MathJax Configuration -->
+                <script>
+                    window.MathJax = {
+                        tex: {
+                            inlineMath: [['$', '$'], ['\\(', '\\)']],
+                            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                            processEscapes: true
+                        },
+                        svg: {
+                            fontCache: 'global'
+                        }
+                    };
+                </script>
+                <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+                <script id="MathJax-script" async
+                    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+                <script>
+
+                    // Also trigger on tab switch if needed, though loadChats covers the main case
+                    const originalLoadTab = loadTab;
+                    loadTab = function (tabName) {
+                        originalLoadTab(tabName);
+                        if (tabName === 'quizzes' && window.quizzesLoaded && window.MathJax) {
+                            setTimeout(() => MathJax.typesetPromise(), 100);
+                        }
+                    };
+                </script>
+                {% endblock %}
