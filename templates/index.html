@@ -1,136 +1,89 @@
-{% extends "base.html" %}
-
-{% block title %}Chatbot - LernyX{% endblock %}
-
-{% block content %}
-<div class="container-fluid h-100 py-3 app-wrapper">
-    <div class="row h-100 g-3">
-        <!-- Chat Area -->
-        <div class="col-lg-9 col-md-8 d-flex flex-column h-100">
-            <div class="glass-card flex-grow-1 d-flex flex-column p-0 overflow-hidden">
-                <!-- Header -->
-                <div
-                    class="p-3 border-bottom border-light border-opacity-10 d-flex justify-content-between align-items-center bg-black bg-opacity-25">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-robot text-primary fs-4"></i>
-                        <div>
-                            <h5 class="mb-0 text-white fw-bold">Gemini Chatbot</h5>
-                            <small class="text-secondary">Powered by Google DeepMind</small>
-                        </div>
-                    </div>
-                    <span class="badge badge-glass">AI Online</span>
-                </div>
-
-                <!-- Chat Messages -->
-                <div class="card-body p-0 position-relative flex-grow-1">
-                    <div id="chat" class="chat-box p-4"
-                        style="height: 100%; overflow-y: auto; scroll-behavior: smooth;">
-                        <!-- Welcome Message -->
-                        <div class="text-center mt-5 fade-in-up">
-                            <div class="mb-3">
-                                <i class="bi bi-stars text-warning display-4"></i>
-                            </div>
-                            <h3 class="text-white fw-bold">How can I help you today?</h3>
-                            <p class="text-secondary">Ask me about code, debugging, or complex concepts.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Input Area -->
-                <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-25">
-                    <!-- File Preview -->
-                    <div id="file-preview"
-                        class="d-none mb-2 p-2 rounded border border-secondary bg-dark bg-opacity-50 position-relative"
-                        style="width: fit-content;">
-                        <span id="file-name" class="text-light small me-3"></span>
-                        <button type="button"
-                            class="btn-close btn-close-white small position-absolute top-0 start-100 translate-middle"
-                            aria-label="Close" onclick="clearFile()"></button>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="file" id="file-input" class="d-none" accept=".pdf,.jpg,.jpeg,.png,.webp"
-                            onchange="handleFileSelect(this)">
-                        <button class="btn btn-glass-outline border-end-0" type="button"
-                            onclick="document.getElementById('file-input').click()" title="Attach file">
-                            <i class="bi bi-paperclip"></i>
-                        </button>
-                        <input type="text" id="message" class="form-control border-start-0 border-end-0"
-                            placeholder="Type your question..." autocomplete="off" style="height: 50px;">
-                        <button class="btn btn-primary" type="button" onclick="send()">
-                            Send <i class="bi bi-send-fill ms-1"></i>
-                        </button>
-                    </div>
-                    <div class="form-text text-secondary small mt-2 d-flex justify-content-between">
-                        <span>Supported: PDF, Images (JPG, PNG, WebP)</span>
-                        <span>Press Enter to send</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- History Sidebar -->
-        <div class="col-lg-3 col-md-4 d-flex flex-column h-100">
-            <div class="glass-card h-100 d-flex flex-column p-0 overflow-hidden">
-                <div class="p-3 border-bottom border-light border-opacity-10 bg-black bg-opacity-25">
-                    <h5 class="mb-0 text-white fw-bold"><i class="bi bi-clock-history me-2"></i>History</h5>
-                </div>
-                <div class="p-3 flex-grow-1 overflow-auto" id="history-list">
-                    <!-- History items will be populated here -->
-                    <div class="text-center text-secondary mt-4">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-25">
-                    <button class="btn btn-glass-outline w-100 btn-sm" onclick="startNewChat()">
-                        <i class="bi bi-plus-lg me-2"></i>New Chat
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Chat Styles Override for this page -->
 <style>
+    .app-wrapper {
+        background: transparent;
+    }
+
+    .chat-header {
+        height: 70px;
+        backdrop-filter: blur(10px);
+    }
+
+    .chat-box {
+        background: rgba(0, 0, 0, 0.2);
+    }
+
     .chat-message {
-        margin-bottom: 1rem;
-        max-width: 80%;
+        margin-bottom: 1.25rem;
+        max-width: 85%;
         padding: 1rem 1.25rem;
-        border-radius: 1rem;
+        border-radius: 1.25rem;
         position: relative;
         animation: fadeIn 0.3s ease;
+        line-height: 1.6;
     }
 
     .chat-message.user {
-        background: rgba(99, 102, 241, 0.2);
-        border: 1px solid rgba(99, 102, 241, 0.3);
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
         color: white;
         margin-left: auto;
         border-bottom-right-radius: 0.25rem;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
     }
 
     .chat-message.bot {
         background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--glass-border);
         color: var(--text-primary);
         margin-right: auto;
         border-bottom-left-radius: 0.25rem;
     }
 
-    .chat-box::-webkit-scrollbar {
-        width: 6px;
+    .chat-message p:last-child {
+        margin-bottom: 0;
     }
 
-    .chat-box::-webkit-scrollbar-track {
-        background: transparent;
+    .chat-input-area {
+        backdrop-filter: blur(10px);
     }
 
-    .chat-box::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 3px;
+    .history-item {
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+
+    .history-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .history-item.active {
+        background: rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .chat-main-col {
+            padding: 0 !important;
+        }
+
+        .chat-header {
+            height: 60px;
+        }
+
+        .chat-message {
+            max-width: 92%;
+            padding: 0.875rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        .welcome-screen h3 {
+            font-size: 1.5rem;
+        }
+
+        .welcome-screen p {
+            font-size: 0.9rem;
+        }
     }
 
     @keyframes fadeIn {
@@ -148,73 +101,66 @@
 
 <script>
     window.MathJax = {
-        tex: {
-            inlineMath: [['$', '$'], ['\\(', '\\)']],
-            displayMath: [['$$', '$$'], ['\\[', '\\]']],
-            processEscapes: true
-        },
-        svg: {
-            fontCache: 'global'
-        }
-    };
-</script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>
-    // Chat Logic
-    let currentChatId = null;
-
-    document.addEventListener('DOMContentLoaded', () => {
         loadHistory();
-
-        // Enter key to send
-        document.getElementById("message").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") send();
+        document.getElementById("message").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") send();
         });
     });
 
     function startNewChat() {
         currentChatId = null;
         document.getElementById('chat').innerHTML = `
-            <div class="text-center mt-5 fade-in-up">
+            <div class="text-center mt-5 fade-in-up welcome-screen">
                 <div class="mb-3"><i class="bi bi-stars text-warning display-4"></i></div>
                 <h3 class="text-white fw-bold">How can I help you today?</h3>
-                <p class="text-secondary">Ask me about code, debugging, or complex concepts.</p>
+                <p class="text-secondary px-3">Ask me about code, debugging, or complex concepts.</p>
             </div>`;
-        loadHistory(); // Refresh active state
+        loadHistory();
     }
 
     async function loadHistory() {
         const historyList = document.getElementById('history-list');
+        const historyListMobile = document.getElementById('history-list-mobile');
+
         try {
             const response = await fetch('/api/user-chats');
             const data = await response.json();
             const chats = data.conversations || [];
 
-            historyList.innerHTML = '';
+            const renderChats = (container) => {
+                container.innerHTML = '';
+                if (chats.length === 0) {
+                    container.innerHTML = '<p class="text-center text-secondary small mt-3">No recent chats</p>';
+                    return;
+                }
 
-            if (chats.length === 0) {
-                historyList.innerHTML = '<p class="text-center text-secondary small mt-3">No recent chats</p>';
-                return;
-            }
+                chats.forEach(chat => {
+                    const div = document.createElement('div');
+                    const isActive = chat._id === currentChatId;
+                    div.className = `p-3 mb-2 rounded history-item cursor-pointer ${isActive ? 'active' : ''}`;
+                    div.innerHTML = `
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-chat-left-text text-primary"></i>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="text-truncate small text-white fw-medium">${chat.title || 'Untitled Chat'}</div>
+                                <div class="text-secondary" style="font-size: 0.7rem;">${new Date(chat.timestamp).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                    `;
+                    div.onclick = () => {
+                        loadChat(chat._id);
+                        // Close offcanvas on mobile
+                        const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('historySidebar'));
+                        if (offcanvas) offcanvas.hide();
+                    };
+                    container.appendChild(div);
+                });
+            };
 
-            chats.forEach(chat => {
-                const div = document.createElement('div');
-                div.className = `p-2 mb-2 rounded cursor-pointer transition-all ${chat.id === currentChatId ? 'bg-primary bg-opacity-25 border border-primary border-opacity-25' : 'hover-bg-glass'}`;
-                div.style.cursor = 'pointer';
-                div.innerHTML = `
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-chat-left-text text-secondary"></i>
-                        <div class="text-truncate small text-light">${chat.title || 'Untitled Chat'}</div>
-                    </div>
-                    <div class="small text-secondary ms-4" style="font-size: 0.75rem;">${new Date(chat.timestamp).toLocaleDateString()}</div>
-                `;
-                div.onclick = () => loadChat(chat._id);
-                historyList.appendChild(div);
-            });
+            renderChats(historyList);
+            renderChats(historyListMobile);
         } catch (error) {
             console.error('Error loading history:', error);
-            historyList.innerHTML = '<p class="text-danger small text-center">Failed to load history</p>';
         }
     }
 
@@ -226,19 +172,17 @@
         try {
             const response = await fetch(`/api/get_chat/${chatId}`);
             const data = await response.json();
-
             chatBox.innerHTML = '';
             data.messages.forEach(msg => {
                 appendMessage(msg.role === 'user' ? 'user' : 'bot', msg.content);
             });
-            loadHistory(); // Update active highlight
+            loadHistory();
         } catch (error) {
             console.error('Error loading chat:', error);
         }
     }
 
     let selectedFile = null;
-
     function handleFileSelect(input) {
         if (input.files && input.files[0]) {
             selectedFile = input.files[0];
@@ -256,38 +200,27 @@
     async function send() {
         const messageInput = document.getElementById('message');
         const message = messageInput.value.trim();
-
         if (!message && !selectedFile) return;
 
-        // UI Updates
         appendMessage('user', message);
         messageInput.value = '';
         const chatBox = document.getElementById('chat');
 
-        // Loading Indicator
         const loadingId = 'loading-' + Date.now();
         const loadingDiv = document.createElement('div');
         loadingDiv.id = loadingId;
         loadingDiv.className = 'chat-message bot';
-        loadingDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-light" role="status"></div> Thinking...';
+        loadingDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Thinking...';
         chatBox.appendChild(loadingDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
 
         const formData = new FormData();
         formData.append('message', message);
-        if (selectedFile) {
-            formData.append('file', selectedFile);
-        }
-        if (currentChatId) {
-            formData.append('chat_id', currentChatId);
-        }
+        if (selectedFile) formData.append('file', selectedFile);
+        if (currentChatId) formData.append('chat_id', currentChatId);
 
         try {
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                body: formData
-            });
-
+            const response = await fetch('/api/chat', { method: 'POST', body: formData });
             const data = await response.json();
             document.getElementById(loadingId).remove();
 
@@ -297,12 +230,12 @@
                 appendMessage('bot', data.response);
                 if (data.conversation_id) {
                     currentChatId = data.conversation_id;
-                    loadHistory(); // Refresh history to show new chat or update title
+                    loadHistory();
                 }
             }
             clearFile();
         } catch (error) {
-            document.getElementById(loadingId).remove();
+            if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
             appendMessage('bot', 'Error: Could not connect to server.');
         }
     }
@@ -312,7 +245,6 @@
         const div = document.createElement('div');
         div.className = `chat-message ${sender}`;
 
-        // Parse Markdown for bot messages
         if (sender === 'bot') {
             div.innerHTML = marked.parse(text);
         } else {
@@ -322,7 +254,6 @@
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        // Render MathJax
         if (window.MathJax) {
             MathJax.typesetPromise([div]).catch((err) => console.log(err));
         }
