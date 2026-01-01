@@ -3289,8 +3289,7 @@ def chat():
                     "_id": ObjectId(conversation_id),
                     "user_id": {"$in": [ObjectId(current_user.id), str(current_user.id)]}
                 })
-                with open("debug_chat.log", "a") as f:
-                    f.write(f"FETCH_HISTORY: ID={conversation_id}, User={current_user.id}, Found={bool(session)}\n")
+                print(f"FETCH_HISTORY: ID={conversation_id}, User={current_user.id}, Found={bool(session)}")
                 if session:
                     history = session.get("messages", [])[-10:] # Limit context to last 10 messages
             except Exception as e:
