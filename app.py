@@ -2804,15 +2804,13 @@ def api_user_chats():
         query = {"$or": query_conditions}
         
         # DEBUG LOGGING
-        with open("debug_chat.log", "a") as f:
-            f.write(f"API_USER_CHATS: UserID={user_id} (Type: {type(user_id)})\n")
-            f.write(f"API_USER_CHATS: Query={query}\n")
+        print(f"API_USER_CHATS: UserID={user_id} (Type: {type(user_id)})")
+        print(f"API_USER_CHATS: Query={query}")
         
         # Fetch sessions, sorted by newest first
         sessions = list(chat_sessions_collection.find(query).sort("updated_at", -1).limit(50))
         
-        with open("debug_chat.log", "a") as f:
-            f.write(f"API_USER_CHATS: Found {len(sessions)} sessions\n")
+        print(f"API_USER_CHATS: Found {len(sessions)} sessions")
         
         formatted_sessions = []
         for s in sessions:
@@ -3359,13 +3357,11 @@ def chat():
                     }
                     result = chat_sessions_collection.insert_one(session)
                     chat_id = str(result.inserted_id)
-                    with open("debug_chat.log", "a") as f:
-                        f.write(f"INSERT_CHAT: NewID={chat_id}, UserID={user_id_obj}, Type={type(user_id_obj)}, Title={title}\n")
+                    print(f"INSERT_CHAT: NewID={chat_id}, UserID={user_id_obj}, Type={type(user_id_obj)}, Title={title}")
                     
             except Exception as e:
                 print(f"Error storing conversation: {str(e)}")
-                with open("db_debug.log", "a") as f:
-                    f.write(f"{datetime.now()}: Error storing conversation: {str(e)}\n")
+                print(f"{datetime.now()}: Error storing conversation: {str(e)}")
                 chat_id = None
         else:
             print("DEBUG: MONGODB_AVAILABLE is False")
