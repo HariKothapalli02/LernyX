@@ -789,15 +789,30 @@ def service_worker():
 
 @app.route('/google10c68f1d7dfe2f5f.html')
 def google_verification():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'google10c68f1d7dfe2f5f.html')
+    try:
+        path = os.path.join(os.path.dirname(__file__), 'static', 'google10c68f1d7dfe2f5f.html')
+        with open(path, 'r') as f:
+            return f.read(), 200, {'Content-Type': 'text/html'}
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 @app.route('/sitemap.xml')
 def sitemap():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'sitemap.xml', mimetype='application/xml')
+    try:
+        path = os.path.join(os.path.dirname(__file__), 'static', 'sitemap.xml')
+        with open(path, 'r') as f:
+            return f.read(), 200, {'Content-Type': 'application/xml'}
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 @app.route('/robots.txt')
 def robots():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt', mimetype='text/plain')
+    try:
+        path = os.path.join(os.path.dirname(__file__), 'static', 'robots.txt')
+        with open(path, 'r') as f:
+            return f.read(), 200, {'Content-Type': 'text/plain'}
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 @app.route("/compiler")
 @login_required
