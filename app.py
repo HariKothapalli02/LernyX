@@ -777,6 +777,8 @@ def get_video_metadata(video_id, yt_url):
 
 @app.route("/")
 def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
     return render_template('landing.html')
 
 @app.route('/sw.js')
