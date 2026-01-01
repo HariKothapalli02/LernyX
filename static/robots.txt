@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: {{ request.url_root }}sitemap.xml
+Sitemap: https://lernyx.vercel.app/sitemap.xml

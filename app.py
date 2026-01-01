@@ -789,15 +789,15 @@ def service_worker():
 
 @app.route('/google10c68f1d7dfe2f5f.html')
 def google_verification():
-    return send_file(os.path.join(app.root_path, 'google10c68f1d7dfe2f5f.html'))
+    return app.send_static_file('google10c68f1d7dfe2f5f.html')
 
 @app.route('/sitemap.xml')
 def sitemap():
-    return send_file(os.path.join(app.root_path, 'sitemap.xml'))
+    return app.send_static_file('sitemap.xml')
 
 @app.route('/robots.txt')
 def robots():
-    return send_file(os.path.join(app.root_path, 'robots.txt'))
+    return app.send_static_file('robots.txt')
 
 @app.route("/compiler")
 @login_required
