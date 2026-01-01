@@ -3454,45 +3454,6 @@ def get_chat_history(chat_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/sitemap.xml")
-def sitemap():
-    """Generate sitemap.xml for SEO."""
-    host = request.host_url.rstrip('/')
-    pages = [
-        {"loc": f"{host}/", "changefreq": "daily", "priority": "1.0"},
-        {"loc": f"{host}/login", "changefreq": "monthly", "priority": "0.8"},
-        {"loc": f"{host}/signup", "changefreq": "monthly", "priority": "0.8"},
-        {"loc": f"{host}/about", "changefreq": "monthly", "priority": "0.5"},
-    ]
-    
-    sitemap_xml = ['<?xml version="1.0" encoding="UTF-8"?>']
-    sitemap_xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
-    
-    for page in pages:
-        sitemap_xml.append('  <url>')
-        sitemap_xml.append(f'    <loc>{page["loc"]}</loc>')
-        sitemap_xml.append(f'    <changefreq>{page["changefreq"]}</changefreq>')
-        sitemap_xml.append(f'    <priority>{page["priority"]}</priority>')
-        sitemap_xml.append('  </url>')
-        
-    sitemap_xml.append('</urlset>')
-    
-    from flask import Response
-    return Response('\n'.join(sitemap_xml), mimetype='application/xml')
-
-@app.route("/robots.txt")
-def robots_txt():
-    """Serve robots.txt for SEO."""
-    host = request.host_url.rstrip('/')
-    lines = [
-        "User-agent: *",
-        "Allow: /",
-        f"Sitemap: {host}/sitemap.xml"
-    ]
-    from flask import Response
-    return Response('\n'.join(lines), mimetype='text/plain')
-
-
 
 if __name__ == "__main__":
     print("---------------------------------------------------")
