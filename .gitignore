@@ -4,15 +4,3 @@ __pycache__/
 otp_debug.log
 debug_email.py
 
-# Android/Gradle
-.gradle/
-build/
-gradle/
-gradlew
-gradlew.bat
-*.iml
-local.properties
-.idea/
-*.apk
-*.aab
-gradle.properties

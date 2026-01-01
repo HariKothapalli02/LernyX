@@ -101,6 +101,20 @@
 
 <script>
     window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true
+        },
+        svg: { fontCache: 'global' }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    let currentChatId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
         loadHistory();
         document.getElementById("message").addEventListener("keypress", (e) => {
             if (e.key === "Enter") send();
@@ -128,6 +142,7 @@
             const chats = data.conversations || [];
 
             const renderChats = (container) => {
+                if (!container) return;
                 container.innerHTML = '';
                 if (chats.length === 0) {
                     container.innerHTML = '<p class="text-center text-secondary small mt-3">No recent chats</p>';
@@ -150,8 +165,9 @@
                     div.onclick = () => {
                         loadChat(chat._id);
                         // Close offcanvas on mobile
-                        const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('historySidebar'));
-                        if (offcanvas) offcanvas.hide();
+                        const offcanvasEl = document.getElementById('historySidebar');
+                        const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl) || new bootstrap.Offcanvas(offcanvasEl);
+                        offcanvas.hide();
                     };
                     container.appendChild(div);
                 });
