@@ -787,6 +787,10 @@ def service_worker():
     response.headers['Service-Worker-Allowed'] = '/'
     return response
 
+@app.route('/google10c68f1d7dfe2f5f.html')
+def google_verification():
+    return send_file('google10c68f1d7dfe2f5f.html')
+
 @app.route("/compiler")
 @login_required
 def compiler():
