@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}LernyX - The Future of Learning{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- 3D Background Container -->
+<div id="canvas-container"></div>
+
+<!-- Main Overlay Content -->
+<div class="immersive-wrapper">
+
+    <!-- Hero Section -->
+    <section class="immersive-hero d-flex align-items-center justify-content-center">
+        <div class="container text-center position-relative z-2">
+            <div class="hero-badge mb-4 fade-in-up">
+                <span class="badge-glass">AI-POWERED LEARNING</span>
+            </div>
+            <h1 class="display-1 fw-bold text-white mb-4 tracking-tight fade-in-up delay-100">
+                LERNYX<br>
+                <span class="text-stroke">INTELLIGENCE</span>
+            </h1>
+            <p class="lead text-light-50 mb-5 mx-auto fade-in-up delay-200" style="max-width: 600px;">
+                Experience the next generation of coding education.
+                Powered by Gemini AI, driven by your curiosity.
+            </p>
+            <div class="d-flex justify-content-center gap-4 fade-in-up delay-300">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('home') }}" class="btn btn-glass btn-lg">
+                    ENTER DASHBOARD
+                </a>
+                {% else %}
+                <a href="{{ url_for('signup') }}" class="btn btn-glass btn-lg">
+                    START JOURNEY
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-glass-outline btn-lg">
+                    LOGIN
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+            <div class="mouse"></div>
+            <p>SCROLL TO EXPLORE</p>
+        </div>
+    </section>
+
+    <!-- Features Section (Floating Cards) -->
+    <section class="immersive-features py-5">
+        <div class="container">
+            <div class="row g-5">
+                <!-- Card 1 -->
+                <div class="col-lg-4 fade-in-on-scroll">
+                    <div class="glass-card-feature">
+                        <div class="feature-number">01</div>
+                        <h3>AI Tutor</h3>
+                        <p>Real-time assistance powered by advanced neural networks. Debug code, get explanations, and
+                            learn faster.</p>
+                        <div class="feature-visual">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="col-lg-4 fade-in-on-scroll delay-100">
+                    <div class="glass-card-feature">
+                        <div class="feature-number">02</div>
+                        <h3>Video Intelligence</h3>
+                        <p>Transform any educational content into interactive quizzes instantly. Learn from what you
+                            watch.</p>
+                        <div class="feature-visual">
+                            <i class="bi bi-youtube"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="col-lg-4 fade-in-on-scroll delay-200">
+                    <div class="glass-card-feature">
+                        <div class="feature-number">03</div>
+                        <h3>Code Compiler</h3>
+                        <p>Execute Java and Python code directly in the browser. Practice algorithms with zero setup.
+                        </p>
+                        <div class="feature-visual">
+                            <i class="bi bi-code-slash"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="immersive-stats py-5">
+        <div class="container">
+            <div class="glass-strip">
+                <div class="row text-center">
+                    <div class="col-md-4 border-end border-light border-opacity-10">
+                        <div class="stat-number">10k+</div>
+                        <div class="stat-label">Active Learners</div>
+                    </div>
+                    <div class="col-md-4 border-end border-light border-opacity-10">
+                        <div class="stat-number">50k+</div>
+                        <div class="stat-label">Quizzes Generated</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-number">99%</div>
+                        <div class="stat-label">Satisfaction Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <section class="immersive-cta text-center py-5">
+        <div class="container">
+            <h2 class="display-4 fw-bold text-white mb-4">Ready to Evolve?</h2>
+            <a href="{{ url_for('signup') }}" class="btn btn-glass btn-xl">
+                JOIN THE FUTURE
+            </a>
+        </div>
+    </section>
+</div>
+
+<!-- Scripts -->
+<script src="{{ url_for('static', filename='js/three-background.js') }}"></script>
+<script>
+    // Scroll Animation Observer
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in-on-scroll').forEach(el => observer.observe(el));
+</script>
+{% endblock %}

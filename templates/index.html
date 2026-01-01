@@ -1,203 +1,486 @@
 {% extends "base.html" %}
 
-{% block title %}Chatbot - Learnex{% endblock %}
+{% block title %}Chatbot - LernyX{% endblock %}
 
 {% block content %}
-<div class="container py-4 h-100">
-    <div class="row h-100">
+<div class="container-fluid h-100 py-3 app-wrapper">
+    <div class="row h-100 g-3">
         <!-- Chat Area -->
         <div class="col-lg-9 col-md-8 d-flex flex-column h-100">
-            <div class="card flex-grow-1 shadow-sm mb-3">
-                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-white">Gemini Chatbot</h5>
-                    <span class="badge bg-primary">AI Powered</span>
+            <div class="glass-card flex-grow-1 d-flex flex-column p-0 overflow-hidden">
+                <!-- Header -->
+                <div
+                    class="p-3 border-bottom border-light border-opacity-10 d-flex justify-content-between align-items-center bg-black bg-opacity-25">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-robot text-primary fs-4"></i>
+                        <div>
+                            <h5 class="mb-0 text-white fw-bold">Gemini Chatbot</h5>
+                            <small class="text-secondary">Powered by Google DeepMind</small>
+                        </div>
+                    </div>
+                    <span class="badge badge-glass">AI Online</span>
                 </div>
-                <div class="card-body p-0 position-relative">
-                    <div id="chat" class="chat-box p-3" style="height: 500px; overflow-y: auto;">
-                        <!-- Messages will appear here -->
-                        <div class="text-center text-muted mt-5">
-                            <p>Start a conversation with Gemini AI!</p>
+
+                <!-- Chat Messages -->
+                <div class="card-body p-0 position-relative flex-grow-1">
+                    <div id="chat" class="chat-box p-4"
+                        style="height: 100%; overflow-y: auto; scroll-behavior: smooth;">
+                        <!-- Welcome Message -->
+                        <div class="text-center mt-5 fade-in-up">
+                            <div class="mb-3">
+                                <i class="bi bi-stars text-warning display-4"></i>
+                            </div>
+                            <h3 class="text-white fw-bold">How can I help you today?</h3>
+                            <p class="text-secondary">Ask me about code, debugging, or complex concepts.</p>
                         </div>
                     </div>
                 </div>
-                <div class="card-footer bg-transparent border-top p-3">
+
+                <!-- Input Area -->
+                <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-25">
+                    <!-- File Preview -->
+                    <div id="file-preview"
+                        class="d-none mb-2 p-2 rounded border border-secondary bg-dark bg-opacity-50 position-relative"
+                        style="width: fit-content;">
+                        <span id="file-name" class="text-light small me-3"></span>
+                        <button type="button"
+                            class="btn-close btn-close-white small position-absolute top-0 start-100 translate-middle"
+                            aria-label="Close" onclick="clearFile()"></button>
+                    </div>
+
                     <div class="input-group">
-                        <input type="text" id="message" class="form-control" placeholder="Type your question..."
-                            autocomplete="off">
+                        <input type="file" id="file-input" class="d-none" accept=".pdf,.jpg,.jpeg,.png,.webp"
+                            onchange="handleFileSelect(this)">
+                        <button class="btn btn-glass-outline border-end-0" type="button"
+                            onclick="document.getElementById('file-input').click()" title="Attach file">
+                            <i class="bi bi-paperclip"></i>
+                        </button>
+                        <input type="text" id="message" class="form-control border-start-0 border-end-0"
+                            placeholder="Type your question..." autocomplete="off" style="height: 50px;">
                         <button class="btn btn-primary" type="button" onclick="send()">
                             Send <i class="bi bi-send-fill ms-1"></i>
                         </button>
+                    </div>
+                    <div class="form-text text-secondary small mt-2 d-flex justify-content-between">
+                        <span>Supported: PDF, Images (JPG, PNG, WebP)</span>
+                        <span>Press Enter to send</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- History Sidebar -->
-        <div class="col-lg-3 col-md-4 d-none d-md-block h-100">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-transparent border-bottom">
-                    <h6 class="mb-0 text-white">Recent Chats</h6>
+        <div class="col-lg-3 col-md-4 d-flex flex-column h-100">
+            <div class="glass-card h-100 d-flex flex-column p-0 overflow-hidden">
+                <div class="p-3 border-bottom border-light border-opacity-10 bg-black bg-opacity-25">
+                    <h5 class="mb-0 text-white fw-bold"><i class="bi bi-clock-history me-2"></i>History</h5>
                 </div>
-                <div class="card-body p-0">
-                    <div id="history-container" class="list-group list-group-flush"
-                        style="height: 500px; overflow-y: auto;">
-                        <!-- History items will appear here -->
+                <div class="p-3 flex-grow-1 overflow-auto" id="history-list">
+                    <!-- History items will be populated here -->
+                    <div class="text-center text-secondary mt-4">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
                     </div>
+                </div>
+                <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-25">
+                    <button class="btn btn-glass-outline w-100 btn-sm" onclick="startNewChat()">
+                        <i class="bi bi-plus-lg me-2"></i>New Chat
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<!-- Chat Styles Override for this page -->
+<style>
+    .chat-message {
+        margin-bottom: 1rem;
+        max-width: 80%;
+        padding: 1rem 1.25rem;
+        border-radius: 1rem;
+        position: relative;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .chat-message.user {
+        background: rgba(99, 102, 241, 0.2);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 0.25rem;
+    }
+
+    .chat-message.bot {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        margin-right: auto;
+        border-bottom-left-radius: 0.25rem;
+    }
+
+    .chat-box::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-box::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
 <script>
-    const chat = document.getElementById('chat');
-    const historyContainer = document.getElementById('history-container');
-    let recentChats = [];
-    let activeHistory = null;
-
-    function addMsg(sender, htmlContent) {
-        // Remove initial placeholder if present
-        if (chat.querySelector('.text-center')) {
-            chat.innerHTML = '';
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true
+        },
+        svg: {
+            fontCache: 'global'
         }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    // Chat Logic
+    let currentChatId = null;
 
-        let div = document.createElement('div');
-        div.className = 'chat-message ' + sender + ' mb-3 p-3 rounded-3';
+    document.addEventListener('DOMContentLoaded', () => {
+        loadHistory();
 
-        if (sender === 'user') {
-            div.classList.add('bg-primary', 'text-white', 'ms-auto');
-            div.style.maxWidth = '80%';
-            div.textContent = htmlContent;
-        } else {
-            div.classList.add('bg-dark', 'border', 'border-secondary', 'text-light', 'me-auto');
-            div.style.maxWidth = '80%';
-            div.innerHTML = htmlContent;
-        }
-
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
-    }
-
-    async function send() {
-        let msgInput = document.getElementById('message');
-        let msg = msgInput.value.trim();
-        if (!msg) return;
-
-        addMsg('user', msg);
-        msgInput.value = '';
-
-        // Show loading indicator
-        let loadingDiv = document.createElement('div');
-        loadingDiv.id = 'loading-msg';
-        loadingDiv.className = 'chat-message bot mb-3 p-3 rounded-3 bg-dark border border-secondary text-light me-auto';
-        loadingDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-light" role="status"><span class="visually-hidden">Loading...</span></div> Thinking...';
-        chat.appendChild(loadingDiv);
-        chat.scrollTop = chat.scrollHeight;
-
-        try {
-            let payload = msg;
-            if (activeHistory) {
-                const contextText = buildContextFromHistory(activeHistory);
-                payload = contextText + "\n\nNew question: " + msg;
-            }
-            let resp = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: payload })
-            });
-            let data = await resp.json();
-
-            // Remove loading indicator
-            const loader = document.getElementById('loading-msg');
-            if (loader) loader.remove();
-
-            if (data.response) {
-                addMsg('bot', data.response);
-            } else {
-                addMsg('bot', "Error: " + (data.error || "No response"));
-            }
-        } catch (err) {
-            const loader = document.getElementById('loading-msg');
-            if (loader) loader.remove();
-            addMsg('bot', "Error: " + err.message);
-        }
-    }
-
-    document.getElementById('message').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') send();
+        // Enter key to send
+        document.getElementById("message").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") send();
+        });
     });
 
-    function buildContextFromHistory(item) {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = item.bot_response || '';
-        const cleanBot = tmp.textContent || tmp.innerText || '';
-        return (
-            "Previous chat context:\\n" +
-            "User: " + (item.user_message || '') + "\\n" +
-            "Assistant: " + cleanBot.trim()
-        );
+    function startNewChat() {
+        currentChatId = null;
+        document.getElementById('chat').innerHTML = `
+            <div class="text-center mt-5 fade-in-up">
+                <div class="mb-3"><i class="bi bi-stars text-warning display-4"></i></div>
+                <h3 class="text-white fw-bold">How can I help you today?</h3>
+                <p class="text-secondary">Ask me about code, debugging, or complex concepts.</p>
+            </div>`;
+        loadHistory(); // Refresh active state
     }
 
     async function loadHistory() {
+        const historyList = document.getElementById('history-list');
         try {
-            const resp = await fetch('/api/user-chats?limit=30');
-            if (!resp.ok) {
-                historyContainer.innerHTML = '<div class="p-3 text-muted small">Unable to load history.</div>';
+            const response = await fetch('/api/user-chats');
+            const data = await response.json();
+            const chats = data.conversations || [];
+
+            historyList.innerHTML = '';
+
+            if (chats.length === 0) {
+                historyList.innerHTML = '<p class="text-center text-secondary small mt-3">No recent chats</p>';
                 return;
             }
-            const data = await resp.json();
-            if (!data.conversations || !data.conversations.length) {
-                historyContainer.innerHTML = '<div class="p-3 text-muted small">No chats yet.</div>';
-                return;
-            }
-            recentChats = data.conversations;
-            historyContainer.innerHTML = '';
-            recentChats.forEach(conv => {
-                const date = conv.timestamp ? new Date(conv.timestamp) : null;
-                const timeLabel = date ? date.toLocaleString() : '';
-                const fullMsg = (conv.user_message || '').trim();
-                const title = fullMsg.length > 40 ? fullMsg.slice(0, 40) + '…' : fullMsg || '(no message)';
-                const id = (conv._id || timeLabel.replace(/[^0-9]/g, '')).toString();
 
-                const item = document.createElement('a');
-                item.href = '#';
-                item.className = 'list-group-item list-group-item-action bg-transparent border-secondary text-light';
-                item.dataset.id = id;
-                item.onclick = (e) => { e.preventDefault(); selectHistory(id); };
-
-                item.innerHTML = `
-                    <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1 text-truncate" style="max-width: 100%;">${title}</h6>
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = `p-2 mb-2 rounded cursor-pointer transition-all ${chat.id === currentChatId ? 'bg-primary bg-opacity-25 border border-primary border-opacity-25' : 'hover-bg-glass'}`;
+                div.style.cursor = 'pointer';
+                div.innerHTML = `
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-chat-left-text text-secondary"></i>
+                        <div class="text-truncate small text-light">${chat.title || 'Untitled Chat'}</div>
                     </div>
-                    <small class="text-muted">${timeLabel}</small>
+                    <div class="small text-secondary ms-4" style="font-size: 0.75rem;">${new Date(chat.timestamp).toLocaleDateString()}</div>
                 `;
-                historyContainer.appendChild(item);
+                div.onclick = () => loadChat(chat._id);
+                historyList.appendChild(div);
             });
-        } catch (e) {
-            historyContainer.innerHTML = '<div class="p-3 text-muted small">Unable to load history.</div>';
+        } catch (error) {
+            console.error('Error loading history:', error);
+            historyList.innerHTML = '<p class="text-danger small text-center">Failed to load history</p>';
         }
     }
 
-    function selectHistory(id) {
-        const conv = recentChats.find(c => (c._id || '').toString() === id);
-        if (!conv) return;
-        activeHistory = conv;
+    async function loadChat(chatId) {
+        currentChatId = chatId;
+        const chatBox = document.getElementById('chat');
+        chatBox.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div></div>';
 
-        document.querySelectorAll('.list-group-item').forEach(el => {
-            el.classList.remove('active');
+        try {
+            const response = await fetch(`/api/get_chat/${chatId}`);
+            const data = await response.json();
+
+            chatBox.innerHTML = '';
+            data.messages.forEach(msg => {
+                appendMessage(msg.role === 'user' ? 'user' : 'bot', msg.content);
+            });
+            loadHistory(); // Update active highlight
+        } catch (error) {
+            console.error('Error loading chat:', error);
+        }
+    }
+
+    let selectedFile = null;
+
+    function handleFileSelect(input) {
+        if (input.files && input.files[0]) {
+            selectedFile = input.files[0];
+            document.getElementById('file-name').textContent = selectedFile.name;
+            document.getElementById('file-preview').classList.remove('d-none');
+        }
+    }
+
+    function clearFile() {
+        selectedFile = null;
+        document.getElementById('file-input').value = '';
+        document.getElementById('file-preview').classList.add('d-none');
+    }
+
+    async function send() {
+        const messageInput = document.getElementById('message');
+        const message = messageInput.value.trim();
+
+        if (!message && !selectedFile) return;
+
+        // UI Updates
+        appendMessage('user', message);
+        messageInput.value = '';
+        const chatBox = document.getElementById('chat');
+
+        // Loading Indicator
+        const loadingId = 'loading-' + Date.now();
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = loadingId;
+        loadingDiv.className = 'chat-message bot';
+        loadingDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-light" role="status"></div> Thinking...';
+        chatBox.appendChild(loadingDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        const formData = new FormData();
+        formData.append('message', message);
+        if (selectedFile) {
+            formData.append('file', selectedFile);
+        }
+        if (currentChatId) {
+            formData.append('chat_id', currentChatId);
+        }
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            document.getElementById(loadingId).remove();
+
+            if (data.error) {
+                appendMessage('bot', 'Error: ' + data.error);
+            } else {
+                appendMessage('bot', data.response);
+                if (data.chat_id) {
+                    currentChatId = data.chat_id;
+                    loadHistory(); // Refresh history to show new chat or update title
+                }
+            }
+            clearFile();
+        } catch (error) {
+            document.getElementById(loadingId).remove();
+            appendMessage('bot', 'Error: Could not connect to server.');
+        }
+    }
+
+    function appendMessage(sender, text) {
+        const chatBox = document.getElementById('chat');
+        const div = document.createElement('div');
+        div.className = `chat-message ${sender}`;
+
+        // Parse Markdown for bot messages
+        if (sender === 'bot') {
+            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    // Chat Logic
+                let currentChatId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+                    loadHistory();
+
+                // Enter key to send
+                document.getElementById("message").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") send();
         });
-        const selected = document.querySelector('.list-group-item[data-id=\"' + id + '\"]');
-        if (selected) {
-            selected.classList.add('active');
-        }
+    });
 
-        chat.innerHTML = '';
-        if (conv.user_message) addMsg('user', conv.user_message);
-        if (conv.bot_response) addMsg('bot', conv.bot_response);
+                function startNewChat() {
+                    currentChatId = null;
+                document.getElementById('chat').innerHTML = `
+                <div class="text-center mt-5 fade-in-up">
+                    <div class="mb-3"><i class="bi bi-stars text-warning display-4"></i></div>
+                    <h3 class="text-white fw-bold">How can I help you today?</h3>
+                    <p class="text-secondary">Ask me about code, debugging, or complex concepts.</p>
+                </div>`;
+                loadHistory(); // Refresh active state
     }
 
-    window.addEventListener('DOMContentLoaded', loadHistory);
+                async function loadHistory() {
+        const historyList = document.getElementById('history-list');
+                try {
+            const response = await fetch('/api/user-chats');
+                const data = await response.json();
+                const chats = data.conversations || [];
+
+                historyList.innerHTML = '';
+
+                if (chats.length === 0) {
+                    historyList.innerHTML = '<p class="text-center text-secondary small mt-3">No recent chats</p>';
+                return;
+            }
+
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = `p-2 mb-2 rounded cursor-pointer transition-all ${chat.id === currentChatId ? 'bg-primary bg-opacity-25 border border-primary border-opacity-25' : 'hover-bg-glass'}`;
+                div.style.cursor = 'pointer';
+                div.innerHTML = `
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-chat-left-text text-secondary"></i>
+                    <div class="text-truncate small text-light">${chat.title || 'Untitled Chat'}</div>
+                </div>
+                <div class="small text-secondary ms-4" style="font-size: 0.75rem;">${new Date(chat.timestamp).toLocaleDateString()}</div>
+                `;
+                div.onclick = () => loadChat(chat._id);
+                historyList.appendChild(div);
+            });
+        } catch (error) {
+                    console.error('Error loading history:', error);
+                historyList.innerHTML = '<p class="text-danger small text-center">Failed to load history</p>';
+        }
+    }
+
+                async function loadChat(chatId) {
+                    currentChatId = chatId;
+                const chatBox = document.getElementById('chat');
+                chatBox.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div></div>';
+
+                try {
+            const response = await fetch(`/api/get_chat/${chatId}`);
+                const data = await response.json();
+
+                chatBox.innerHTML = '';
+            data.messages.forEach(msg => {
+                    appendMessage(msg.role === 'user' ? 'user' : 'bot', msg.content);
+            });
+                loadHistory(); // Update active highlight
+        } catch (error) {
+                    console.error('Error loading chat:', error);
+        }
+    }
+
+                let selectedFile = null;
+
+                function handleFileSelect(input) {
+        if (input.files && input.files[0]) {
+                    selectedFile = input.files[0];
+                document.getElementById('file-name').textContent = selectedFile.name;
+                document.getElementById('file-preview').classList.remove('d-none');
+        }
+    }
+
+                function clearFile() {
+                    selectedFile = null;
+                document.getElementById('file-input').value = '';
+                document.getElementById('file-preview').classList.add('d-none');
+    }
+
+                async function send() {
+        const messageInput = document.getElementById('message');
+                const message = messageInput.value.trim();
+
+                if (!message && !selectedFile) return;
+
+                // UI Updates
+                appendMessage('user', message);
+                messageInput.value = '';
+                const chatBox = document.getElementById('chat');
+
+                // Loading Indicator
+                const loadingId = 'loading-' + Date.now();
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = loadingId;
+                loadingDiv.className = 'chat-message bot';
+                loadingDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-light" role="status"></div> Thinking...';
+                chatBox.appendChild(loadingDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                const formData = new FormData();
+                formData.append('message', message);
+                if (selectedFile) {
+                    formData.append('file', selectedFile);
+        }
+                if (currentChatId) {
+                    formData.append('chat_id', currentChatId);
+        }
+
+                try {
+            const response = await fetch('/api/chat', {
+                    method: 'POST',
+                body: formData
+            });
+
+                const data = await response.json();
+                document.getElementById(loadingId).remove();
+
+                if (data.error) {
+                    appendMessage('bot', 'Error: ' + data.error);
+            } else {
+                    appendMessage('bot', data.response);
+                if (data.chat_id) {
+                    currentChatId = data.chat_id;
+                loadHistory(); // Refresh history to show new chat or update title
+                }
+            }
+                clearFile();
+        } catch (error) {
+                    document.getElementById(loadingId).remove();
+                appendMessage('bot', 'Error: Could not connect to server.');
+        }
+    }
+
+                function appendMessage(sender, text) {
+        const chatBox = document.getElementById('chat');
+                const div = document.createElement('div');
+                div.className = `chat-message ${sender}`;
+
+        // Parse Markdown for bot messages
+        if (sender === 'bot') {
+            div.innerHTML = marked.parse(text);
+        } else {
+            div.textContent = text;
+        }
+
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Render MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([div]).catch((err) => console.log(err));
+        }
+    }
 </script>
 {% endblock %}

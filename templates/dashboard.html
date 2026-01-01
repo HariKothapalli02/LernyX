@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}My Dashboard - Learnex{% endblock %}
+{% block title %}My Dashboard - LernyX{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -210,7 +210,7 @@
     async function loadChats() {
         const container = document.getElementById('chats-container');
         try {
-            const resp = await fetch('/api/user-chats');
+            const resp = await fetch('/api/user-chats?t=' + new Date().getTime());
             if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
             const data = await resp.json();
 
@@ -223,9 +223,20 @@
                 container.innerHTML = data.conversations.map(conv => {
                     const date = new Date(conv.timestamp).toLocaleString();
                     const fullUserMsg = (conv.user_message || '').trim();
-                    const title = fullUserMsg.length > 80 ? fullUserMsg.slice(0, 80) + '...' : (fullUserMsg || '(no message)');
+                    let title = conv.title;
+                    if (!title || title === '(no title)') {
+                        title = 'New Chat';
+                    }
                     const botResponse = conv.bot_response || '';
                     const chatId = conv._id || (conv.timestamp || '').replace(/[^0-9]/g, '');
+
+                    let attachmentHtml = '';
+                    if (conv.attachment) {
+                        const icon = conv.attachment.type === 'pdf' ? 'bi-file-pdf' : 'bi-file-image';
+                        attachmentHtml = `<div class="mt-1 small text-muted"><i class="bi ${icon} me-1"></i> ${escapeHtml(conv.attachment.filename)}</div>`;
+                    }
+
+                    const displayTitle = title === '(no message)' && conv.attachment ? `Analysis of ${conv.attachment.filename}` : title;
 
                     return `
                         <div class="card mb-3 border-start border-4 border-success bg-light bg-opacity-10">
@@ -237,10 +248,13 @@
                                         <span class="ms-2 text-muted" id="chevron-${chatId}">▼</span>
                                     </div>
                                 </div>
-                                <div class="fw-semibold text-body">You: ${escapeHtml(title)}</div>
+                                <div class="fw-semibold text-body">You: ${escapeHtml(displayTitle)}</div>
                                 
                                 <div class="mt-3 pt-3 border-top d-none" id="chat-details-${chatId}">
-                                    <div class="mb-2 fw-bold text-primary">You: ${escapeHtml(fullUserMsg)}</div>
+                                    <div class="mb-2 fw-bold text-primary">
+                                        You: ${escapeHtml(fullUserMsg)}
+                                        ${attachmentHtml}
+                                    </div>
                                     <div class="ps-3 border-start border-2">Bot: ${botResponse}</div>
                                 </div>
                             </div>
@@ -596,5 +610,39 @@
             alert('Error deleting account: ' + error.message);
         }
     }
+</script>
+<!-- MathJax Configuration -->
+<script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true
+        },
+        svg: {
+            fontCache: 'global'
+        }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+    // Hook into loadChats to trigger MathJax
+    const originalLoadChats = loadChats;
+    loadChats = async function () {
+        await originalLoadChats();
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    };
+
+    // Also trigger on tab switch if needed, though loadChats covers the main case
+    const originalLoadTab = loadTab;
+    loadTab = function (tabName) {
+        originalLoadTab(tabName);
+        if (tabName === 'chats' && window.chatsLoaded && window.MathJax) {
+            setTimeout(() => MathJax.typesetPromise(), 100);
+        }
+    };
 </script>
 {% endblock %}

@@ -1,98 +1,41 @@
-<!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Learnex</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-</head>
+{% block title %}Login - LernyX{% endblock %}
 
-<body class="d-flex align-items-center min-vh-100 py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow-lg border-0">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <h2 class="fw-bold text-white">Welcome Back</h2>
-                            <p class="text-muted">Login to access Learnex</p>
-                        </div>
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="glass-card fade-in-up">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-white">Welcome Back</h2>
+                    <p class="text-secondary">Login to continue your journey</p>
+                </div>
 
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                        {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        {% endfor %}
-                        {% endif %}
-                        {% endwith %}
-
-                        <form method="POST" action="{{ url_for('login') }}">
-                            <div class="mb-3">
-                                <label for="username" class="form-label text-muted small fw-bold">Username or
-                                    Email</label>
-                                <input type="text" class="form-control bg-dark text-white border-secondary"
-                                    id="username" name="username" required autofocus>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="password" class="form-label text-muted small fw-bold">Password</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control bg-dark text-white border-secondary"
-                                        id="password" name="password" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="d-grid mb-4">
-                                <button type="submit" class="btn btn-primary btn-lg">Login</button>
-                            </div>
-                        </form>
-
-                        <div class="text-center text-muted small">
-                            <p class="mb-2">Don't have an account? <a href="{{ url_for('signup') }}"
-                                    class="text-primary text-decoration-none">Sign up</a></p>
-                            <p class="mb-0"><a href="{{ url_for('forgot_password') }}"
-                                    class="text-secondary text-decoration-none">Forgot Password?</a></p>
-                        </div>
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label text-white">Username or Email</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                            placeholder="Enter username or email" required>
                     </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label text-white">Password</label>
+                        <input type="password" class="form-control" id="password" name="password"
+                            placeholder="Enter your password" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-secondary small">
+                        Don't have an account? <a href="{{ url_for('signup') }}"
+                            class="text-white fw-bold text-decoration-none">Sign Up</a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const passwordInput = document.getElementById('password');
-            const togglePasswordBtn = document.getElementById('togglePassword');
-
-            if (togglePasswordBtn && passwordInput) {
-                togglePasswordBtn.addEventListener('click', function () {
-                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passwordInput.setAttribute('type', type);
-
-                    const icon = this.querySelector('i');
-                    icon.classList.toggle('bi-eye');
-                    icon.classList.toggle('bi-eye-slash');
-                });
-            }
-        });
-    </script>
-</body>
-
-</html>
+</div>
+{% endblock %}

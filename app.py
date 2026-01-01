@@ -13,9 +13,11 @@ import string
 from youtube_transcript_api import YouTubeTranscriptApi
 from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+import shutil
 from pymongo import MongoClient
 from bson import ObjectId
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import smtplib
 from email.mime.text import MIMEText
 from generate_dsa_questions import generate_questions_batch
@@ -98,6 +100,7 @@ custom_quiz_attempts_collection = None
 aptitude_questions_collection = None
 aptitude_attempts_collection = None
 aptitude_practice_history_collection = None
+chat_sessions_collection = None
 
 try:
     if not MONGODB_URI:
@@ -114,7 +117,10 @@ try:
     custom_quiz_attempts_collection = db.custom_quiz_attempts  # Store attempts for custom quizzes
     aptitude_questions_collection = db.aptitude_questions  # Store aptitude questions
     aptitude_attempts_collection = db.aptitude_attempts  # Store aptitude quiz attempts
+    aptitude_attempts_collection = db.aptitude_attempts  # Store aptitude quiz attempts
     aptitude_practice_history_collection = db.aptitude_practice_history  # Store individual practice question attempts
+    chat_sessions_collection = db.chat_sessions # Store persistent chat sessions
+    chat_sessions_collection = db.chat_sessions # Store persistent chat sessions
     # Test connection
     client.admin.command('ping')
     MONGODB_AVAILABLE = True
@@ -270,22 +276,34 @@ def clean_json_text(text):
         
     return text
 
-def ask_gemini(prompt):
+def ask_gemini(prompt, history=None, attachment_path=None):
     # Greeting/Non-technical detection
     greeting_keywords = {"hi", "hello", "welcome", "hey", "greetings"}
     cleaned = prompt.strip().lower()
     # Only consider it a greeting if it's an exact match or very short and starts with a greeting
-    is_greeting = cleaned in greeting_keywords or (len(cleaned) < 10 and any(cleaned.startswith(w) for w in greeting_keywords))
+    # AND there is no attachment (if user uploads a file and says "hi", they probably want analysis)
+    is_greeting = (cleaned in greeting_keywords or (len(cleaned) < 10 and any(cleaned.startswith(w) for w in greeting_keywords))) and not attachment_path
 
-    if is_greeting:
+    if is_greeting and not history: # Only return static greeting if it's the very first message
         html = "<b>Hi there! 👋</b><br>I am your Gemini chatbot. Ask me anything, request code, or type a command to get started!"
         return html
+
+    # Build context from history
+    context_str = ""
+    if history:
+        context_str = "Previous conversation history:\n"
+        for msg in history:
+            role = "User" if msg.get("role") == "user" else "Assistant"
+            content = msg.get("content", "")
+            context_str += f"{role}: {content}\n"
+        context_str += "\n"
 
     # For technical/code/commands, enforce a strict HTML answer format and keep answers crisp.
     # The model should answer exactly what the user asked—no extra disclaimers or off-topic text—
     # and return a clean HTML fragment (no <html>, <head>, or <body> tags).
     format_prompt = (
         "You are a helpful AI assistant. Respond to the user's request on ANY topic (coding, general knowledge, creative writing, etc.).\n\n"
+        f"{context_str}"
         "Answer style:\n"
         "- Be helpful, friendly, and direct.\n"
         "- Keep answers concise and well-structured unless the user asks for a detailed explanation.\n"
@@ -297,20 +315,44 @@ def ask_gemini(prompt):
         "- For any console/sample output, wrap it in <pre>...</pre>.\n"
         "- Use <b>, <ul>, <ol>, <li>, <p>, and <br> for structure and readability.\n"
         "- Do NOT use Markdown code fences like ```; use HTML tags only.\n"
-        "- Do NOT restate the user prompt; just answer it.\n\n"
+        "- Do NOT restate the user prompt; just answer it.\n"
+        "- **Mathematical Formulas:**\n"
+        "  - Use LaTeX for all mathematical formulas.\n"
+        "  - Wrap block equations in double dollar signs: $$ ... $$\n"
+        "  - Wrap inline equations in single dollar signs: $ ... $\n"
+        "  - Example: The area of a circle is $ A = \\pi r^2 $.\n\n"
         "User request:\n"
         f"{prompt}"
     )
+    
     model = get_gemini_model()
     if model is None:
         return "<p><b>AI Chatbot Unavailable.</b><br>Please configure the Gemini API key in settings.</p>"
 
-    response = model.generate_content(format_prompt)
-    answer = _get_gemini_text(response)
-    if not answer:
-        # Graceful fallback if Gemini returned no usable content
-        return "<p><b>Sorry, I couldn't generate a response right now.</b><br>Please try again in a moment.</p>"
-    return answer
+    try:
+        content_parts = [format_prompt]
+        
+        if attachment_path:
+            print(f"Uploading file to Gemini: {attachment_path}")
+            # Upload the file to Gemini
+            uploaded_file = genai.upload_file(attachment_path)
+            
+            # Wait for processing if it's a PDF or video (though for images it's usually instant)
+            # For this implementation, we'll assume it's ready or will wait implicitly during generation
+            content_parts.append(uploaded_file)
+            print(f"File uploaded: {uploaded_file.name}")
+
+        response = model.generate_content(content_parts)
+        answer = _get_gemini_text(response)
+        
+        if not answer:
+            # Graceful fallback if Gemini returned no usable content
+            return "<p><b>Sorry, I couldn't generate a response right now.</b><br>Please try again in a moment.</p>"
+        return answer
+        
+    except Exception as e:
+        print(f"Error in ask_gemini: {str(e)}")
+        return f"<p><b>Error processing request.</b><br>{str(e)}</p>"
 
 def get_video_id(yt_url):
     match = re.search(r"(?:v=|youtu\.be/)([a-zA-Z0-9_-]{11})", yt_url)
@@ -329,41 +371,41 @@ def _send_otp_email_thread(recipient_email, otp, purpose="signup"):
         msg['To'] = recipient_email
         
         if purpose == "signup":
-            msg['Subject'] = "Verify Your Email - Learnex"
+            msg['Subject'] = "Verify Your Email - LernyX"
             body = f"""
             <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
                     <h2 style="color: #2563eb;">Email Verification</h2>
                     <p>Hello,</p>
-                    <p>Thank you for signing up for Learnex! Please use the following OTP to verify your email address and complete your account creation:</p>
+                    <p>Thank you for signing up for LernyX! Please use the following OTP to verify your email address and complete your account creation:</p>
                     <div style="background-color: #ffffff; border: 2px solid #2563eb; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
                         <h1 style="color: #2563eb; font-size: 32px; margin: 0; letter-spacing: 5px;">{otp}</h1>
                     </div>
                     <p>This OTP is valid for 10 minutes. Do not share this code with anyone.</p>
                     <p>If you did not create an account, please ignore this email.</p>
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-                    <p style="color: #666; font-size: 12px;">This is an automated message from Learnex.</p>
+                    <p style="color: #666; font-size: 12px;">This is an automated message from LernyX.</p>
                 </div>
             </body>
             </html>
             """
         else:  # password reset
-            msg['Subject'] = "Password Reset OTP - Learnex"
+            msg['Subject'] = "Password Reset OTP - LernyX"
             body = f"""
             <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
                     <h2 style="color: #2563eb;">Password Reset Request</h2>
                     <p>Hello,</p>
-                    <p>You have requested to reset your password for your Learnex account. Please use the following OTP to verify your identity:</p>
+                    <p>You have requested to reset your password for your LernyX account. Please use the following OTP to verify your identity:</p>
                     <div style="background-color: #ffffff; border: 2px solid #2563eb; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
                         <h1 style="color: #2563eb; font-size: 32px; margin: 0; letter-spacing: 5px;">{otp}</h1>
                     </div>
                     <p>This OTP is valid for 10 minutes. Do not share this code with anyone.</p>
                     <p>If you did not request a password reset, please ignore this email and your password will remain unchanged.</p>
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-                    <p style="color: #666; font-size: 12px;">This is an automated message from Learnex.</p>
+                    <p style="color: #666; font-size: 12px;">This is an automated message from LernyX.</p>
                 </div>
             </body>
             </html>
@@ -728,9 +770,7 @@ def get_video_metadata(video_id, yt_url):
 
 @app.route("/")
 def index():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    return redirect(url_for('login'))
+    return render_template('landing.html')
 
 @app.route('/sw.js')
 def service_worker():
@@ -1105,7 +1145,7 @@ def verify_signup():
 def logout():
     logout_user()
     flash("You have been logged out.", "info")
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 @app.route("/delete-account", methods=["POST"])
 @login_required
@@ -1362,39 +1402,7 @@ def custom_quiz_exam():
     """Custom quiz exam page for students (enter code and attempt in fullscreen)."""
     return render_template("custom_exam.html")
 
-@app.route("/api/user-chats", methods=["GET"])
-@login_required
-def get_user_chats():
-    """Get user's past chatbot conversations."""
-    if not MONGODB_AVAILABLE:
-        return jsonify({"error": "Database unavailable"}), 500
-    
-    try:
-        limit = int(request.args.get("limit", 50))
-        # Try both ObjectId and string format for user_id
-        try:
-            user_id_obj = ObjectId(current_user.id)
-            conversations = list(chat_conversations_collection.find(
-                {"user_id": user_id_obj}
-            ).sort("timestamp", -1).limit(limit))
-        except:
-            # Fallback to string if ObjectId conversion fails
-            conversations = list(chat_conversations_collection.find(
-                {"user_id": current_user.id}
-            ).sort("timestamp", -1).limit(limit))
-        
-        # Convert ObjectId to string and format dates
-        for conv in conversations:
-            conv["_id"] = str(conv["_id"])
-            if "user_id" in conv:
-                conv["user_id"] = str(conv["user_id"])
-            if isinstance(conv.get("timestamp"), datetime):
-                conv["timestamp"] = conv["timestamp"].isoformat()
-        
-        print(f"Found {len(conversations)} conversations for user {current_user.id}")
-        return jsonify({"conversations": conversations})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/user-chats/<chat_id>", methods=["DELETE"])
 @login_required
@@ -2773,11 +2781,60 @@ def submit_aptitude_answer():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# --- Dashboard APIs ---
-
 @app.route("/api/user-chats")
 @login_required
 def api_user_chats():
+    if not MONGODB_AVAILABLE:
+        return jsonify({"error": "Database unavailable"}), 500
+    
+    try:
+        # robust user_id handling
+        user_id = current_user.id
+        user_id_obj = None
+        try:
+            user_id_obj = ObjectId(user_id)
+        except:
+            pass
+            
+        # Query for both string and ObjectId versions of user_id to be safe
+        query_conditions = [{"user_id": str(user_id)}]
+        if user_id_obj:
+            query_conditions.append({"user_id": user_id_obj})
+            
+        query = {"$or": query_conditions}
+        
+        # DEBUG LOGGING
+        with open("debug_chat.log", "a") as f:
+            f.write(f"API_USER_CHATS: UserID={user_id} (Type: {type(user_id)})\n")
+            f.write(f"API_USER_CHATS: Query={query}\n")
+        
+        # Fetch sessions, sorted by newest first
+        sessions = list(chat_sessions_collection.find(query).sort("updated_at", -1).limit(50))
+        
+        with open("debug_chat.log", "a") as f:
+            f.write(f"API_USER_CHATS: Found {len(sessions)} sessions\n")
+        
+        formatted_sessions = []
+        for s in sessions:
+            # Safely get title, defaulting to "New Chat"
+            title = s.get("title")
+            if not title or title == "(no title)":
+                title = "New Chat"
+                
+            formatted_sessions.append({
+                "_id": str(s["_id"]),
+                "title": title,
+                "timestamp": s.get("updated_at")
+            })
+            
+        return jsonify({"conversations": formatted_sessions})
+    except Exception as e:
+        print(f"Error in api_user_chats: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/get_chat/<chat_id>")
+@login_required
+def api_get_chat(chat_id):
     if not MONGODB_AVAILABLE:
         return jsonify({"error": "Database unavailable"}), 500
     try:
@@ -2787,15 +2844,19 @@ def api_user_chats():
             user_id_obj = current_user.id
         user_id_str = str(current_user.id)
         
-        chats = list(chat_conversations_collection.find(
-            {"user_id": {"$in": [user_id_obj, user_id_str]}}
-        ).sort("timestamp", -1))
+        chat = chat_sessions_collection.find_one({
+            "_id": ObjectId(chat_id),
+            "user_id": {"$in": [user_id_obj, user_id_str]}
+        })
         
-        for chat in chats:
-            chat["_id"] = str(chat["_id"])
-            chat["user_id"] = str(chat["user_id"])
+        if not chat:
+            return jsonify({"error": "Chat not found"}), 404
             
-        return jsonify({"conversations": chats})
+        return jsonify({
+            "id": str(chat["_id"]),
+            "title": chat.get("title", "New Chat"),
+            "messages": chat.get("messages", [])
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -2811,7 +2872,7 @@ def api_delete_chat(chat_id):
             user_id_obj = current_user.id
         user_id_str = str(current_user.id)
         
-        result = chat_conversations_collection.delete_one({
+        result = chat_sessions_collection.delete_one({
             "_id": ObjectId(chat_id),
             "user_id": {"$in": [user_id_obj, user_id_str]}
         })
@@ -3108,7 +3169,7 @@ def test_email():
         msg = MIMEMultipart()
         msg['From'] = EMAIL_ADDRESS
         msg['To'] = recipient_email
-        msg['Subject'] = "Test Email - Learnex Debug"
+        msg['Subject'] = "Test Email - LernyX Debug"
         body = f"This is a test email to verify SMTP configuration.\n\nDiagnostics:\n{json.dumps(diagnostics, indent=2)}"
         msg.attach(MIMEText(body, 'plain'))
         text = msg.as_string()
@@ -3185,12 +3246,68 @@ def videoquiz():
 @app.route("/api/chat", methods=["POST"])
 @login_required
 def chat():
-    data = request.get_json()
-    user_message = data.get("message", "")
-    if not user_message:
-        return jsonify({"error": "No message provided"}), 400
+    # Handle both JSON and Multipart/Form-Data
+    if request.is_json:
+        data = request.get_json()
+        user_message = data.get("message", "")
+        conversation_id = data.get("conversation_id") or data.get("chat_id")
+        file = None
+    else:
+        user_message = request.form.get("message", "")
+        conversation_id = request.form.get("conversation_id") or request.form.get("chat_id")
+        file = request.files.get("file")
+
+    if not user_message and not file:
+        return jsonify({"error": "No message or file provided"}), 400
+        
+    # Handle file upload
+    attachment_path = None
+    attachment_info = None
+    
+    if file and file.filename:
+        try:
+            # Create temp directory if not exists
+            temp_dir = tempfile.mkdtemp()
+            filename = file.filename
+            # Sanitize filename
+            filename = "".join([c for c in filename if c.isalpha() or c.isdigit() or c in "._- "])
+            attachment_path = os.path.join(temp_dir, filename)
+            file.save(attachment_path)
+            
+            attachment_info = {
+                "filename": filename,
+                "type": "image" if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')) else "pdf" if filename.lower().endswith('.pdf') else "file"
+            }
+        except Exception as e:
+            print(f"Error saving uploaded file: {str(e)}")
+            return jsonify({"error": f"Failed to process file: {str(e)}"}), 500
+
     try:
-        answer = ask_gemini(user_message)
+        # Fetch history if conversation_id exists
+        history = []
+        if conversation_id and MONGODB_AVAILABLE:
+            try:
+                session = chat_sessions_collection.find_one({
+                    "_id": ObjectId(conversation_id),
+                    "user_id": {"$in": [ObjectId(current_user.id), str(current_user.id)]}
+                })
+                with open("debug_chat.log", "a") as f:
+                    f.write(f"FETCH_HISTORY: ID={conversation_id}, User={current_user.id}, Found={bool(session)}\n")
+                if session:
+                    history = session.get("messages", [])[-10:] # Limit context to last 10 messages
+            except Exception as e:
+                print(f"Error fetching history: {e}")
+        
+        # Call Gemini
+        answer = ask_gemini(user_message, history, attachment_path)
+        
+        # Clean up temp file
+        if attachment_path and os.path.exists(attachment_path):
+            try:
+                os.remove(attachment_path)
+                os.rmdir(os.path.dirname(attachment_path))
+            except Exception as e:
+                print(f"Error cleaning up temp file: {e}")
         
         # Store conversation in MongoDB
         if MONGODB_AVAILABLE:
@@ -3201,18 +3318,90 @@ def chat():
                 except:
                     user_id_obj = current_user.id
                 
-                conversation = {
-                    "user_id": user_id_obj,
-                    "username": current_user.username,
-                    "user_message": user_message,
-                    "bot_response": answer,
-                    "timestamp": datetime.utcnow()
+                timestamp = datetime.now(timezone.utc)
+                
+                user_msg_obj = {
+                    "role": "user", 
+                    "content": user_message, 
+                    "timestamp": timestamp
                 }
-                chat_conversations_collection.insert_one(conversation)
+                if attachment_info:
+                    user_msg_obj["attachment"] = attachment_info
+                
+                new_messages = [
+                    user_msg_obj,
+                    {"role": "assistant", "content": answer, "timestamp": timestamp}
+                ]
+                
+                if conversation_id:
+                    # Update existing session
+                    chat_sessions_collection.update_one(
+                        {"_id": ObjectId(conversation_id)},
+                        {
+                            "$push": {"messages": {"$each": new_messages}},
+                            "$set": {"updated_at": timestamp}
+                        }
+                    )
+                    chat_id = conversation_id
+                else:
+                    # Create new session
+                    # Generate a title from the first message
+                    title_text = user_message.strip() if user_message and user_message.strip() else (f"Analysis of {attachment_info['filename']}" if attachment_info else "New Chat")
+                    title = title_text[:50] + "..." if len(title_text) > 50 else title_text
+                    
+                    session = {
+                        "user_id": user_id_obj,
+                        "username": current_user.username,
+                        "title": title,
+                        "messages": new_messages,
+                        "created_at": timestamp,
+                        "updated_at": timestamp
+                    }
+                    result = chat_sessions_collection.insert_one(session)
+                    chat_id = str(result.inserted_id)
+                    with open("debug_chat.log", "a") as f:
+                        f.write(f"INSERT_CHAT: NewID={chat_id}, UserID={user_id_obj}, Type={type(user_id_obj)}, Title={title}\n")
+                    
             except Exception as e:
                 print(f"Error storing conversation: {str(e)}")
+                with open("db_debug.log", "a") as f:
+                    f.write(f"{datetime.now()}: Error storing conversation: {str(e)}\n")
+                chat_id = None
+        else:
+            print("DEBUG: MONGODB_AVAILABLE is False")
+            chat_id = None
         
-        return jsonify({"response": answer})
+        return jsonify({"response": answer, "conversation_id": chat_id})
+    except Exception as e:
+        print(f"Error in chat endpoint: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Server Error: {str(e)}"}), 500
+
+@app.route("/api/chat/<chat_id>", methods=["GET"])
+@login_required
+def get_chat_history(chat_id):
+    if not MONGODB_AVAILABLE:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        try:
+            user_id_obj = ObjectId(current_user.id)
+        except:
+            user_id_obj = current_user.id
+            
+        session = chat_sessions_collection.find_one({
+            "_id": ObjectId(chat_id),
+            "user_id": {"$in": [user_id_obj, str(current_user.id)]}
+        })
+        
+        if not session:
+            return jsonify({"error": "Chat not found"}), 404
+            
+        return jsonify({
+            "conversation_id": str(session["_id"]),
+            "title": session.get("title"),
+            "messages": session.get("messages", [])
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -3257,4 +3446,7 @@ def robots_txt():
 
 
 if __name__ == "__main__":
+    print("---------------------------------------------------")
+    print("   STARTING LEARNEX SERVER - VERSION: FIX_CHAT_TITLES_V2")
+    print("---------------------------------------------------")
     app.run(debug=True)

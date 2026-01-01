@@ -1,4 +1,4 @@
-const CACHE_NAME = 'learnex-v1';
+const CACHE_NAME = 'lernyx-v1';
 const ASSETS_TO_CACHE = [
     '/static/css/style.css',
     '/static/manifest.json',

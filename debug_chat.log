@@ -1,0 +1,88 @@
+INSERT_CHAT: NewID=6956090a9d127e54fba7b392, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=hi
+INSERT_CHAT: NewID=695609199d127e54fba7b393, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=hello kitty
+INSERT_CHAT: NewID=695609d7fcf06982d95744d7, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=hi
+INSERT_CHAT: NewID=695609e1fcf06982d95744d8, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=hi
+INSERT_CHAT: NewID=69560a6576b3cd9051240b9d, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=hi
+INSERT_CHAT: NewID=69560a8776b3cd9051240b9e, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=xAD
+INSERT_CHAT: NewID=69560b266bdca586f383f217, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=HI
+INSERT_CHAT: NewID=69560c414424b80639ae6b1c, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=HI
+INSERT_CHAT: NewID=695611c6f91adbfafe64818d, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=HI
+INSERT_CHAT: NewID=6956132d7549d9087a2dc7e5, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=HI
+INSERT_CHAT: NewID=695614e06cdd452f25154866, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=HI
+INSERT_CHAT: NewID=695615c14dffc969477bb45a, UserID=694917c84918accf2ebc0763, Type=<class 'bson.objectid.ObjectId'>, Title=hii
+API_USER_CHATS: UserID=694917c84918accf2ebc0763 (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '694917c84918accf2ebc0763'}, {'user_id': ObjectId('694917c84918accf2ebc0763')}]}
+API_USER_CHATS: Found 19 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 0 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 0 sessions
+INSERT_CHAT: NewID=695621da8d627259d07d7389, UserID=692e6dd0cc8fb79e50a5aa8c, Type=<class 'bson.objectid.ObjectId'>, Title=hi
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 1 sessions
+INSERT_CHAT: NewID=695621ef8d627259d07d738a, UserID=692e6dd0cc8fb79e50a5aa8c, Type=<class 'bson.objectid.ObjectId'>, Title=generate back propagation formulaes
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 2 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 2 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 2 sessions
+INSERT_CHAT: NewID=695622baffd9cdc955c37ac0, UserID=692e6dd0cc8fb79e50a5aa8c, Type=<class 'bson.objectid.ObjectId'>, Title=hi
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 3 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 3 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 3 sessions
+INSERT_CHAT: NewID=695622d1ffd9cdc955c37ac1, UserID=692e6dd0cc8fb79e50a5aa8c, Type=<class 'bson.objectid.ObjectId'>, Title=hi
+INSERT_CHAT: NewID=695622d5ffd9cdc955c37ac2, UserID=692e6dd0cc8fb79e50a5aa8c, Type=<class 'bson.objectid.ObjectId'>, Title=hello
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 5 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 5 sessions
+INSERT_CHAT: NewID=695623a20c15f6ddf9f34212, UserID=692e6dd0cc8fb79e50a5aa8c, Type=<class 'bson.objectid.ObjectId'>, Title=hi
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+FETCH_HISTORY: ID=695623a20c15f6ddf9f34212, User=692e6dd0cc8fb79e50a5aa8c, Found=True
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
+API_USER_CHATS: UserID=692e6dd0cc8fb79e50a5aa8c (Type: <class 'str'>)
+API_USER_CHATS: Query={'$or': [{'user_id': '692e6dd0cc8fb79e50a5aa8c'}, {'user_id': ObjectId('692e6dd0cc8fb79e50a5aa8c')}]}
+API_USER_CHATS: Found 6 sessions
