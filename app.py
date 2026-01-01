@@ -789,30 +789,43 @@ def service_worker():
 
 @app.route('/google10c68f1d7dfe2f5f.html')
 def google_verification():
-    try:
-        path = os.path.join(os.path.dirname(__file__), 'static', 'google10c68f1d7dfe2f5f.html')
-        with open(path, 'r') as f:
-            return f.read(), 200, {'Content-Type': 'text/html'}
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+    return "google-site-verification: google10c68f1d7dfe2f5f.html", 200, {'Content-Type': 'text/html'}
 
 @app.route('/sitemap.xml')
 def sitemap():
-    try:
-        path = os.path.join(os.path.dirname(__file__), 'static', 'sitemap.xml')
-        with open(path, 'r') as f:
-            return f.read(), 200, {'Content-Type': 'application/xml'}
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+    sitemap_xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://lernyx.vercel.app/</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://lernyx.vercel.app/login</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://lernyx.vercel.app/signup</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://lernyx.vercel.app/home</loc>
+    <lastmod>2026-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>"""
+    return sitemap_xml, 200, {'Content-Type': 'application/xml'}
 
 @app.route('/robots.txt')
 def robots():
-    try:
-        path = os.path.join(os.path.dirname(__file__), 'static', 'robots.txt')
-        with open(path, 'r') as f:
-            return f.read(), 200, {'Content-Type': 'text/plain'}
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+    robots_txt = "User-agent: *\nAllow: /\n\n# Sitemaps\nSitemap: https://lernyx.vercel.app/sitemap.xml"
+    return robots_txt, 200, {'Content-Type': 'text/plain'}
 
 @app.route("/compiler")
 @login_required
