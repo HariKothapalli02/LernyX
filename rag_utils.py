@@ -1,64 +1,126 @@
 import os
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_community.vectorstores import FAISS
+import json
+import math
+import google.generativeai as genai
+from pypdf import PdfReader
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize embeddings
-embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/text-embedding-004",
-    google_api_key=os.environ.get("GEMINI_API_KEY")
-)
+# Configure Gemini
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
-# Local storage path for the vector index
-VECTOR_DB_PATH = "faiss_index"
+# Local storage for the "vector db"
+KNOWLEDGE_BASE_PATH = "knowledge_base.json"
+
+def dot_product(v1, v2):
+    return sum(x * y for x, y in zip(v1, v2))
+
+def magnitude(v):
+    return math.sqrt(sum(x * x for x in v))
+
+def cosine_similarity(v1, v2):
+    mag1 = magnitude(v1)
+    mag2 = magnitude(v2)
+    if mag1 == 0 or mag2 == 0:
+        return 0
+    return dot_product(v1, v2) / (mag1 * mag2)
+
+def split_text(text, chunk_size=1000, overlap=100):
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunks.append(text[start:end])
+        start += (chunk_size - overlap)
+    return chunks
 
 def process_document(file_path):
-    """Load, chunk, and index a document."""
+    """Load, chunk, and index a document using a lightweight approach."""
     try:
+        text = ""
         if file_path.lower().endswith('.pdf'):
-            loader = PyPDFLoader(file_path)
+            reader = PdfReader(file_path)
+            for page in reader.pages:
+                text += (page.extract_text() or "") + "\n"
         else:
-            loader = TextLoader(file_path)
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                text = f.read()
         
-        documents = loader.load()
+        if not text.strip():
+            return False
+
+        chunks = split_text(text)
         
-        # Split into chunks
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=100,
-            length_function=len,
-        )
-        chunks = text_splitter.split_documents(documents)
+        # Get embeddings for chunks
+        new_entries = []
+        for chunk in chunks:
+            if not chunk.strip(): continue
+            result = genai.embed_content(
+                model="models/text-embedding-004",
+                content=chunk,
+                task_type="retrieval_document"
+            )
+            new_entries.append({
+                "content": chunk,
+                "embedding": result['embedding']
+            })
         
-        # Create or update vector store
-        if os.path.exists(VECTOR_DB_PATH):
-            vector_store = FAISS.load_local(VECTOR_DB_PATH, embeddings, allow_dangerous_deserialization=True)
-            vector_store.add_documents(chunks)
-        else:
-            vector_store = FAISS.from_documents(chunks, embeddings)
+        # Load existing or create new
+        kb = []
+        if os.path.exists(KNOWLEDGE_BASE_PATH):
+            try:
+                with open(KNOWLEDGE_BASE_PATH, 'r') as f:
+                    kb = json.load(f)
+            except:
+                kb = []
         
-        # Save locally
-        vector_store.save_local(VECTOR_DB_PATH)
+        kb.extend(new_entries)
+        
+        # Save (limit size to prevent huge files)
+        if len(kb) > 1000:
+            kb = kb[-1000:]
+            
+        with open(KNOWLEDGE_BASE_PATH, 'w') as f:
+            json.dump(kb, f)
+            
         return True
     except Exception as e:
-        print(f"Error processing document for RAG: {e}")
+        print(f"Error in Lite RAG processing: {e}")
         return False
 
 def get_relevant_context(query, k=3):
-    """Retrieve relevant chunks for a query."""
+    """Retrieve relevant chunks using pure Python cosine similarity."""
     try:
-        if not os.path.exists(VECTOR_DB_PATH):
+        if not os.path.exists(KNOWLEDGE_BASE_PATH):
             return ""
         
-        vector_store = FAISS.load_local(VECTOR_DB_PATH, embeddings, allow_dangerous_deserialization=True)
-        results = vector_store.similarity_search(query, k=k)
+        # Embed query
+        query_result = genai.embed_content(
+            model="models/text-embedding-004",
+            content=query,
+            task_type="retrieval_query"
+        )
+        query_embedding = query_result['embedding']
         
-        context = "\n---\n".join([doc.page_content for doc in results])
-        return context
+        # Load KB
+        with open(KNOWLEDGE_BASE_PATH, 'r') as f:
+            kb = json.load(f)
+        
+        if not kb:
+            return ""
+
+        # Calculate similarities
+        scored_chunks = []
+        for entry in kb:
+            score = cosine_similarity(query_embedding, entry['embedding'])
+            scored_chunks.append((score, entry['content']))
+        
+        # Sort and take top k
+        scored_chunks.sort(key=lambda x: x[0], reverse=True)
+        top_chunks = [chunk for score, chunk in scored_chunks[:k]]
+        
+        return "\n---\n".join(top_chunks)
     except Exception as e:
-        print(f"Error retrieving context: {e}")
+        print(f"Error in Lite RAG retrieval: {e}")
         return ""
