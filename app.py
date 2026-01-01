@@ -791,6 +791,14 @@ def service_worker():
 def google_verification():
     return send_file('google10c68f1d7dfe2f5f.html')
 
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_file('sitemap.xml')
+
+@app.route('/robots.txt')
+def robots():
+    return send_file('robots.txt')
+
 @app.route("/compiler")
 @login_required
 def compiler():
