@@ -3,42 +3,117 @@
 {% block title %}LernyX - The Future of Learning{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
 <!-- Three.js CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+    @keyframes scroll {
+        0% {
+            opacity: 1;
+            top: 8px;
+        }
+
+        50% {
+            opacity: 0.5;
+            top: 16px;
+        }
+
+        100% {
+            opacity: 0;
+            top: 24px;
+        }
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .mouse::before {
+        content: '';
+        position: absolute;
+        width: 4px;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 2px;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: scroll 1.5s infinite;
+    }
+
+    .fade-in-up {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .delay-100 {
+        animation-delay: 0.1s;
+    }
+
+    .delay-200 {
+        animation-delay: 0.2s;
+    }
+
+    .delay-300 {
+        animation-delay: 0.3s;
+    }
+
+    .fade-in-on-scroll {
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 0.8s ease;
+    }
+
+    .fade-in-on-scroll.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <!-- 3D Background Container -->
-<div id="canvas-container"></div>
+<div id="canvas-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;"></div>
 
 <!-- Main Overlay Content -->
-<div class="immersive-wrapper">
+<div class="immersive-wrapper" style="position: relative; z-index: 1;">
 
     <!-- Hero Section -->
-    <section class="immersive-hero d-flex align-items-center justify-content-center">
+    <section class="immersive-hero d-flex align-items-center justify-content-center"
+        style="min-height: 100vh; position: relative; padding: 2rem 1rem;">
         <div class="container text-center position-relative z-2">
-            <div class="hero-badge mb-4 fade-in-up">
-                <span class="badge-glass">AI-POWERED LEARNING</span>
+            <div class="hero-badge mb-4 fade-in-up" style="margin-bottom: 1.5rem;">
+                <span class="badge-glass"
+                    style="display: inline-block; padding: 0.5rem 1.5rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; color: rgba(255, 255, 255, 0.9);">AI-POWERED
+                    LEARNING</span>
             </div>
-            <h1 class="display-1 fw-bold text-white mb-4 tracking-tight fade-in-up delay-100">
+            <h1 class="display-1 fw-bold text-white mb-4 fade-in-up delay-100"
+                style="font-size: clamp(2.5rem, 10vw, 6rem); line-height: 1.1; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 1.5rem;">
                 LERNYX<br>
-                <span class="text-stroke">INTELLIGENCE</span>
+                <span
+                    style="-webkit-text-stroke: 2px rgba(255, 255, 255, 0.8); -webkit-text-fill-color: transparent; background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)); -webkit-background-clip: text; background-clip: text;">INTELLIGENCE</span>
             </h1>
-            <p class="lead text-light-50 mb-5 mx-auto fade-in-up delay-200" style="max-width: 600px;">
+            <p class="lead mb-5 mx-auto fade-in-up delay-200"
+                style="max-width: 600px; font-size: clamp(1rem, 2vw, 1.25rem); line-height: 1.6; color: rgba(255, 255, 255, 0.7); margin-bottom: 2rem;">
                 Experience the next generation of coding education.
                 Powered by Gemini AI, driven by your curiosity.
             </p>
-            <div class="d-flex justify-content-center gap-4 fade-in-up delay-300">
+            <div class="d-flex justify-content-center gap-4 fade-in-up delay-300" style="gap: 1rem; flex-wrap: wrap;">
                 {% if current_user.is_authenticated %}
-                <a href="{{ url_for('home') }}" class="btn btn-glass btn-lg">
+                <a href="{{ url_for('home') }}" class="btn btn-glass btn-lg"
+                    style="padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; display: inline-block; transition: all 0.3s ease; border: none; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; cursor: pointer;">
                     ENTER DASHBOARD
                 </a>
                 {% else %}
-                <a href="{{ url_for('signup') }}" class="btn btn-glass btn-lg">
+                <a href="{{ url_for('signup') }}" class="btn btn-glass btn-lg"
+                    style="padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; display: inline-block; transition: all 0.3s ease; border: none; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; cursor: pointer;">
                     START JOURNEY
                 </a>
-                <a href="{{ url_for('login') }}" class="btn btn-glass-outline btn-lg">
+                <a href="{{ url_for('login') }}" class="btn btn-glass-outline btn-lg"
+                    style="padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; display: inline-block; transition: all 0.3s ease; background: transparent; border: 2px solid rgba(255, 255, 255, 0.3); color: #fff; cursor: pointer;">
                     LOGIN
                 </a>
                 {% endif %}
@@ -46,51 +121,75 @@
         </div>
 
         <!-- Scroll Indicator -->
-        <div class="scroll-indicator">
-            <div class="mouse"></div>
-            <p>SCROLL TO EXPLORE</p>
+        <div class="scroll-indicator"
+            style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0.6;">
+            <div class="mouse"
+                style="width: 24px; height: 40px; border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 12px; margin: 0 auto 0.5rem; position: relative;">
+            </div>
+            <p style="font-size: 0.65rem; letter-spacing: 2px; color: rgba(255, 255, 255, 0.5); margin: 0;">SCROLL TO
+                EXPLORE</p>
         </div>
     </section>
 
     <!-- Features Section (Floating Cards) -->
-    <section class="immersive-features py-5">
+    <section class="immersive-features py-5" style="padding: 5rem 1rem;">
         <div class="container">
             <div class="row g-5">
                 <!-- Card 1 -->
-                <div class="col-lg-4 fade-in-on-scroll">
-                    <div class="glass-card-feature">
-                        <div class="feature-number">01</div>
-                        <h3>AI Tutor</h3>
-                        <p>Real-time assistance powered by advanced neural networks. Debug code, get explanations, and
+                <div class="col-lg-4 fade-in-on-scroll" style="padding: 0 1rem; margin-bottom: 2rem;">
+                    <div class="glass-card-feature"
+                        style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 2.5rem 2rem; height: 100%; position: relative; overflow: hidden; transition: all 0.4s ease;">
+                        <div class="feature-number"
+                            style="font-size: 3rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 1rem; right: 1.5rem; line-height: 1;">
+                            01</div>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #fff;">AI Tutor</h3>
+                        <p
+                            style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; margin-bottom: 2rem; font-size: 0.95rem;">
+                            Real-time assistance powered by advanced neural networks. Debug code, get explanations, and
                             learn faster.</p>
-                        <div class="feature-visual">
-                            <i class="bi bi-robot"></i>
+                        <div class="feature-visual" style="text-align: center; margin-top: 2rem;">
+                            <i class="bi bi-robot"
+                                style="font-size: 3rem; color: rgba(255, 255, 255, 0.3); transition: all 0.3s ease;"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- Card 2 -->
-                <div class="col-lg-4 fade-in-on-scroll delay-100">
-                    <div class="glass-card-feature">
-                        <div class="feature-number">02</div>
-                        <h3>Video Intelligence</h3>
-                        <p>Transform any educational content into interactive quizzes instantly. Learn from what you
+                <div class="col-lg-4 fade-in-on-scroll delay-100" style="padding: 0 1rem; margin-bottom: 2rem;">
+                    <div class="glass-card-feature"
+                        style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 2.5rem 2rem; height: 100%; position: relative; overflow: hidden; transition: all 0.4s ease;">
+                        <div class="feature-number"
+                            style="font-size: 3rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 1rem; right: 1.5rem; line-height: 1;">
+                            02</div>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #fff;">Video
+                            Intelligence</h3>
+                        <p
+                            style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; margin-bottom: 2rem; font-size: 0.95rem;">
+                            Transform any educational content into interactive quizzes instantly. Learn from what you
                             watch.</p>
-                        <div class="feature-visual">
-                            <i class="bi bi-youtube"></i>
+                        <div class="feature-visual" style="text-align: center; margin-top: 2rem;">
+                            <i class="bi bi-youtube"
+                                style="font-size: 3rem; color: rgba(255, 255, 255, 0.3); transition: all 0.3s ease;"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- Card 3 -->
-                <div class="col-lg-4 fade-in-on-scroll delay-200">
-                    <div class="glass-card-feature">
-                        <div class="feature-number">03</div>
-                        <h3>Code Compiler</h3>
-                        <p>Execute Java and Python code directly in the browser. Practice algorithms with zero setup.
+                <div class="col-lg-4 fade-in-on-scroll delay-200" style="padding: 0 1rem; margin-bottom: 2rem;">
+                    <div class="glass-card-feature"
+                        style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 2.5rem 2rem; height: 100%; position: relative; overflow: hidden; transition: all 0.4s ease;">
+                        <div class="feature-number"
+                            style="font-size: 3rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 1rem; right: 1.5rem; line-height: 1;">
+                            03</div>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #fff;">Code Compiler
+                        </h3>
+                        <p
+                            style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; margin-bottom: 2rem; font-size: 0.95rem;">
+                            Execute Java and Python code directly in the browser. Practice algorithms with zero setup.
                         </p>
-                        <div class="feature-visual">
-                            <i class="bi bi-code-slash"></i>
+                        <div class="feature-visual" style="text-align: center; margin-top: 2rem;">
+                            <i class="bi bi-code-slash"
+                                style="font-size: 3rem; color: rgba(255, 255, 255, 0.3); transition: all 0.3s ease;"></i>
                         </div>
                     </div>
                 </div>
@@ -99,21 +198,34 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="immersive-stats py-5">
+    <section class="immersive-stats py-5" style="padding: 3rem 1rem;">
         <div class="container">
-            <div class="glass-strip">
+            <div class="glass-strip"
+                style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 3rem 2rem;">
                 <div class="row text-center">
-                    <div class="col-md-4 border-end border-light border-opacity-10">
-                        <div class="stat-number">10k+</div>
-                        <div class="stat-label">Active Learners</div>
+                    <div class="col-md-4 border-end border-light border-opacity-10" style="padding: 1.5rem 0;">
+                        <div class="stat-number"
+                            style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; color: #fff; margin-bottom: 0.5rem; line-height: 1;">
+                            10k+</div>
+                        <div class="stat-label"
+                            style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 1px;">
+                            Active Learners</div>
                     </div>
-                    <div class="col-md-4 border-end border-light border-opacity-10">
-                        <div class="stat-number">50k+</div>
-                        <div class="stat-label">Quizzes Generated</div>
+                    <div class="col-md-4 border-end border-light border-opacity-10" style="padding: 1.5rem 0;">
+                        <div class="stat-number"
+                            style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; color: #fff; margin-bottom: 0.5rem; line-height: 1;">
+                            50k+</div>
+                        <div class="stat-label"
+                            style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 1px;">
+                            Quizzes Generated</div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="stat-number">99%</div>
-                        <div class="stat-label">Satisfaction Rate</div>
+                    <div class="col-md-4" style="padding: 1.5rem 0;">
+                        <div class="stat-number"
+                            style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; color: #fff; margin-bottom: 0.5rem; line-height: 1;">
+                            99%</div>
+                        <div class="stat-label"
+                            style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 1px;">
+                            Satisfaction Rate</div>
                     </div>
                 </div>
             </div>
@@ -121,10 +233,13 @@
     </section>
 
     <!-- Footer CTA -->
-    <section class="immersive-cta text-center py-5">
+    <section class="immersive-cta text-center py-5" style="padding: 5rem 1rem;">
         <div class="container">
-            <h2 class="display-4 fw-bold text-white mb-4">Ready to Evolve?</h2>
-            <a href="{{ url_for('signup') }}" class="btn btn-glass btn-xl">
+            <h2 class="display-4 fw-bold text-white mb-4"
+                style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 2rem;">Ready to Evolve?
+            </h2>
+            <a href="{{ url_for('signup') }}" class="btn btn-glass btn-xl"
+                style="padding: 1.25rem 3rem; border-radius: 50px; font-weight: 600; font-size: 1rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; display: inline-block; transition: all 0.3s ease; border: none; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; cursor: pointer;">
                 JOIN THE FUTURE
             </a>
         </div>
@@ -144,5 +259,91 @@
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.fade-in-on-scroll').forEach(el => observer.observe(el));
+
+    // Button hover effects
+    document.querySelectorAll('.btn-glass').forEach(btn => {
+        btn.addEventListener('mouseenter', function () {
+            this.style.background = 'rgba(255, 255, 255, 0.2)';
+            this.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 10px 30px rgba(255, 255, 255, 0.1)';
+        });
+        btn.addEventListener('mouseleave', function () {
+            this.style.background = 'rgba(255, 255, 255, 0.1)';
+            this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'none';
+        });
+    });
+
+    document.querySelectorAll('.btn-glass-outline').forEach(btn => {
+        btn.addEventListener('mouseenter', function () {
+            this.style.background = 'rgba(255, 255, 255, 0.1)';
+            this.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+            this.style.transform = 'translateY(-2px)';
+        });
+        btn.addEventListener('mouseleave', function () {
+            this.style.background = 'transparent';
+            this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    document.querySelectorAll('.glass-card-feature').forEach(card => {
+        card.addEventListener('mouseenter', function () {
+            this.style.transform = 'translateY(-10px)';
+            this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            this.style.boxShadow = '0 20px 60px rgba(255, 255, 255, 0.05)';
+            const icon = this.querySelector('.feature-visual i');
+            if (icon) {
+                icon.style.color = 'rgba(255, 255, 255, 0.6)';
+                icon.style.transform = 'scale(1.1)';
+            }
+        });
+        card.addEventListener('mouseleave', function () {
+            this.style.transform = 'translateY(0)';
+            this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            this.style.boxShadow = 'none';
+            const icon = this.querySelector('.feature-visual i');
+            if (icon) {
+                icon.style.color = 'rgba(255, 255, 255, 0.3)';
+                icon.style.transform = 'scale(1)';
+            }
+        });
+    });
+
+    // Mobile responsive adjustments
+    function handleResize() {
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            document.querySelectorAll('.d-flex.gap-4').forEach(el => {
+                el.style.flexDirection = 'column';
+                el.style.width = '100%';
+                el.style.maxWidth = '300px';
+                el.style.margin = '0 auto';
+            });
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.style.width = '100%';
+                btn.style.padding = '1rem 1.5rem';
+                btn.style.fontSize = '0.85rem';
+            });
+            document.querySelectorAll('.border-end').forEach(el => {
+                el.style.borderRight = 'none';
+                el.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+            });
+        } else {
+            document.querySelectorAll('.d-flex.gap-4').forEach(el => {
+                el.style.flexDirection = 'row';
+                el.style.width = 'auto';
+                el.style.maxWidth = 'none';
+            });
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.style.width = 'auto';
+            });
+        }
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
 </script>
 {% endblock %}
