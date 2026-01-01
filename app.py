@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, flash, session, has_request_context
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, redirect, url_for, flash, session, has_request_context
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import google.generativeai as genai
 import os
@@ -789,15 +789,15 @@ def service_worker():
 
 @app.route('/google10c68f1d7dfe2f5f.html')
 def google_verification():
-    return app.send_static_file('google10c68f1d7dfe2f5f.html')
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'google10c68f1d7dfe2f5f.html')
 
 @app.route('/sitemap.xml')
 def sitemap():
-    return app.send_static_file('sitemap.xml')
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'sitemap.xml', mimetype='application/xml')
 
 @app.route('/robots.txt')
 def robots():
-    return app.send_static_file('robots.txt')
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt', mimetype='text/plain')
 
 @app.route("/compiler")
 @login_required
