@@ -17,7 +17,7 @@ from werkzeug.utils import secure_filename
 import shutil
 from pymongo import MongoClient
 from bson import ObjectId
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta
 import smtplib
 from email.mime.text import MIMEText
 from generate_dsa_questions import generate_questions_batch
@@ -27,6 +27,7 @@ import tempfile
 import threading
 import socket
 import logging
+import rag_utils
 
 # Configure logging
 # Configure logging
@@ -290,8 +291,14 @@ def ask_gemini(prompt, history=None, attachment_path=None):
 
     # Build context from history
     context_str = ""
+    
+    # RAG Context Retrieval
+    rag_context = rag_utils.get_relevant_context(prompt)
+    if rag_context:
+        context_str += f"Relevant information from Knowledge Base:\n{rag_context}\n\n"
+
     if history:
-        context_str = "Previous conversation history:\n"
+        context_str += "Previous conversation history:\n"
         for msg in history:
             role = "User" if msg.get("role") == "user" else "Assistant"
             content = msg.get("content", "")
@@ -3276,6 +3283,11 @@ def chat():
                 "filename": filename,
                 "type": "image" if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')) else "pdf" if filename.lower().endswith('.pdf') else "file"
             }
+            
+            # Index for RAG if it's a PDF or Text
+            if filename.lower().endswith(('.pdf', '.txt')):
+                print(f"Indexing {filename} for RAG...")
+                rag_utils.process_document(attachment_path)
         except Exception as e:
             print(f"Error saving uploaded file: {str(e)}")
             return jsonify({"error": f"Failed to process file: {str(e)}"}), 500
