@@ -1,3 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Chatbot - LernyX{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100 p-0 app-wrapper">
+    <div class="row h-100 g-0">
+        <!-- Chat Area -->
+        <div class="col-lg-9 col-md-8 d-flex flex-column h-100 chat-main-col">
+            <div class="glass-card flex-grow-1 d-flex flex-column p-0 overflow-hidden border-0 rounded-0">
+                <!-- Header -->
+                <div
+                    class="p-3 border-bottom border-light border-opacity-10 d-flex justify-content-between align-items-center bg-black bg-opacity-25 chat-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-link text-white p-0 d-md-none me-2" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#historySidebar" aria-controls="historySidebar">
+                            <i class="bi bi-layout-sidebar-inset fs-4"></i>
+                        </button>
+                        <i class="bi bi-robot text-primary fs-4"></i>
+                        <div>
+                            <h5 class="mb-0 text-white fw-bold">Gemini Chatbot</h5>
+                            <small class="text-secondary d-none d-sm-block">Powered by Google DeepMind</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge badge-glass d-none d-sm-inline-block">AI Online</span>
+                        <button class="btn btn-sm btn-glass-outline d-md-none" onclick="startNewChat()">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="card-body p-0 position-relative flex-grow-1 overflow-hidden">
+                    <div id="chat" class="chat-box p-3 p-md-4"
+                        style="height: 100%; overflow-y: auto; scroll-behavior: smooth;">
+                        <!-- Welcome Message -->
+                        <div class="text-center mt-5 fade-in-up welcome-screen">
+                            <div class="mb-3">
+                                <i class="bi bi-stars text-warning display-4"></i>
+                            </div>
+                            <h3 class="text-white fw-bold">How can I help you today?</h3>
+                            <p class="text-secondary px-3">Ask me about code, debugging, or complex concepts.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-25 chat-input-area">
+                    <!-- File Preview -->
+                    <div id="file-preview"
+                        class="d-none mb-2 p-2 rounded border border-secondary bg-dark bg-opacity-50 position-relative"
+                        style="width: fit-content;">
+                        <span id="file-name" class="text-light small me-3"></span>
+                        <button type="button"
+                            class="btn-close btn-close-white small position-absolute top-0 start-100 translate-middle"
+                            aria-label="Close" onclick="clearFile()"></button>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="file" id="file-input" class="d-none" accept=".pdf,.jpg,.jpeg,.png,.webp"
+                            onchange="handleFileSelect(this)">
+                        <button class="btn btn-glass-outline border-end-0" type="button"
+                            onclick="document.getElementById('file-input').click()" title="Attach file">
+                            <i class="bi bi-paperclip"></i>
+                        </button>
+                        <input type="text" id="message" class="form-control border-start-0 border-end-0"
+                            placeholder="Type your question..." autocomplete="off" style="height: 50px;">
+                        <button class="btn btn-primary px-3 px-md-4" type="button" onclick="send()">
+                            <span class="d-none d-md-inline">Send</span> <i class="bi bi-send-fill ms-md-1"></i>
+                        </button>
+                    </div>
+                    <div class="form-text text-secondary small mt-2 d-flex justify-content-between">
+                        <span class="d-none d-sm-inline">Supported: PDF, Images (JPG, PNG, WebP)</span>
+                        <span class="d-none d-md-inline">Press Enter to send</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Sidebar (Desktop) -->
+        <div class="col-lg-3 col-md-4 d-none d-md-flex flex-column h-100 border-start border-light border-opacity-10">
+            <div class="glass-card h-100 d-flex flex-column p-0 overflow-hidden border-0 rounded-0">
+                <div class="p-3 border-bottom border-light border-opacity-10 bg-black bg-opacity-25">
+                    <h5 class="mb-0 text-white fw-bold"><i class="bi bi-clock-history me-2"></i>History</h5>
+                </div>
+                <div class="p-3 flex-grow-1 overflow-auto" id="history-list">
+                    <!-- History items will be populated here -->
+                </div>
+                <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-25">
+                    <button class="btn btn-glass-outline w-100 btn-sm" onclick="startNewChat()">
+                        <i class="bi bi-plus-lg me-2"></i>New Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Sidebar (Mobile Offcanvas) -->
+        <div class="offcanvas offcanvas-start bg-dark text-white border-end border-light border-opacity-10"
+            tabindex="-1" id="historySidebar" aria-labelledby="historySidebarLabel"
+            style="width: 280px; background: rgba(15, 23, 42, 0.95) !important; backdrop-filter: blur(20px);">
+            <div class="offcanvas-header border-bottom border-light border-opacity-10">
+                <h5 class="offcanvas-title fw-bold" id="historySidebarLabel"><i
+                        class="bi bi-clock-history me-2"></i>History</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-3" id="history-list-mobile">
+                <!-- Mobile history items will be populated here -->
+            </div>
+            <div class="p-3 border-top border-light border-opacity-10">
+                <button class="btn btn-primary w-100" onclick="startNewChat()" data-bs-dismiss="offcanvas">
+                    <i class="bi bi-plus-lg me-2"></i>New Chat
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Chat Styles Override for this page -->
 <style>
     .app-wrapper {
