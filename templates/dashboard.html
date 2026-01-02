@@ -6,47 +6,27 @@
 <div class="container py-4">
     <style>
         /* Settings Section Styles */
-        .settings-form {
-            padding: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 0.95rem;
-        }
-
         .form-text {
             font-size: 0.85rem;
-            color: #6b7280;
+            color: #9ca3af;
             margin-top: 5px;
         }
     </style>
+
     <!-- Status Bar -->
-    <div class="card border-0 shadow-lg mb-4" style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);">
+    <div class="card border-0 shadow-lg mb-4"
+        style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1) !important;">
         <div class="card-body text-white p-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="h4 mb-0">📊 Aptitude Practice Progress</h2>
-                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-light text-primary fw-bold">
+                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-primary fw-bold"
+                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
                     Start Practice
                 </a>
             </div>
             <div id="status-content">
                 <div class="text-center py-4">
-                    <div class="spinner-border text-light" role="status">
+                    <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                     <p class="mt-2">Loading statistics...</p>
@@ -83,8 +63,10 @@
     <div class="tab-content" id="dashboardTabsContent">
         <!-- Quizzes Tab -->
         <div class="tab-pane fade show active" id="quizzes-tab" role="tabpanel" aria-labelledby="quizzes-tab-btn">
-            <div class="card">
-                <div class="card-header">
+            <div class="card"
+                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="card-header"
+                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
                     <h3 class="h5 mb-0 text-white">Generated Quizzes</h3>
                 </div>
                 <div class="card-body" id="quizzes-container">
@@ -98,8 +80,10 @@
 
         <!-- Custom Quizzes Tab -->
         <div class="tab-pane fade" id="custom-tab" role="tabpanel" aria-labelledby="custom-tab-btn">
-            <div class="card">
-                <div class="card-header">
+            <div class="card"
+                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="card-header"
+                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
                     <h3 class="h5 mb-0 text-white">My Custom Quiz Codes</h3>
                 </div>
                 <div class="card-body" id="custom-quizzes-container">
@@ -114,17 +98,20 @@
         <!-- Settings Tab -->
         <div class="tab-pane fade" id="settings-tab" role="tabpanel" aria-labelledby="settings-tab-btn">
             <!-- API Key Settings -->
-            <div class="card mb-4">
-                <div class="card-header">
+            <div class="card mb-4"
+                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="card-header"
+                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
                     <h3 class="h5 mb-0 text-white">API Configuration</h3>
                 </div>
                 <div class="card-body">
                     <form action="{{ url_for('update_api_key') }}" method="POST">
-                        <div class="form-group">
-                            <label for="api_key" class="form-label">Gemini API Key</label>
-                            <input type="password" id="api_key" name="api_key" class="form-input"
+                        <div class="mb-3">
+                            <label for="api_key" class="form-label text-white">Gemini API Key</label>
+                            <input type="password" id="api_key" name="api_key" class="form-control"
                                 placeholder="Enter your Gemini API Key"
-                                value="{{ current_user.api_key if current_user.api_key else '' }}">
+                                value="{{ current_user.api_key if current_user.api_key else '' }}"
+                                style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;">
                             <p class="form-text">
                                 Add your own API key to ensure uninterrupted service.
                                 Your key is stored securely and used only for your requests.
@@ -136,13 +123,15 @@
                     </form>
                 </div>
             </div>
-            <div class="card border-danger bg-danger bg-opacity-10">
+
+            <div class="card border-danger"
+                style="background: rgba(220, 38, 38, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(220, 38, 38, 0.3) !important;">
                 <div class="card-body">
                     <h3 class="h5 text-danger mb-3">⚠️ Danger Zone</h3>
-                    <p class="text-muted mb-3">
+                    <p class="text-secondary mb-3">
                         Deleting your account will permanently remove all your data including:
                     </p>
-                    <ul class="text-muted mb-3">
+                    <ul class="text-secondary mb-3">
                         <li>Your account information</li>
                         <li>All chat conversations</li>
                         <li>All quiz history and scores</li>
@@ -166,9 +155,7 @@
 <script>
     window.quizzesLoaded = false;
     window.customQuizzesLoaded = false;
-    window.aptitudeLoaded = false;
 
-    // Load initial data
     document.addEventListener('DOMContentLoaded', () => {
         loadQuizzes();
         loadStatusBar();
@@ -211,10 +198,10 @@
                         : `<span class="badge bg-warning text-dark">Not completed</span>`;
 
                     return `
-                        <div class="card mb-3 border-start border-4 border-warning bg-light bg-opacity-10">
+                        <div class="card mb-3 border-start border-4 border-warning" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-left: 4px solid #fbbf24 !important;">
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <small class="text-muted">Generated: ${date}</small>
+                                    <small class="text-secondary">Generated: ${date}</small>
                                     <span class="badge bg-${difficultyBadge}">${(quiz.difficulty || 'medium').toUpperCase()}</span>
                                 </div>
                                 <div class="mb-2">
@@ -238,15 +225,15 @@
                 const attemptsHtml = dataCustom.attempts.map(att => {
                     const date = att.submitted_at ? new Date(att.submitted_at).toLocaleString() : '';
                     return `
-                        <div class="card mb-3 border-start border-4 border-info bg-light bg-opacity-10">
+                        <div class="card mb-3 border-start border-4 border-info" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-left: 4px solid #06b6d4 !important;">
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between mb-2">
-                                    <small class="text-muted">Submitted: ${date}</small>
+                                    <small class="text-secondary">Submitted: ${date}</small>
                                     <span class="badge bg-info text-dark">Custom Exam</span>
                                 </div>
                                 <div class="mb-2">
                                     <span class="fw-bold text-white">Code: ${escapeHtml(att.quiz_code || '')}</span>
-                                    ${att.title ? `<div class="small text-muted">${escapeHtml(att.title)}</div>` : ''}
+                                    ${att.title ? `<div class="small text-secondary">${escapeHtml(att.title)}</div>` : ''}
                                 </div>
                                 <div>
                                     <span class="badge bg-success">Score: ${att.score || 0}/${att.total_questions || 0} (${att.percentage || 0}%)</span>
@@ -296,12 +283,12 @@
                         : '<div class="text-muted py-2">No attempts yet.</div>';
 
                     return `
-                        <div class="card mb-3 bg-light bg-opacity-10">
+                        <div class="card mb-3" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                                     <div>
                                         <span class="badge bg-dark fs-6 mb-2">${quiz.code}</span>
-                                        <h5 class="card-title mb-0">${escapeHtml(quiz.title || 'Untitled Quiz')}</h5>
+                                        <h5 class="card-title mb-0 text-white">${escapeHtml(quiz.title || 'Untitled Quiz')}</h5>
                                     </div>
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-outline-light btn-sm" onclick="copyCode('${quiz.code}')">Copy Code</button>
@@ -311,7 +298,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="d-flex gap-3 flex-wrap text-muted small mb-3">
+                                <div class="d-flex gap-3 flex-wrap text-secondary small mb-3">
                                     <span>Created: ${created}</span>
                                     <span>Questions: ${quiz.num_questions}</span>
                                     <span>Difficulty: ${(quiz.difficulty || 'custom').toUpperCase()}</span>
@@ -323,7 +310,7 @@
                                 </button>
                                 
                                 <div class="collapse mt-2" id="attempts-${quiz.code}">
-                                    <div class="card card-body bg-dark bg-opacity-25">
+                                    <div class="card card-body" style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);">
                                         ${attemptList}
                                     </div>
                                 </div>

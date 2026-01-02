@@ -4,63 +4,51 @@
 
 {% block head %}
 <style>
-    @keyframes fadeInUp {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .fade-in-up {
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.8s ease forwards;
-    }
-
     body {
         background: #000;
-        overflow-x: hidden;
+        overflow: hidden;
+        height: 100vh;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container d-flex align-items-center justify-content-center" style="min-height: 100vh; padding: 2rem 1rem;">
-    <div class="row w-100 justify-content-center">
-        <div class="col-md-6 col-lg-4" style="max-width: 450px;">
-            <div class="glass-card fade-in-up"
-                style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 3rem 2.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
-                <div class="text-center mb-4" style="margin-bottom: 2rem;">
+<div class="container d-flex align-items-center justify-content-center"
+    style="height: 100vh; overflow: hidden; padding: 0.5rem;">
+    <div class="row w-100 justify-content-center m-0">
+        <div class="col-md-6 col-lg-4" style="max-width: 400px;">
+            <div class="glass-card"
+                style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 1.75rem 1.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                <div class="text-center mb-3">
                     <h2 class="fw-bold text-white"
-                        style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 900; color: #fff; margin-bottom: 0.75rem; letter-spacing: -0.02em;">
+                        style="font-size: 1.75rem; font-weight: 900; color: #fff; margin-bottom: 0.25rem; letter-spacing: -0.02em;">
                         Welcome Back</h2>
-                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.95rem; margin: 0;">Login to continue your
-                        journey</p>
+                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; margin: 0;">Login to continue</p>
                 </div>
 
                 <form method="POST" action="{{ url_for('login') }}">
-                    <div class="mb-3" style="margin-bottom: 1.5rem;">
+                    <div class="mb-3">
                         <label for="username" class="form-label text-white"
-                            style="display: block; margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; font-weight: 600;">Username
+                            style="display: block; margin-bottom: 0.4rem; color: rgba(255, 255, 255, 0.9); font-size: 0.85rem; font-weight: 600;">Username
                             or Email</label>
                         <input type="text" class="form-control" id="username" name="username"
                             placeholder="Enter username or email" required
-                            style="width: 100%; padding: 0.875rem 1.25rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; color: #fff; font-size: 0.95rem; transition: all 0.3s ease; outline: none;"
+                            style="width: 100%; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff; font-size: 0.9rem; transition: all 0.3s ease; outline: none;"
                             onfocus="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.boxShadow='0 0 0 3px rgba(255, 255, 255, 0.05)';"
                             onblur="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
                     </div>
-                    <div class="mb-4" style="margin-bottom: 2rem;">
+                    <div class="mb-3">
                         <label for="password" class="form-label text-white"
-                            style="display: block; margin-bottom: 0.5rem; color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; font-weight: 600;">Password</label>
+                            style="display: block; margin-bottom: 0.4rem; color: rgba(255, 255, 255, 0.9); font-size: 0.85rem; font-weight: 600;">Password</label>
                         <input type="password" class="form-control" id="password" name="password"
                             placeholder="Enter your password" required
-                            style="width: 100%; padding: 0.875rem 1.25rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; color: #fff; font-size: 0.95rem; transition: all 0.3s ease; outline: none;"
+                            style="width: 100%; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff; font-size: 0.9rem; transition: all 0.3s ease; outline: none;"
                             onfocus="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.boxShadow='0 0 0 3px rgba(255, 255, 255, 0.05)';"
                             onblur="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
                     </div>
-                    <div class="d-grid gap-2">
+                    <div class="d-grid gap-2 mb-3">
                         <button type="submit" class="btn btn-primary btn-lg"
-                            style="width: 100%; padding: 1rem 2rem; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; color: #fff; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; outline: none;"
+                            style="width: 100%; padding: 0.875rem 1.5rem; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 10px; color: #fff; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; outline: none;"
                             onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'; this.style.borderColor='rgba(255, 255, 255, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 30px rgba(255, 255, 255, 0.15)';"
                             onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.borderColor='rgba(255, 255, 255, 0.25)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
                             onmousedown="this.style.transform='translateY(0) scale(0.98)';"
@@ -70,8 +58,8 @@
                     </div>
                 </form>
 
-                <div class="text-center mt-4" style="margin-top: 2rem; text-align: center;">
-                    <p style="color: rgba(255, 255, 255, 0.5); font-size: 0.9rem; margin: 0;">
+                <div class="text-center">
+                    <p style="color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; margin: 0;">
                         Don't have an account? <a href="{{ url_for('signup') }}"
                             style="color: #fff; font-weight: 700; text-decoration: none; transition: all 0.2s ease;"
                             onmouseover="this.style.color='rgba(255, 255, 255, 0.8)'; this.style.textDecoration='underline';"
@@ -82,26 +70,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Mobile responsive adjustments
-    function handleLoginResize() {
-        const isMobile = window.innerWidth <= 768;
-        const glassCard = document.querySelector('.glass-card');
-
-        if (isMobile && glassCard) {
-            glassCard.style.padding = '2rem 1.5rem';
-        } else if (glassCard) {
-            glassCard.style.padding = '3rem 2.5rem';
-        }
-    }
-
-    window.addEventListener('resize', handleLoginResize);
-    handleLoginResize();
-
-    // Add input placeholder animations
-    document.querySelectorAll('input').forEach(input => {
-        input.style.setProperty('::placeholder', 'color: rgba(255, 255, 255, 0.4)');
-    });
-</script>
 {% endblock %}
