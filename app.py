@@ -803,40 +803,11 @@ def sitemap():
     <priority>1.0</priority>
   </url>
   
-  <!-- Authentication Pages -->
+  <!-- Login -->
   <url>
     <loc>https://lernyx.vercel.app/login</loc>
     <lastmod>2026-01-02</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <url>
-    <loc>https://lernyx.vercel.app/signup</loc>
-    <lastmod>2026-01-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <url>
-    <loc>https://lernyx.vercel.app/forgot-password</loc>
-    <lastmod>2026-01-02</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  
-  <!-- Main Application Pages -->
-  <url>
-    <loc>https://lernyx.vercel.app/home</loc>
-    <lastmod>2026-01-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <url>
-    <loc>https://lernyx.vercel.app/dashboard</loc>
-    <lastmod>2026-01-02</lastmod>
-    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
@@ -848,33 +819,20 @@ def sitemap():
     <priority>0.9</priority>
   </url>
   
-  <!-- Quiz Features -->
+  <!-- Video Quiz Generator -->
   <url>
     <loc>https://lernyx.vercel.app/videoquiz</loc>
     <lastmod>2026-01-02</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   
+  <!-- Aptitude Practice -->
   <url>
     <loc>https://lernyx.vercel.app/aptitude-quiz</loc>
     <lastmod>2026-01-02</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <url>
-    <loc>https://lernyx.vercel.app/custom-quiz</loc>
-    <lastmod>2026-01-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <url>
-    <loc>https://lernyx.vercel.app/custom-exam</loc>
-    <lastmod>2026-01-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.9</priority>
   </url>
   
   <!-- Code Compiler -->
@@ -882,22 +840,7 @@ def sitemap():
     <loc>https://lernyx.vercel.app/compiler</loc>
     <lastmod>2026-01-02</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- Static Files -->
-  <url>
-    <loc>https://lernyx.vercel.app/robots.txt</loc>
-    <lastmod>2026-01-02</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.1</priority>
-  </url>
-  
-  <url>
-    <loc>https://lernyx.vercel.app/manifest.json</loc>
-    <lastmod>2026-01-02</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.1</priority>
+    <priority>0.9</priority>
   </url>
 </urlset>"""
     return sitemap_xml, 200, {'Content-Type': 'application/xml'}
