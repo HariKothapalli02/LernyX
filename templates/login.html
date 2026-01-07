@@ -2,68 +2,160 @@
 
 {% block title %}Login - LernyX{% endblock %}
 
-{% block head %}
+{% block content %}
 <style>
+    /* Hide Navbar and Footer for this page to achieve full-screen look */
+    .navbar,
+    footer,
+    #canvas-container {
+        display: none !important;
+    }
+
     body {
-        background: #000;
         overflow: hidden;
+        /* Prevent scrolling */
+        background: var(--bg-deep);
+        /* Use global theme background */
+    }
+
+    .split-screen {
         height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+    }
+
+    .left-pane {
+        background: url("{{ url_for('static', filename='img/hero-illustration.png') }}") no-repeat center center;
+        background-size: cover;
+        position: relative;
+    }
+
+    .left-pane::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .right-pane {
+        /* Use global theme background with slight transparency for depth */
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
+        border-left: 1px solid var(--glass-border);
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .custom-input {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .custom-input:focus {
+        background: var(--glass-bg-hover);
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        color: white;
+    }
+
+    .custom-input::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .btn-login {
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        border: none;
+        padding: 0.8rem;
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        color: white;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 992px) {
+        .left-pane {
+            display: none;
+        }
+
+        .right-pane {
+            width: 100%;
+            border-left: none;
+        }
     }
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="container d-flex align-items-center justify-content-center"
-    style="height: 100vh; overflow: hidden; padding: 0.5rem;">
-    <div class="row w-100 justify-content-center m-0">
-        <div class="col-md-6 col-lg-4" style="max-width: 400px;">
-            <div class="glass-card"
-                style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 1.75rem 1.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
-                <div class="text-center mb-3">
-                    <h2 class="fw-bold text-white"
-                        style="font-size: 1.75rem; font-weight: 900; color: #fff; margin-bottom: 0.25rem; letter-spacing: -0.02em;">
-                        Welcome Back</h2>
-                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; margin: 0;">Login to continue</p>
-                </div>
+<div class="container-fluid p-0 split-screen">
+    <div class="row g-0 h-100">
+        <!-- Left Side: Image -->
+        <div class="col-lg-7 left-pane d-none d-lg-block">
+            <!-- Image is set via CSS background -->
+        </div>
+
+        <!-- Right Side: Form -->
+        <div class="col-lg-5 col-md-12 right-pane">
+            <div class="login-container fade-in-up">
+                <h1 class="fw-bold text-white mb-4 display-5">Sign in</h1>
 
                 <form method="POST" action="{{ url_for('login') }}">
                     <div class="mb-3">
-                        <label for="username" class="form-label text-white"
-                            style="display: block; margin-bottom: 0.4rem; color: rgba(255, 255, 255, 0.9); font-size: 0.85rem; font-weight: 600;">Username
-                            or Email</label>
-                        <input type="text" class="form-control" id="username" name="username"
-                            placeholder="Enter username or email" required
-                            style="width: 100%; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff; font-size: 0.9rem; transition: all 0.3s ease; outline: none;"
-                            onfocus="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.boxShadow='0 0 0 3px rgba(255, 255, 255, 0.05)';"
-                            onblur="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
+                        <input type="text" class="form-control custom-input" id="username" name="username"
+                            placeholder="Username or Email" required>
                     </div>
+
                     <div class="mb-3">
-                        <label for="password" class="form-label text-white"
-                            style="display: block; margin-bottom: 0.4rem; color: rgba(255, 255, 255, 0.9); font-size: 0.85rem; font-weight: 600;">Password</label>
-                        <input type="password" class="form-control" id="password" name="password"
-                            placeholder="Enter your password" required
-                            style="width: 100%; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff; font-size: 0.9rem; transition: all 0.3s ease; outline: none;"
-                            onfocus="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.boxShadow='0 0 0 3px rgba(255, 255, 255, 0.05)';"
-                            onblur="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
+                        <input type="password" class="form-control custom-input" id="password" name="password"
+                            placeholder="Password" required>
                     </div>
-                    <div class="d-grid gap-2 mb-3">
-                        <button type="submit" class="btn btn-primary btn-lg"
-                            style="width: 100%; padding: 0.875rem 1.5rem; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 10px; color: #fff; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; outline: none;"
-                            onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'; this.style.borderColor='rgba(255, 255, 255, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 30px rgba(255, 255, 255, 0.15)';"
-                            onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.borderColor='rgba(255, 255, 255, 0.25)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
-                            onmousedown="this.style.transform='translateY(0) scale(0.98)';"
-                            onmouseup="this.style.transform='translateY(-2px) scale(1)';">
-                            Login
-                        </button>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input bg-transparent border-secondary" type="checkbox"
+                                id="remember">
+                            <label class="form-check-label text-secondary small" for="remember">
+                                Remember me
+                            </label>
+                        </div>
+                        <a href="{{ url_for('forgot_password') }}"
+                            class="text-secondary text-decoration-none small hover-white">Forgot your password?</a>
                     </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-login">
+                        Sign In
+                    </button>
                 </form>
 
-                <div class="text-center">
-                    <p style="color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; margin: 0;">
-                        Don't have an account? <a href="{{ url_for('signup') }}"
-                            style="color: #fff; font-weight: 700; text-decoration: none; transition: all 0.2s ease;"
-                            onmouseover="this.style.color='rgba(255, 255, 255, 0.8)'; this.style.textDecoration='underline';"
-                            onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">Sign Up</a>
+                <div class="mt-4">
+                    <p class="text-secondary small">
+                        Don't have an account?
+                        <a href="{{ url_for('signup') }}" class="text-primary text-decoration-none fw-bold">Sign Up</a>
                     </p>
                 </div>
             </div>

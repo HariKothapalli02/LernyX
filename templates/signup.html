@@ -2,161 +2,162 @@
 
 {% block title %}Sign Up - LernyX{% endblock %}
 
-{% block head %}
+{% block content %}
 <style>
+    /* Hide Navbar and Footer for this page to achieve full-screen look */
+    .navbar,
+    footer,
+    #canvas-container {
+        display: none !important;
+    }
+
     body {
-        background: #000;
         overflow: hidden;
+        /* Prevent scrolling */
+        background: var(--bg-deep);
+        /* Use global theme background */
+    }
+
+    .split-screen {
         height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+    }
+
+    .left-pane {
+        background: url("{{ url_for('static', filename='img/hero-illustration.png') }}") no-repeat center center;
+        background-size: cover;
+        position: relative;
+    }
+
+    .left-pane::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .right-pane {
+        /* Use global theme background with slight transparency for depth */
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
+        border-left: 1px solid var(--glass-border);
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .custom-input {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .custom-input:focus {
+        background: var(--glass-bg-hover);
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        color: white;
+    }
+
+    .custom-input::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .btn-login {
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        border: none;
+        padding: 0.8rem;
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        color: white;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 992px) {
+        .left-pane {
+            display: none;
+        }
+
+        .right-pane {
+            width: 100%;
+            border-left: none;
+        }
     }
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="container d-flex align-items-center justify-content-center"
-    style="height: 100vh; overflow: hidden; padding: 0.5rem;">
-    <div class="row w-100 justify-content-center m-0">
-        <div class="col-md-8 col-lg-5" style="max-width: 450px;">
-            <div class="glass-card"
-                style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 1.5rem 1.25rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
-                <div class="text-center mb-2">
-                    <h2 class="fw-bold text-white"
-                        style="font-size: 1.65rem; font-weight: 900; color: #fff; margin-bottom: 0.25rem; letter-spacing: -0.02em;">
-                        Create Account</h2>
-                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.8rem; margin: 0;">Join thousands of learners
-                    </p>
-                </div>
+<div class="container-fluid p-0 split-screen">
+    <div class="row g-0 h-100">
+        <!-- Left Side: Image -->
+        <div class="col-lg-7 left-pane d-none d-lg-block">
+            <!-- Image is set via CSS background -->
+        </div>
+
+        <!-- Right Side: Form -->
+        <div class="col-lg-5 col-md-12 right-pane">
+            <div class="login-container fade-in-up">
+                <h1 class="fw-bold text-white mb-4 display-5">Create Account</h1>
 
                 <form method="POST" action="{{ url_for('signup') }}">
-                    <div class="mb-2">
-                        <label for="username" class="form-label text-white"
-                            style="display: block; margin-bottom: 0.3rem; color: rgba(255, 255, 255, 0.9); font-size: 0.8rem; font-weight: 600;">Username</label>
-                        <input type="text" class="form-control" id="username" name="username"
-                            placeholder="Choose a username" required
-                            style="width: 100%; padding: 0.65rem 0.9rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff; font-size: 0.85rem; transition: all 0.3s ease; outline: none;"
-                            onfocus="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.boxShadow='0 0 0 3px rgba(255, 255, 255, 0.05)';"
-                            onblur="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
-                    </div>
-                    <div class="mb-2">
-                        <label for="email" class="form-label text-white"
-                            style="display: block; margin-bottom: 0.3rem; color: rgba(255, 255, 255, 0.9); font-size: 0.8rem; font-weight: 600;">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com"
-                            required
-                            style="width: 100%; padding: 0.65rem 0.9rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff; font-size: 0.85rem; transition: all 0.3s ease; outline: none;"
-                            onfocus="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.boxShadow='0 0 0 3px rgba(255, 255, 255, 0.05)';"
-                            onblur="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
-                    </div>
-                    <div class="mb-2">
-                        <label for="password" class="form-label text-white"
-                            style="display: block; margin-bottom: 0.3rem; color: rgba(255, 255, 255, 0.9); font-size: 0.8rem; font-weight: 600;">Password</label>
-                        <input type="password" class="form-control" id="password" name="password"
-                            placeholder="Create a password" required minlength="6"
-                            style="width: 100%; padding: 0.65rem 0.9rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff; font-size: 0.85rem; transition: all 0.3s ease; outline: none;"
-                            onfocus="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.boxShadow='0 0 0 3px rgba(255, 255, 255, 0.05)';"
-                            onblur="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
-                    </div>
                     <div class="mb-3">
-                        <label for="confirm_password" class="form-label text-white"
-                            style="display: block; margin-bottom: 0.3rem; color: rgba(255, 255, 255, 0.9); font-size: 0.8rem; font-weight: 600;">Confirm
-                            Password</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
-                            placeholder="Confirm password" required minlength="6"
-                            style="width: 100%; padding: 0.65rem 0.9rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff; font-size: 0.85rem; transition: all 0.3s ease; outline: none;"
-                            onfocus="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.boxShadow='0 0 0 3px rgba(255, 255, 255, 0.05)';"
-                            onblur="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'; this.style.boxShadow='none';">
+                        <input type="text" class="form-control custom-input" id="username" name="username"
+                            placeholder="Username" required>
                     </div>
-                    <div class="d-grid gap-2 mb-2">
-                        <button type="submit" class="btn btn-primary btn-lg"
-                            style="width: 100%; padding: 0.75rem 1.5rem; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 10px; color: #fff; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; outline: none;"
-                            onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'; this.style.borderColor='rgba(255, 255, 255, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 30px rgba(255, 255, 255, 0.15)';"
-                            onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.borderColor='rgba(255, 255, 255, 0.25)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
-                            onmousedown="this.style.transform='translateY(0) scale(0.98)';"
-                            onmouseup="this.style.transform='translateY(-2px) scale(1)';">
-                            Sign Up
-                        </button>
+
+                    <div class="mb-3">
+                        <input type="email" class="form-control custom-input" id="email" name="email"
+                            placeholder="Email" required>
                     </div>
+
+                    <div class="mb-3">
+                        <input type="password" class="form-control custom-input" id="password" name="password"
+                            placeholder="Password" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="password" class="form-control custom-input" id="confirm_password"
+                            name="confirm_password" placeholder="Confirm Password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-login">
+                        Sign Up
+                    </button>
                 </form>
 
-                <div class="text-center">
-                    <p style="color: rgba(255, 255, 255, 0.5); font-size: 0.8rem; margin: 0;">
-                        Already have an account? <a href="{{ url_for('login') }}"
-                            style="color: #fff; font-weight: 700; text-decoration: none; transition: all 0.2s ease;"
-                            onmouseover="this.style.color='rgba(255, 255, 255, 0.8)'; this.style.textDecoration='underline';"
-                            onmouseout="this.style.color='#fff'; this.style.textDecoration='none';">Login</a>
+                <div class="mt-4">
+                    <p class="text-secondary small">
+                        Already have an account?
+                        <a href="{{ url_for('login') }}" class="text-primary text-decoration-none fw-bold">Sign In</a>
                     </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    // Password matching validation
-    const form = document.querySelector('form');
-    const password = document.getElementById('password');
-    const confirmPassword = document.getElementById('confirm_password');
-
-    form.addEventListener('submit', function (e) {
-        if (password.value !== confirmPassword.value) {
-            e.preventDefault();
-            confirmPassword.style.borderColor = 'rgba(255, 100, 100, 0.5)';
-            confirmPassword.style.background = 'rgba(255, 100, 100, 0.1)';
-
-            let errorMsg = document.getElementById('password-error');
-            if (!errorMsg) {
-                errorMsg = document.createElement('div');
-                errorMsg.id = 'password-error';
-                errorMsg.style.cssText = 'color: rgba(255, 100, 100, 0.9); font-size: 0.75rem; margin-top: 0.3rem; font-weight: 500;';
-                confirmPassword.parentElement.appendChild(errorMsg);
-            }
-            errorMsg.textContent = 'Passwords do not match';
-
-            confirmPassword.addEventListener('input', function () {
-                this.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                this.style.background = 'rgba(255, 255, 255, 0.08)';
-                if (errorMsg) errorMsg.remove();
-            }, { once: true });
-        }
-    });
-
-    // Real-time password strength indicator
-    password.addEventListener('input', function () {
-        const strength = this.value.length;
-        let strengthText = '';
-        let strengthColor = '';
-
-        if (strength === 0) {
-            strengthText = '';
-        } else if (strength < 6) {
-            strengthText = 'Too short';
-            strengthColor = 'rgba(255, 100, 100, 0.9)';
-        } else if (strength < 8) {
-            strengthText = 'Weak';
-            strengthColor = 'rgba(255, 200, 100, 0.9)';
-        } else if (strength < 12) {
-            strengthText = 'Good';
-            strengthColor = 'rgba(100, 200, 255, 0.9)';
-        } else {
-            strengthText = 'Strong';
-            strengthColor = 'rgba(100, 255, 150, 0.9)';
-        }
-
-        let strengthIndicator = document.getElementById('strength-indicator');
-        if (!strengthIndicator && strengthText) {
-            strengthIndicator = document.createElement('div');
-            strengthIndicator.id = 'strength-indicator';
-            strengthIndicator.style.cssText = 'font-size: 0.75rem; margin-top: 0.3rem; font-weight: 500; transition: all 0.3s ease;';
-            password.parentElement.appendChild(strengthIndicator);
-        }
-
-        if (strengthIndicator) {
-            if (strengthText) {
-                strengthIndicator.textContent = `Strength: ${strengthText}`;
-                strengthIndicator.style.color = strengthColor;
-            } else {
-                strengthIndicator.remove();
-            }
-        }
-    });
-</script>
 {% endblock %}
