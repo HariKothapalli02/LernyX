@@ -28,6 +28,7 @@ import threading
 import socket
 import logging
 import rag_utils
+import pinecone_utils
 
 try:
     from PIL import Image
@@ -118,6 +119,7 @@ aptitude_questions_collection = None
 aptitude_attempts_collection = None
 aptitude_practice_history_collection = None
 chat_sessions_collection = None
+resume_reviews_collection = None
 
 try:
     if not MONGODB_URI:
@@ -134,10 +136,9 @@ try:
     custom_quiz_attempts_collection = db.custom_quiz_attempts  # Store attempts for custom quizzes
     aptitude_questions_collection = db.aptitude_questions  # Store aptitude questions
     aptitude_attempts_collection = db.aptitude_attempts  # Store aptitude quiz attempts
-    aptitude_attempts_collection = db.aptitude_attempts  # Store aptitude quiz attempts
     aptitude_practice_history_collection = db.aptitude_practice_history  # Store individual practice question attempts
     chat_sessions_collection = db.chat_sessions # Store persistent chat sessions
-    chat_sessions_collection = db.chat_sessions # Store persistent chat sessions
+    resume_reviews_collection = db.resume_reviews # Store user resume reports
     # Test connection
     client.admin.command('ping')
     MONGODB_AVAILABLE = True
@@ -384,17 +385,33 @@ def ask_gemini(prompt, history=None, attachment_path=None):
                     reader = PdfReader(attachment_path)
                     pdf_text = "\n".join([page.extract_text() or "" for page in reader.pages[:15]])
                     if pdf_text.strip():
-                        content_parts[0] += f"\n\nAttached Document Content:\n{pdf_text[:5000]}"
-                    else:
-                        uploaded_file = genai.upload_file(attachment_path)
-                        content_parts.append(uploaded_file)
+                        filename = os.path.basename(attachment_path)
+                        # Index document chunks into Pinecone Vector Database
+                        pinecone_utils.index_document_text("chat_documents", filename, pdf_text)
+                        
+                        # Query Pinecone Vector Database for relevant chunks
+                        pine_results = pinecone_utils.query_vectors("chat_documents", prompt, top_k=4)
+                        if pine_results:
+                            pine_context = "\n".join([f"- {r['text']}" for r in pine_results])
+                            content_parts[0] += f"\n\n[Pinecone Vector DB Context ({filename})]:\n{pine_context}"
+                        else:
+                            content_parts[0] += f"\n\nAttached Document Content:\n{pdf_text[:5000]}"
                 except Exception as pdf_err:
-                    print(f"Error extracting PDF text: {pdf_err}")
-                    try:
-                        uploaded_file = genai.upload_file(attachment_path)
-                        content_parts.append(uploaded_file)
-                    except Exception as u_err:
-                        print(f"Error uploading PDF: {u_err}")
+                    print(f"Error processing PDF with Pinecone: {pdf_err}")
+            elif ext in ['.txt', '.py', '.js', '.html', '.css', '.json', '.c', '.java', '.cpp', '.md']:
+                try:
+                    with open(attachment_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        file_text = f.read()
+                    filename = os.path.basename(attachment_path)
+                    pinecone_utils.index_document_text("chat_documents", filename, file_text)
+                    pine_results = pinecone_utils.query_vectors("chat_documents", prompt, top_k=4)
+                    if pine_results:
+                        pine_context = "\n".join([f"- {r['text']}" for r in pine_results])
+                        content_parts[0] += f"\n\n[Pinecone Vector DB Context ({filename})]:\n{pine_context}"
+                    else:
+                        content_parts[0] += f"\n\nAttached Code/Text ({filename}):\n{file_text[:5000]}"
+                except Exception as f_err:
+                    print(f"Error processing text attachment with Pinecone: {f_err}")
             else:
                 try:
                     uploaded_file = genai.upload_file(attachment_path)
@@ -1490,6 +1507,148 @@ def dashboard():
         return render_template("dashboard.html")
 
     return render_template("dashboard.html")
+
+@app.route("/api/analyze-resume", methods=["POST"])
+@login_required
+def analyze_resume():
+    if 'file' not in request.files:
+        return jsonify({"error": "No resume file uploaded"}), 400
+        
+    file = request.files['file']
+    if not file or file.filename == '':
+        return jsonify({"error": "Selected file is empty"}), 400
+        
+    target_role = request.form.get("target_role", "Software Engineer").strip()
+    filename = secure_filename(file.filename).lower()
+    
+    extracted_text = ""
+    image_obj = None
+    
+    try:
+        if filename.endswith(".pdf"):
+            if PYPDF_AVAILABLE:
+                reader = PdfReader(file)
+                for page in reader.pages:
+                    txt = page.extract_text()
+                    if txt:
+                        extracted_text += txt + "\n"
+            else:
+                return jsonify({"error": "PDF processing engine unavailable"}), 500
+        elif filename.endswith((".png", ".jpg", ".jpeg", ".webp")):
+            if PIL_AVAILABLE:
+                image_obj = Image.open(file.stream)
+            else:
+                return jsonify({"error": "Image processing engine unavailable"}), 500
+        elif filename.endswith((".txt", ".md")):
+            extracted_text = file.read().decode('utf-8', errors='ignore')
+        elif filename.endswith(".docx"):
+            try:
+                import docx
+                doc = docx.Document(file)
+                extracted_text = "\n".join([p.text for p in doc.paragraphs if p.text])
+            except Exception:
+                file.seek(0)
+                extracted_text = file.read().decode('utf-8', errors='ignore')
+        else:
+            extracted_text = file.read().decode('utf-8', errors='ignore')
+    except Exception as e:
+        return jsonify({"error": f"Failed to parse resume file: {str(e)}"}), 500
+
+    if not extracted_text and not image_obj:
+        return jsonify({"error": "Could not extract readable text from the uploaded resume file"}), 400
+
+    # Index resume chunks into Pinecone Vector DB
+    pinecone_context = ""
+    if extracted_text:
+        try:
+            namespace = f"resume_{current_user.id}"
+            pinecone_utils.index_document_text(namespace, filename, extracted_text)
+            
+            # Query Pinecone for relevant vector search chunks based on target role
+            pine_matches = pinecone_utils.query_vectors(namespace, target_role, top_k=5)
+            if pine_matches:
+                pinecone_context = "\n".join([f"- {m['text']}" for m in pine_matches])
+        except Exception as p_err:
+            print(f"Pinecone resume indexing warning: {p_err}")
+
+    model = get_gemini_model('gemini-2.5-flash')
+    if not model:
+        return jsonify({"error": "AI model unavailable"}), 500
+
+    prompt = f"""
+You are an expert HR Executive, ATS (Applicant Tracking System) Specialist, and Senior Tech Recruiter.
+Analyze the following resume for the target role: "{target_role}".
+
+Provide a comprehensive, professional, highly actionable Resume Audit Report formatted in clean Markdown with emojis and GitHub alert boxes where appropriate.
+
+Include the following sections clearly:
+
+1. **Overall Resume Score**: Provide a numerical score out of 100 (e.g. **85 / 100**) with a 1-sentence executive verdict.
+2. **Executive Summary**: High-level candidate impression and alignment for the role of "{target_role}".
+3. **Key Strengths**: 3-5 major highlights that stand out positively.
+4. **ATS & Formatting Audit**: Keyword optimization, formatting structure, impact metrics, readability.
+5. **Critical Red Flags & Missing Elements**: Passive language, missing skills, unquantified achievements, formatting issues.
+6. **Specific Step-by-Step Recommended Changes**:
+   - Section-by-section improvements (Summary, Experience, Projects, Skills, Education).
+   - "Before" vs "After" examples of how to rewrite weak bullet points using action verbs and measurable metrics.
+7. **Tailored Interview Preparation**: 3 specific interview questions to prepare for based on this resume's project and experience details.
+
+{"Pinecone Vector Database Top Matches:" + "\n" + pinecone_context if pinecone_context else ""}
+
+Resume Document Content:
+{extracted_text if extracted_text else "[Resume provided as attached image/document]"}
+"""
+    try:
+        if image_obj:
+            response = model.generate_content([prompt, image_obj])
+        else:
+            response = model.generate_content(prompt)
+            
+        report = _get_gemini_text(response)
+
+        # Store persistent resume review in MongoDB
+        if MONGODB_AVAILABLE and resume_reviews_collection is not None:
+            try:
+                resume_reviews_collection.update_one(
+                    {"user_id": str(current_user.id)},
+                    {
+                        "$set": {
+                            "user_id": str(current_user.id),
+                            "filename": file.filename,
+                            "target_role": target_role,
+                            "report": report,
+                            "updated_at": datetime.utcnow()
+                        }
+                    },
+                    upsert=True
+                )
+            except Exception as db_err:
+                print(f"Error persisting resume review to MongoDB: {db_err}")
+
+        return jsonify({"report": report, "filename": file.filename, "target_role": target_role})
+    except Exception as e:
+        return jsonify({"error": f"AI Resume Analysis failed: {str(e)}"}), 500
+
+@app.route("/api/latest-resume-review", methods=["GET"])
+@login_required
+def get_latest_resume_review():
+    if not MONGODB_AVAILABLE or resume_reviews_collection is None:
+        return jsonify({"review": None})
+    try:
+        review = resume_reviews_collection.find_one({"user_id": str(current_user.id)})
+        if not review:
+            return jsonify({"review": None})
+            
+        return jsonify({
+            "review": {
+                "filename": review.get("filename"),
+                "target_role": review.get("target_role"),
+                "report": review.get("report"),
+                "updated_at": review.get("updated_at").isoformat() if review.get("updated_at") else None
+            }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/aptitude")
 @login_required

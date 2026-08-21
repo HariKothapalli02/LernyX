@@ -123,7 +123,17 @@
                                 </div>
                             </div>
                             <button class="btn btn-primary w-100" onclick="generateFromAI()">Generate Questions</button>
-                            <div id="ai_status" class="mt-3"></div>
+                            <div id="ai_status" class="mt-2"></div>
+
+                            <hr class="border-secondary my-4">
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Quiz Title (Optional)</label>
+                                <input type="text" class="form-control bg-dark text-white border-secondary"
+                                    id="ai_quiz_title" placeholder="e.g., Java Practice Quiz">
+                            </div>
+                            <button class="btn btn-success w-100" onclick="saveCustomQuiz('ai')">Save & Generate Code</button>
+                            <div id="ai_save_status" class="mt-2"></div>
                         </div>
                     </div>
                 </div>
@@ -260,17 +270,27 @@
         }
     }
 
-    async function saveCustomQuiz() {
-        const title = document.getElementById('manual_title').value.trim() || "Custom Quiz";
-        const difficulty = document.getElementById('manual_difficulty').value;
-        const status = document.getElementById('save_status');
+    async function saveCustomQuiz(source = 'manual') {
+        let title, difficulty, status;
+        if (source === 'ai') {
+            const topic = document.getElementById('ai_topic').value.trim();
+            const aiTitleInput = document.getElementById('ai_quiz_title');
+            const customTitle = aiTitleInput ? aiTitleInput.value.trim() : '';
+            title = customTitle || (topic ? `${topic} Quiz` : "AI Custom Quiz");
+            difficulty = document.getElementById('ai_difficulty').value;
+            status = document.getElementById('ai_save_status') || document.getElementById('ai_status');
+        } else {
+            title = document.getElementById('manual_title').value.trim() || "Custom Quiz";
+            difficulty = document.getElementById('manual_difficulty').value;
+            status = document.getElementById('save_status');
+        }
 
         if (!builderQuestions.length) {
-            status.innerHTML = '<div class="alert alert-danger">Add questions first.</div>';
+            status.innerHTML = '<div class="alert alert-danger mt-2">Generate/Add questions first.</div>';
             return;
         }
 
-        status.innerHTML = '<div class="alert alert-info">Saving...</div>';
+        status.innerHTML = '<div class="alert alert-info mt-2">Saving...</div>';
 
         try {
             const resp = await fetch('/api/custom-quizzes', {
@@ -287,13 +307,13 @@
             if (!resp.ok || data.error) throw new Error(data.error || "Failed");
 
             status.innerHTML = `
-                <div class="alert alert-success">
+                <div class="alert alert-success mt-2">
                     <strong>Quiz Saved!</strong> Code: <span class="user-select-all fw-bold">${data.code}</span>
                     <button class="btn btn-sm btn-light ms-2" onclick="navigator.clipboard.writeText('${data.code}')">Copy</button>
                 </div>
             `;
         } catch (err) {
-            status.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+            status.innerHTML = `<div class="alert alert-danger mt-2">Error: ${err.message}</div>`;
         }
     }
 

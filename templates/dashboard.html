@@ -51,6 +51,12 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="resume-tab-btn" data-bs-toggle="tab" data-bs-target="#resume-tab"
+                type="button" role="tab" aria-controls="resume-tab" aria-selected="false">
+                📄 Resume Review
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link fw-semibold" id="settings-tab-btn" data-bs-toggle="tab"
                 data-bs-target="#settings-tab" type="button" role="tab" aria-controls="settings-tab"
                 aria-selected="false">
@@ -90,6 +96,54 @@
                     <div class="text-center py-5 text-muted">
                         <div class="spinner-border text-primary" role="status"></div>
                         <p class="mt-2">Loading your custom quizzes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resume Review Tab -->
+        <div class="tab-pane fade" id="resume-tab" role="tabpanel" aria-labelledby="resume-tab-btn">
+            <div class="card"
+                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="card-header d-flex justify-content-between align-items-center"
+                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <h3 class="h5 mb-0 text-white"><i class="bi bi-file-earmark-person text-primary me-2"></i>AI Resume Reviewer & Feedback Report</h3>
+                    <span class="badge bg-primary">Gemini 2.5 Flash</span>
+                </div>
+                <div class="card-body p-4">
+                    <form id="resume-form" onsubmit="analyzeResume(event)" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label class="form-label text-white fw-medium">Upload Resume (PDF, DOCX, TXT, Image)</label>
+                                <input type="file" id="resume_file" class="form-control" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" required
+                                    style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label text-white fw-medium">Target Job Role / Domain</label>
+                                <input type="text" id="target_role" class="form-control" placeholder="e.g. Full Stack Developer, Data Analyst"
+                                    value="Software Engineer"
+                                    style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;">
+                            </div>
+                        </div>
+                        <button type="submit" id="resume-submit-btn" class="btn btn-primary mt-3 px-4 fw-bold"
+                            style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
+                            <i class="bi bi-magic me-2"></i>Analyze Resume & Get Recommendations
+                        </button>
+                    </form>
+
+                    <div id="resume-loading" class="d-none text-center py-5">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                        <h5 class="text-white mt-3 fw-bold">Analyzing Your Resume with AI...</h5>
+                        <p class="text-muted small">Checking ATS optimization, impact metrics, formatting, and key recommendations.</p>
+                    </div>
+
+                    <div id="resume-results" class="d-none mt-4 p-4 rounded"
+                        style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary">
+                            <h4 class="text-white mb-0 fw-bold"><i class="bi bi-clipboard-data text-success me-2"></i>Complete Resume Analysis Report</h4>
+                            <button class="btn btn-sm btn-outline-light" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print Report</button>
+                        </div>
+                        <div id="resume-report-content" class="text-white markdown-body"></div>
                     </div>
                 </div>
             </div>
@@ -155,10 +209,12 @@
 <script>
     window.quizzesLoaded = false;
     window.customQuizzesLoaded = false;
+    window.resumeLoaded = false;
 
     document.addEventListener('DOMContentLoaded', () => {
         loadQuizzes();
         loadStatusBar();
+        loadLatestResumeReview();
     });
 
     function loadTab(tabName) {
@@ -166,6 +222,31 @@
             loadQuizzes();
         } else if (tabName === 'custom' && !window.customQuizzesLoaded) {
             loadMyCustomQuizzes();
+        } else if (tabName === 'resume' && !window.resumeLoaded) {
+            loadLatestResumeReview();
+        }
+    }
+
+    async function loadLatestResumeReview() {
+        try {
+            const resp = await fetch('/api/latest-resume-review');
+            const data = await resp.json();
+            if (resp.ok && data.review) {
+                const r = data.review;
+                if (r.target_role) {
+                    document.getElementById('target_role').value = r.target_role;
+                }
+                const resultsDiv = document.getElementById('resume-results');
+                const contentDiv = document.getElementById('resume-report-content');
+                if (r.report && contentDiv) {
+                    contentDiv.innerHTML = window.marked ? marked.parse(r.report) : r.report;
+                    resultsDiv.classList.remove('d-none');
+                    if (window.MathJax) MathJax.typesetPromise([contentDiv]);
+                }
+                window.resumeLoaded = true;
+            }
+        } catch (err) {
+            console.error('Error loading latest resume review:', err);
         }
     }
 
@@ -444,6 +525,55 @@
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    async function analyzeResume(event) {
+        event.preventDefault();
+        const fileInput = document.getElementById('resume_file');
+        const targetRole = document.getElementById('target_role').value.trim();
+        const submitBtn = document.getElementById('resume-submit-btn');
+        const loadingDiv = document.getElementById('resume-loading');
+        const resultsDiv = document.getElementById('resume-results');
+        const contentDiv = document.getElementById('resume-report-content');
+
+        if (!fileInput.files || !fileInput.files[0]) {
+            alert('Please select a resume file first.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('target_role', targetRole || 'Software Engineer');
+
+        submitBtn.disabled = true;
+        loadingDiv.classList.remove('d-none');
+        resultsDiv.classList.add('d-none');
+
+        try {
+            const resp = await fetch('/api/analyze-resume', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+
+            if (!resp.ok || data.error) {
+                alert('Analysis Error: ' + (data.error || 'Failed to analyze resume'));
+                return;
+            }
+
+            // Parse Markdown into HTML
+            contentDiv.innerHTML = window.marked ? marked.parse(data.report) : data.report;
+            resultsDiv.classList.remove('d-none');
+            window.resumeLoaded = true;
+
+            // Render MathJax if present
+            if (window.MathJax) MathJax.typesetPromise([contentDiv]);
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            submitBtn.disabled = false;
+            loadingDiv.classList.add('d-none');
+        }
     }
 
     async function deleteAccount() {
