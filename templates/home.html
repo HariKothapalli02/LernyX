@@ -91,10 +91,230 @@
                 <a href="{{ url_for('compiler') }}" class="btn btn-glass w-100 mt-3">Start Coding</a>
             </div>
         </div>
+
+        <!-- Full Horizontal Bar: AI Virtual Placement Officer & Relocation Job Finder -->
+        <div class="col-12 mt-4 fade-in-on-scroll delay-600">
+            <div class="glass-card p-4 text-white" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15)); border: 1px solid rgba(139, 92, 246, 0.3) !important;">
+                <div class="row align-items-center">
+                    <div class="col-lg-8 mb-3 mb-lg-0">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-3 rounded-circle" style="background: rgba(99, 102, 241, 0.2);">
+                                <i class="bi bi-briefcase-fill display-5 text-primary"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold mb-1 text-white">AI Virtual Placement Officer & Relocation Job Finder</h4>
+                                <p class="text-secondary mb-0">Conduct an interactive assessment based on your resume & relocation preferences to unlock 20 matched LinkedIn jobs.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <a href="{{ url_for('virtual_placement') }}" class="btn btn-primary btn-lg fw-bold px-4 shadow" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
+                            <i class="bi bi-rocket-takeoff me-2"></i>Start Virtual Assessment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Virtual Assessment & Job Matcher Modal -->
+<div class="modal fade" id="virtualAssessmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content text-white" style="background: #111827; border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold text-white"><i class="bi bi-person-workspace text-primary me-2"></i>Virtual AI Career Officer & LinkedIn Job Matcher</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="assessment-form" onsubmit="runVirtualAssessment(event)" class="mb-4" enctype="multipart/form-data">
+                    <div id="saved-resume-alert" class="alert alert-info py-2 px-3 mb-3 d-none border-info">
+                        <i class="bi bi-file-earmark-check-fill text-info me-2"></i>Saved Resume active: <strong id="saved-resume-name">My Resume</strong> (or upload a new resume below).
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-white"><i class="bi bi-file-earmark-arrow-up text-primary me-2"></i>Upload Your Resume <span class="text-danger">*</span></label>
+                            <input type="file" id="assessment_resume_file" class="form-control bg-dark text-white border-secondary" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg">
+                            <small class="text-muted">Supports PDF, DOCX, TXT, or Image. Uploading will index your resume into Pinecone & MongoDB.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium text-white">Target Job Role / Title</label>
+                            <input type="text" id="target_role_input" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Full Stack Developer, Java Engineer" value="Software Engineer" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium text-white">Willingness to Relocate?</label>
+                            <select id="relocate_select" class="form-select bg-dark text-white border-secondary">
+                                <option value="Yes" selected>Yes - Willing to Relocate</option>
+                                <option value="No">No - Remote Only / Local</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium text-white">Preferred Job Locations / Cities</label>
+                            <input type="text" id="locations_input" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Bangalore, London, New York, Remote" value="Bangalore, India">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium text-white">Quick Virtual Notes / Key Skills</label>
+                            <input type="text" id="answers_input" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Proficient in Java, Spring Boot, React, Problem Solving">
+                        </div>
+                    </div>
+                    <button type="submit" id="assessment-btn" class="btn btn-primary mt-3 w-100 fw-bold py-2" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
+                        <i class="bi bi-cpu me-2"></i>Run Virtual Placement Assessment
+                    </button>
+                </form>
+
+                <div id="assessment-loading" class="d-none text-center py-5">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                    <h5 class="text-white mt-3 fw-bold">Evaluating Profile & Scraping Live LinkedIn Job Posts...</h5>
+                    <p class="text-muted small">Apify API fetching up to 20 jobs (24h MongoDB Cache active).</p>
+                </div>
+
+                <div id="assessment-results" class="d-none">
+                    <div id="status-banner" class="alert p-3 mb-4"></div>
+                    
+                    <div id="jobs-section">
+                        <h5 class="fw-bold text-white mb-3"><i class="bi bi-linkedin text-primary me-2"></i>20 Recommended LinkedIn Job Postings</h5>
+                        <div id="jobs-container" class="row g-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', checkSavedResume);
+
+    async function checkSavedResume() {
+        try {
+            const resp = await fetch('/api/latest-resume-review');
+            const data = await resp.json();
+            if (resp.ok && data.review && data.review.filename) {
+                const alertDiv = document.getElementById('saved-resume-alert');
+                const nameSpan = document.getElementById('saved-resume-name');
+                if (alertDiv && nameSpan) {
+                    nameSpan.textContent = data.review.filename;
+                    alertDiv.classList.remove('d-none');
+                }
+                window.hasSavedResume = true;
+            } else {
+                window.hasSavedResume = false;
+            }
+        } catch (err) {
+            console.error('Error checking saved resume:', err);
+        }
+    }
+
+    async function runVirtualAssessment(event) {
+        event.preventDefault();
+        const fileInput = document.getElementById('assessment_resume_file');
+        const role = document.getElementById('target_role_input').value.trim();
+        const relocate = document.getElementById('relocate_select').value;
+        const locations = document.getElementById('locations_input').value.trim();
+        const answers = document.getElementById('answers_input').value.trim();
+
+        const btn = document.getElementById('assessment-btn');
+        const loading = document.getElementById('assessment-loading');
+        const results = document.getElementById('assessment-results');
+        const banner = document.getElementById('status-banner');
+        const jobsContainer = document.getElementById('jobs-container');
+
+        // Check if user uploaded a file OR has a saved resume
+        const hasFile = fileInput.files && fileInput.files.length > 0;
+        if (!hasFile && !window.hasSavedResume) {
+            alert('Please select and upload your resume file (PDF, DOCX, TXT, Image) first to run the Virtual Assessment!');
+            return;
+        }
+
+        const formData = new FormData();
+        if (hasFile) {
+            formData.append('file', fileInput.files[0]);
+        }
+        formData.append('target_role', role);
+        formData.append('relocate', relocate);
+        formData.append('preferred_locations', locations);
+        formData.append('answers', answers);
+
+        btn.disabled = true;
+        loading.classList.remove('d-none');
+        results.classList.add('d-none');
+
+        try {
+            const resp = await fetch('/api/career/virtual-assessment', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+
+            if (!resp.ok || data.error) {
+                alert('Assessment error: ' + (data.error || 'Failed to complete assessment'));
+                return;
+            }
+
+            results.classList.remove('d-none');
+            
+            if (!data.threshold_passed) {
+                banner.className = 'alert alert-warning border-warning text-white p-4 rounded';
+                banner.innerHTML = `
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-exclamation-triangle-fill display-6 text-warning"></i>
+                        <div>
+                            <h5 class="fw-bold text-warning mb-1">${escapeHtml(data.message)}</h5>
+                            <p class="mb-2">${escapeHtml(data.feedback)}</p>
+                            <div class="badge bg-dark fs-6 text-warning border border-warning">${escapeHtml(data.recommendation)}</div>
+                        </div>
+                    </div>
+                `;
+                jobsContainer.innerHTML = '';
+                document.getElementById('jobs-section').classList.add('d-none');
+            } else {
+                banner.className = 'alert alert-success border-success text-white p-4 rounded';
+                banner.innerHTML = `
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-check-circle-fill display-6 text-success"></i>
+                        <div>
+                            <h5 class="fw-bold text-success mb-1">${escapeHtml(data.message)}</h5>
+                            <p class="mb-0 text-white-50">${escapeHtml(data.feedback)}</p>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('jobs-section').classList.remove('d-none');
+                const jobs = data.jobs || [];
+                if (jobs.length === 0) {
+                    jobsContainer.innerHTML = '<div class="col-12 text-center text-muted py-4">No matching job posts found for this location. Try adjusting location filters.</div>';
+                } else {
+                    jobsContainer.innerHTML = jobs.map((job, idx) => `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 p-3" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-primary">Job #${idx + 1}</span>
+                                    <span class="badge bg-dark text-info border border-info">${escapeHtml(job.location || 'Remote')}</span>
+                                </div>
+                                <h6 class="fw-bold text-white mb-1 text-truncate">${escapeHtml(job.title)}</h6>
+                                <div class="text-secondary small mb-2"><i class="bi bi-building me-1"></i>${escapeHtml(job.company)}</div>
+                                <p class="text-muted small flex-grow-1 text-truncate-2" style="font-size: 0.82rem;">${escapeHtml(job.description)}</p>
+                                <a href="${escapeHtml(job.link)}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mt-2 fw-bold">
+                                    <i class="bi bi-linkedin me-1"></i>Apply on LinkedIn <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            loading.classList.add('d-none');
+        }
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {

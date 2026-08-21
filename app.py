@@ -29,6 +29,7 @@ import socket
 import logging
 import rag_utils
 import pinecone_utils
+import apify_utils
 
 try:
     from PIL import Image
@@ -1649,6 +1650,160 @@ def get_latest_resume_review():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/virtual-placement")
+@login_required
+def virtual_placement():
+    """AI Virtual Placement Officer & LinkedIn Job Matcher page."""
+    return render_template("virtual_placement.html")
+
+@app.route("/api/career/virtual-assessment", methods=["POST"])
+@login_required
+def virtual_career_assessment():
+    try:
+        if request.is_json:
+            data = request.get_json() or {}
+        else:
+            data = request.form
+
+        target_role = data.get("target_role", "Software Engineer").strip()
+        relocate = data.get("relocate", "Yes").strip()
+        preferred_locations = data.get("preferred_locations", "Bangalore, India").strip()
+        answers = data.get("answers", "")
+        
+        extracted_resume_text = ""
+        image_obj = None
+
+        # 1. Check if a fresh resume file is uploaded in the request
+        if 'file' in request.files and request.files['file'].filename != '':
+            file = request.files['file']
+            filename = secure_filename(file.filename).lower()
+            try:
+                if filename.endswith(".pdf"):
+                    if PYPDF_AVAILABLE:
+                        reader = PdfReader(file)
+                        for page in reader.pages:
+                            txt = page.extract_text()
+                            if txt:
+                                extracted_resume_text += txt + "\n"
+                elif filename.endswith((".png", ".jpg", ".jpeg", ".webp")):
+                    if PIL_AVAILABLE:
+                        image_obj = Image.open(file.stream)
+                elif filename.endswith((".txt", ".md")):
+                    extracted_resume_text = file.read().decode('utf-8', errors='ignore')
+                elif filename.endswith(".docx"):
+                    try:
+                        import docx
+                        doc = docx.Document(file)
+                        extracted_resume_text = "\n".join([p.text for p in doc.paragraphs if p.text])
+                    except Exception:
+                        file.seek(0)
+                        extracted_resume_text = file.read().decode('utf-8', errors='ignore')
+                else:
+                    extracted_resume_text = file.read().decode('utf-8', errors='ignore')
+                
+                # Index into Pinecone Vector DB
+                if extracted_resume_text:
+                    try:
+                        pinecone_utils.index_document_text(f"resume_{current_user.id}", filename, extracted_resume_text)
+                    except Exception as p_err:
+                        print(f"[Pinecone Resume Index Error]: {p_err}")
+            except Exception as parse_err:
+                print(f"[Resume File Parse Error]: {parse_err}")
+
+        # 2. If no fresh file uploaded, retrieve saved resume from MongoDB
+        if not extracted_resume_text and not image_obj:
+            if MONGODB_AVAILABLE and resume_reviews_collection is not None:
+                user_review = resume_reviews_collection.find_one({"user_id": str(current_user.id)})
+                if user_review:
+                    extracted_resume_text = user_review.get("report", "")
+
+        # 3. Strictly require a resume before running the assessment!
+        if not extracted_resume_text and not image_obj:
+            return jsonify({
+                "error": "No resume found. Please upload your resume file (PDF, DOCX, TXT, Image) first to start the Virtual Assessment!"
+            }), 400
+
+        model = get_gemini_model('gemini-2.5-flash')
+        
+        prompt = f"""
+You are a Senior Tech Recruiter and AI Virtual Placement Officer.
+Evaluate the candidate's readiness and profile alignment for the target job role: "{target_role}".
+Willingness to Relocate: {relocate}
+Preferred Job Locations: {preferred_locations}
+Candidate Interview / Response Notes: {answers}
+Resume / Profile Evaluation Context:
+{extracted_resume_text[:3000] if extracted_resume_text else "[Resume provided as image]"}
+
+Evaluate candidate's overall profile alignment score out of 100 for this target role and location, and determine their experience level (e.g. "fresher" if student/recent grad/<2 years exp, or "experienced").
+
+Format output as a valid JSON object strictly with these fields:
+{{
+  "score": 85,
+  "threshold_passed": true,
+  "experience_level": "fresher",
+  "verdict": "string summary verdict",
+  "feedback": "string detailed actionable feedback explaining key strengths or missing skills to improve"
+}}
+Ensure the response contains ONLY the JSON object.
+"""
+        score = 75
+        threshold_passed = True
+        experience_level = "fresher"
+        verdict = "Strong alignment for the target role."
+        feedback = "Candidate shows solid foundational skills."
+
+        if model:
+            try:
+                if image_obj:
+                    res = model.generate_content([prompt, image_obj])
+                else:
+                    res = model.generate_content(prompt)
+                txt = _get_gemini_text(res)
+                clean_txt = clean_json_text(txt) if 'clean_json_text' in globals() else txt.replace("```json", "").replace("```", "").strip()
+                eval_data = json.loads(clean_txt)
+                score = int(eval_data.get("score", 75))
+                threshold_passed = bool(eval_data.get("threshold_passed", score >= 60))
+                experience_level = str(eval_data.get("experience_level", "fresher")).strip().lower()
+                verdict = str(eval_data.get("verdict", verdict))
+                feedback = str(eval_data.get("feedback", feedback))
+            except Exception as eval_err:
+                print(f"[Virtual Assessment Gemini Eval Error]: {eval_err}")
+
+        # Check threshold requirement
+        if not threshold_passed or score < 60:
+            return jsonify({
+                "score": score,
+                "threshold_passed": False,
+                "verdict": verdict,
+                "message": f"⚠️ Profile Match Score: {score}%. Your profile does not meet the minimum 60% threshold for '{target_role}' positions in {preferred_locations} yet.",
+                "feedback": feedback,
+                "recommendation": "Improve your core technical skills, complete missing projects, and try the assessment again to unlock live job recommendations!",
+                "jobs": []
+            })
+
+        # Threshold passed (>= 60%) -> Scrape/Fetch 20 live LinkedIn job postings using Apify with 24h MongoDB cache
+        jobs = apify_utils.fetch_linkedin_jobs(
+            role=target_role,
+            location=preferred_locations,
+            experience_level=experience_level,
+            relocate=relocate,
+            max_results=20,
+            db=db if MONGODB_AVAILABLE else None
+        )
+
+        return jsonify({
+            "score": score,
+            "threshold_passed": True,
+            "verdict": verdict,
+            "message": f"🎉 Profile Match Score: {score}%! You passed the Virtual Assessment threshold for '{target_role}'. Here are 20 recommended LinkedIn job postings matching your profile & relocation preferences:",
+            "feedback": feedback,
+            "jobs": jobs
+        })
+
+    except Exception as e:
+        print(f"Error in virtual career assessment: {e}")
+        return jsonify({"error": f"Assessment server error: {str(e)}"}), 500
 
 @app.route("/aptitude")
 @login_required
