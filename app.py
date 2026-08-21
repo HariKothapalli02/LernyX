@@ -3341,8 +3341,9 @@ def generate_questions():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/chat")
+@app.route("/chat/<chat_id>")
 @login_required
-def chat_main():
+def chat_main(chat_id=None):
     return render_template("index.html")
 
 @app.route("/videoquiz")

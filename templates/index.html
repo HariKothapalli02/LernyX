@@ -521,6 +521,21 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         loadHistory();
+
+        // 1. Check for chat ID in URL query string or path
+        const urlParams = new URLSearchParams(window.location.search);
+        let chatId = urlParams.get('c') || urlParams.get('id');
+        if (!chatId) {
+            const parts = window.location.pathname.split('/chat/');
+            if (parts.length > 1 && parts[1].trim()) {
+                chatId = parts[1].trim();
+            }
+        }
+
+        if (chatId) {
+            loadChat(chatId);
+        }
+
         document.getElementById("message").addEventListener("keypress", (e) => {
             if (e.key === "Enter") send();
         });
@@ -528,6 +543,9 @@
 
     function startNewChat() {
         currentChatId = null;
+        if (window.history.pushState) {
+            window.history.pushState({}, '', '/chat');
+        }
         document.getElementById('chat').innerHTML = `
             <div class="text-center mt-5 fade-in-up welcome-screen">
                 <div class="mb-3"><i class="bi bi-stars text-warning display-4"></i></div>
@@ -572,7 +590,7 @@
                         // Close offcanvas on mobile
                         const offcanvasEl = document.getElementById('historySidebar');
                         const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl) || new bootstrap.Offcanvas(offcanvasEl);
-                        offcanvas.hide();
+                        if (offcanvas) offcanvas.hide();
                     };
                     container.appendChild(div);
                 });
@@ -587,6 +605,15 @@
 
     async function loadChat(chatId) {
         currentChatId = chatId;
+        
+        // Sync URL with active chat ID so refresh preserves chat state
+        if (window.history.pushState) {
+            const targetUrl = window.location.pathname.startsWith('/chat/') 
+                ? '/chat/' + chatId 
+                : '/chat?c=' + chatId;
+            window.history.pushState({}, '', targetUrl);
+        }
+
         const chatBox = document.getElementById('chat');
         chatBox.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div></div>';
 
@@ -674,6 +701,12 @@
                 appendMessage('bot', data.response);
                 if (data.conversation_id) {
                     currentChatId = data.conversation_id;
+                    if (window.history.pushState) {
+                        const targetUrl = window.location.pathname.startsWith('/chat/') 
+                            ? '/chat/' + currentChatId 
+                            : '/chat?c=' + currentChatId;
+                        window.history.pushState({}, '', targetUrl);
+                    }
                     loadHistory();
                 }
             }
