@@ -29,12 +29,7 @@ def get_gemini_model():
         print("Error: GEMINI_API_KEY not found.")
         return None
     genai.configure(api_key=api_key)
-    for model_name in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest']:
-        try:
-            return genai.GenerativeModel(model_name)
-        except Exception:
-            continue
-    return genai.GenerativeModel('gemini-2.5-flash')
+    return genai.GenerativeModel('gemini-flash-latest')
 
 def clean_json_text(text):
     """Clean JSON text from markdown blocks and common errors."""

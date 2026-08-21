@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Custom Quiz Builder - Learnex{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-white">Custom Quiz Builder</h1>
+        <p class="lead text-muted">Create your own exam-style quizzes manually or let AI draft questions for a topic.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Editor -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="tab-manual" data-bs-toggle="tab"
+                                data-bs-target="#manual-panel" type="button">Manual Entry</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="tab-ai" data-bs-toggle="tab" data-bs-target="#ai-panel"
+                                type="button">AI-Assisted</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- Manual Panel -->
+                        <div class="tab-pane fade show active" id="manual-panel">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Quiz Title</label>
+                                <input type="text" class="form-control bg-dark text-white border-secondary"
+                                    id="manual_title" placeholder="e.g., Python Basics Midterm">
+                            </div>
+                            <hr class="border-secondary">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Question</label>
+                                <textarea class="form-control bg-dark text-white border-secondary" id="q_text" rows="2"
+                                    placeholder="Enter question text..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Options</label>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text bg-dark border-secondary text-muted">A</span>
+                                    <input type="text" class="form-control bg-dark text-white border-secondary"
+                                        id="opt_a" placeholder="Option A">
+                                </div>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text bg-dark border-secondary text-muted">B</span>
+                                    <input type="text" class="form-control bg-dark text-white border-secondary"
+                                        id="opt_b" placeholder="Option B">
+                                </div>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text bg-dark border-secondary text-muted">C</span>
+                                    <input type="text" class="form-control bg-dark text-white border-secondary"
+                                        id="opt_c" placeholder="Option C">
+                                </div>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text bg-dark border-secondary text-muted">D</span>
+                                    <input type="text" class="form-control bg-dark text-white border-secondary"
+                                        id="opt_d" placeholder="Option D">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Correct Option</label>
+                                <select class="form-select bg-dark text-white border-secondary" id="correct_opt">
+                                    <option value="0">Option A</option>
+                                    <option value="1">Option B</option>
+                                    <option value="2">Option C</option>
+                                    <option value="3">Option D</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Explanation (Optional)</label>
+                                <textarea class="form-control bg-dark text-white border-secondary" id="q_explanation"
+                                    rows="2" placeholder="Explain the correct answer..."></textarea>
+                            </div>
+                            <div class="d-flex gap-2 mb-3">
+                                <button class="btn btn-primary flex-grow-1" onclick="addManualQuestion()">Add
+                                    Question</button>
+                                <button class="btn btn-outline-secondary" onclick="clearQuestionForm()">Clear</button>
+                            </div>
+                            <div id="manual_status"></div>
+
+                            <hr class="border-secondary my-4">
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Difficulty</label>
+                                <select class="form-select bg-dark text-white border-secondary" id="manual_difficulty">
+                                    <option value="easy">Easy</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-success w-100" onclick="saveCustomQuiz()">Save & Generate
+                                Code</button>
+                            <div id="save_status" class="mt-2"></div>
+                        </div>
+
+                        <!-- AI Panel -->
+                        <div class="tab-pane fade" id="ai-panel">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Topic</label>
+                                <input type="text" class="form-control bg-dark text-white border-secondary"
+                                    id="ai_topic" placeholder="e.g., OOP Concepts">
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label text-muted small fw-bold">Questions</label>
+                                    <input type="number" class="form-control bg-dark text-white border-secondary"
+                                        id="ai_num_questions" min="3" max="20" value="5">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted small fw-bold">Difficulty</label>
+                                    <select class="form-select bg-dark text-white border-secondary" id="ai_difficulty">
+                                        <option value="easy">Easy</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="hard">Hard</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="ai_generate_custom_quiz()">Generate
+                                Questions</button>
+                            <div id="ai_status" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Preview -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="mb-0 text-white">Question List</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="questions_container" class="list-group list-group-flush"
+                        style="max-height: 800px; overflow-y: auto;">
+                        <div class="p-4 text-center text-muted">
+                            <p>No questions yet. Add them manually or use the AI tab.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let builderQuestions = [];
+
+    function addManualQuestion() {
+        const q = document.getElementById('q_text').value.trim();
+        const a = document.getElementById('opt_a').value.trim();
+        const b = document.getElementById('opt_b').value.trim();
+        const c = document.getElementById('opt_c').value.trim();
+        const d = document.getElementById('opt_d').value.trim();
+        const expl = document.getElementById('q_explanation').value.trim();
+        const correct = parseInt(document.getElementById('correct_opt').value, 10);
+        const status = document.getElementById('manual_status');
+
+        if (!q || !a || !b || !c || !d) {
+            status.innerHTML = '<div class="alert alert-danger mt-2 py-2">Fill all fields.</div>';
+            return;
+        }
+
+        builderQuestions.push({
+            question: q,
+            options: [a, b, c, d],
+            correct,
+            explanation: expl || ""
+        });
+
+        status.innerHTML = '<div class="alert alert-success mt-2 py-2">Question added.</div>';
+        setTimeout(() => status.innerHTML = '', 2000);
+        clearQuestionForm(false);
+        renderQuestions();
+    }
+
+    function clearQuestionForm(clearStatus = true) {
+        document.getElementById('q_text').value = "";
+        document.getElementById('opt_a').value = "";
+        document.getElementById('opt_b').value = "";
+        document.getElementById('opt_c').value = "";
+        document.getElementById('opt_d').value = "";
+        document.getElementById('q_explanation').value = "";
+        document.getElementById('correct_opt').value = "0";
+        if (clearStatus) document.getElementById('manual_status').innerHTML = "";
+    }
+
+    function renderQuestions() {
+        const container = document.getElementById('questions_container');
+        if (!builderQuestions.length) {
+            container.innerHTML = '<div class="p-4 text-center text-muted"><p>No questions yet.</p></div>';
+            return;
+        }
+        container.innerHTML = builderQuestions.map((q, idx) => {
+            const opt = q.options || [];
+            const correctLabel = ["A", "B", "C", "D"][q.correct] || "?";
+            return `
+                <div class="list-group-item bg-transparent border-secondary text-white p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0 fw-bold">Q${idx + 1}: ${escapeHtml(q.question)}</h6>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteQuestion(${idx})"><i class="bi bi-trash"></i> Delete</button>
+                    </div>
+                    <ul class="list-unstyled mb-2 ps-3 small text-muted">
+                        <li>A. ${escapeHtml(opt[0])}</li>
+                        <li>B. ${escapeHtml(opt[1])}</li>
+                        <li>C. ${escapeHtml(opt[2])}</li>
+                        <li>D. ${escapeHtml(opt[3])}</li>
+                    </ul>
+                    <div class="d-flex gap-2 small">
+                        <span class="badge bg-success">Correct: ${correctLabel}</span>
+                        ${q.explanation ? `<span class="text-info fst-italic">Has explanation</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    function deleteQuestion(idx) {
+        if (confirm(`Delete question ${idx + 1}?`)) {
+            builderQuestions.splice(idx, 1);
+            renderQuestions();
+        }
+    }
+
+    async function generateFromAI() {
+        const topic = document.getElementById('ai_topic').value.trim();
+        const numQ = document.getElementById('ai_num_questions').value || 5;
+        const difficulty = document.getElementById('ai_difficulty').value;
+        const status = document.getElementById('ai_status');
+
+        if (!topic) {
+            status.innerHTML = '<div class="alert alert-danger">Enter a topic.</div>';
+            return;
+        }
+
+        status.innerHTML = '<div class="alert alert-info"><div class="spinner-border spinner-border-sm me-2"></div> Generating...</div>';
+
+        try {
+            const resp = await fetch('/api/customquiz/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic, num_questions: numQ, difficulty })
+            });
+            const data = await resp.json();
+            if (!resp.ok || data.error) throw new Error(data.error || "Failed");
+
+            builderQuestions = data.quiz_data.questions || [];
+            status.innerHTML = `<div class="alert alert-success">Generated ${builderQuestions.length} questions.</div>`;
+            renderQuestions();
+        } catch (err) {
+            status.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+        }
+    }
+
+    async function saveCustomQuiz() {
+        const title = document.getElementById('manual_title').value.trim() || "Custom Quiz";
+        const difficulty = document.getElementById('manual_difficulty').value;
+        const status = document.getElementById('save_status');
+
+        if (!builderQuestions.length) {
+            status.innerHTML = '<div class="alert alert-danger">Add questions first.</div>';
+            return;
+        }
+
+        status.innerHTML = '<div class="alert alert-info">Saving...</div>';
+
+        try {
+            const resp = await fetch('/api/custom-quizzes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title,
+                    quiz_data: { questions: builderQuestions },
+                    num_questions: builderQuestions.length,
+                    difficulty
+                })
+            });
+            const data = await resp.json();
+            if (!resp.ok || data.error) throw new Error(data.error || "Failed");
+
+            status.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>Quiz Saved!</strong> Code: <span class="user-select-all fw-bold">${data.code}</span>
+                    <button class="btn btn-sm btn-light ms-2" onclick="navigator.clipboard.writeText('${data.code}')">Copy</button>
+                </div>
+            `;
+        } catch (err) {
+            status.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || "";
+        return div.innerHTML;
+    }
+</script>
+{% endblock %}

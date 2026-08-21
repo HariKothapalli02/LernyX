@@ -620,8 +620,13 @@
 
     async function send() {
         const messageInput = document.getElementById('message');
+        const sendBtn = document.querySelector('.chat-input-area .btn-primary');
         const message = messageInput.value.trim();
         if (!message && !selectedFile) return;
+
+        // Disable input & button while processing
+        if (sendBtn) sendBtn.disabled = true;
+        messageInput.disabled = true;
 
         appendMessage('user', message);
         messageInput.value = '';
@@ -648,10 +653,20 @@
         if (selectedFile) formData.append('file', selectedFile);
         if (currentChatId) formData.append('chat_id', currentChatId);
 
+        // 60-second fetch timeout controller
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+
         try {
-            const response = await fetch('/api/chat', { method: 'POST', body: formData });
+            const response = await fetch('/api/chat', { 
+                method: 'POST', 
+                body: formData,
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
             const data = await response.json();
-            document.getElementById(loadingId).remove();
+            if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
 
             if (data.error) {
                 appendMessage('bot', 'Error: ' + data.error);
@@ -664,8 +679,17 @@
             }
             clearFile();
         } catch (error) {
+            clearTimeout(timeoutId);
             if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
-            appendMessage('bot', 'Error: Could not connect to server.');
+            if (error.name === 'AbortError') {
+                appendMessage('bot', 'Error: Request timed out. Please try again.');
+            } else {
+                appendMessage('bot', 'Error: ' + (error.message || 'Could not connect to server.'));
+            }
+        } finally {
+            if (sendBtn) sendBtn.disabled = false;
+            messageInput.disabled = false;
+            messageInput.focus();
         }
     }
 

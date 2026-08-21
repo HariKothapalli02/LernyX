@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "692e6e88c8687896d51d1673",
+    "question": "Which number comes next in the sequence: 5, 8, 11, 14, __?",
+    "options": [
+      "18",
+      "17",
+      "16",
+      "15"
+    ],
+    "correct": 1,
+    "explanation": "The pattern involves adding 3 to the previous number. 14 + 3 = 17.",
+    "difficulty": "easy",
+    "created_at": 

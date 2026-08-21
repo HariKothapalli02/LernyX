@@ -1,0 +1,7 @@
+Problem Statement - LernyX
+
+Traditional e-learning platforms often fail to engage students effectively due to their passive, one-way delivery of content. Learners consume videos and articles without immediate feedback, personalized guidance, or built-in, hands-on practice environments. This decoupling of learning and assessment leads to lower retention rates and slower skill acquisition, especially in technical fields like programming.
+
+Furthermore, when students struggle with specific concepts, standard FAQs or delayed forum responses provide little immediate support, leaving gaps in their understanding. There is a lack of integration between instructional material, practical environments, and personalized mentorship.
+
+LernyX addresses this by providing an all-in-one, AI-powered educational ecosystem. It leverages generative AI (Google Gemini) to instantly convert passive educational videos into interactive quizzes ("Video Intelligence"), while simultaneously offering an in-browser code compiler for immediate practice without setup friction. To supplement this, LernyX includes a pervasive, context-aware conversational AI Tutor using Retrieval-Augmented Generation (RAG) to provide 24/7 personalized debugging and conceptual guidance, ultimately closing the gap between learning, practicing, and mastering material.

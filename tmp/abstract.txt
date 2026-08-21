@@ -1,0 +1,12 @@
+Abstract: LernyX - AI-Powered Educational Platform
+
+LernyX is an advanced, AI-driven educational platform designed to revolutionize coding education and interactive learning. Built with a robust backend using Python (Flask) and MongoDB, and featuring a highly interactive, 3D-enhanced frontend, the platform integrates the Gemini AI models to serve as an intelligent, real-time tutor.
+
+Key features of LernyX include:
+1. AI Tutor Integration: A responsive AI assistant capable of debugging code, answering technical queries, and generating explanations on demand, allowing learners to progress faster.
+2. Video Intelligence: The ability to process educational YouTube videos, extract metadata and transcripts, and instantly generate interactive quizzes, turning passive viewing into active learning.
+3. In-Browser Code Compiler: Built-in support for executing Java, Python, and Data Structures & Algorithms (DSA) code directly within the web application, requiring zero local environment setup.
+4. Comprehensive Assessment & Tracking: The platform dynamically generates standard quizzes, custom shareable quizzes, and aptitude questions, while tracking user scores, practice history, and overall progress.
+5. Secure Authentication & Session Management: Utilizing Flask-Login and OTP-based email verification, the system securely manages user profiles, custom API keys, and persistent chat sessions.
+
+In summary, LernyX represents the next generation of learning environments. It merges modern web technologies, AI-powered generation capabilities, and hands-on coding practice into a single, cohesive educational ecosystem.
