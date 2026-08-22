@@ -35,6 +35,20 @@ def split_text(text, chunk_size=1000, overlap=100):
         start += (chunk_size - overlap)
     return chunks
 
+def safe_embed_content(content, task_type=None):
+    candidates = ["models/embedding-001", "embedding-001", "models/text-embedding-004", "text-embedding-004"]
+    for model_name in candidates:
+        try:
+            kwargs = {"model": model_name, "content": content}
+            if task_type:
+                kwargs["task_type"] = task_type
+            result = genai.embed_content(**kwargs)
+            if result and ('embedding' in result or hasattr(result, 'embedding')):
+                return result
+        except Exception:
+            continue
+    return None
+
 def process_document(file_path):
     """Load, chunk, and index a document using a lightweight approach."""
     try:
@@ -56,15 +70,12 @@ def process_document(file_path):
         new_entries = []
         for chunk in chunks:
             if not chunk.strip(): continue
-            result = genai.embed_content(
-                model="models/text-embedding-004",
-                content=chunk,
-                task_type="retrieval_document"
-            )
-            new_entries.append({
-                "content": chunk,
-                "embedding": result['embedding']
-            })
+            result = safe_embed_content(chunk, task_type="retrieval_document")
+            if result and 'embedding' in result:
+                new_entries.append({
+                    "content": chunk,
+                    "embedding": result['embedding']
+                })
         
         # Load existing or create new
         kb = []
@@ -96,11 +107,10 @@ def get_relevant_context(query, k=3):
             return ""
         
         # Embed query
-        query_result = genai.embed_content(
-            model="models/text-embedding-004",
-            content=query,
-            task_type="retrieval_query"
-        )
+        query_result = safe_embed_content(query, task_type="retrieval_query")
+        if not query_result or 'embedding' not in query_result:
+            return ""
+            
         query_embedding = query_result['embedding']
         
         # Load KB

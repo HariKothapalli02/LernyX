@@ -185,47 +185,74 @@ def load_user(user_id):
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_API_KEYS = os.environ.get("GEMINI_API_KEYS")
 
-def get_gemini_model(preferred_model='gemini-2.5-flash'):
+def get_gemini_candidates(preferred_model=None):
     """
-    Configures and returns a Gemini model instance using a random API key
-    from the available pool to prevent rate limiting.
+    Returns the Gemini model candidates list prioritized with gemini-flash-latest.
+    """
+    return ['gemini-flash-latest']
+
+def generate_content_with_fallback(content_parts, preferred_model=None):
+    """
+    Generate content with Gemini API, trying candidate models sequentially.
+    If a model returns a 404 or "not available" error, automatically retries with the next model.
+    Returns (response, error_message).
     """
     api_key = None
-    
-    # 1. Check if current user has a custom API key
     if has_request_context() and current_user.is_authenticated and hasattr(current_user, 'api_key') and current_user.api_key:
         api_key = current_user.api_key
-
-    # 2. Try to get a random key from the list first (if no user key)
     if not api_key and GEMINI_API_KEYS:
         keys = [k.strip() for k in GEMINI_API_KEYS.split(',') if k.strip()]
         if keys:
             api_key = random.choice(keys)
-            
-    # 3. Fallback to single key if no list or list is empty
     if not api_key and GEMINI_API_KEY:
         api_key = GEMINI_API_KEY
-        
+
+    if not api_key:
+        return None, "No valid GEMINI_API_KEY found."
+
+    try:
+        genai.configure(api_key=api_key)
+    except Exception as conf_err:
+        return None, f"Error configuring Gemini API: {conf_err}"
+
+    candidates = get_gemini_candidates(preferred_model)
+    last_error = None
+
+    for model_name in candidates:
+        try:
+            model_inst = genai.GenerativeModel(model_name)
+            response = model_inst.generate_content(content_parts)
+            return response, None
+        except Exception as e:
+            last_error = e
+            err_msg = str(e)
+            print(f"[Gemini Fallback] Model '{model_name}' failed: {err_msg}")
+            continue
+
+    return None, str(last_error) if last_error else "All candidate Gemini models failed."
+
+def get_gemini_model(preferred_model=None):
+    """
+    Configures and returns a Gemini model instance using available API key.
+    """
+    api_key = None
+    if has_request_context() and current_user.is_authenticated and hasattr(current_user, 'api_key') and current_user.api_key:
+        api_key = current_user.api_key
+    if not api_key and GEMINI_API_KEYS:
+        keys = [k.strip() for k in GEMINI_API_KEYS.split(',') if k.strip()]
+        if keys:
+            api_key = random.choice(keys)
+    if not api_key and GEMINI_API_KEY:
+        api_key = GEMINI_API_KEY
+
     if api_key:
         try:
             genai.configure(api_key=api_key)
-            candidates = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest', 'gemini-pro']
-            if preferred_model:
-                if preferred_model in candidates:
-                    candidates.remove(preferred_model)
-                candidates.insert(0, preferred_model)
-            for model_name in candidates:
-                try:
-                    return genai.GenerativeModel(model_name)
-                except Exception:
-                    continue
-            return genai.GenerativeModel('gemini-2.5-flash')
+            return genai.GenerativeModel('gemini-flash-latest')
         except Exception as e:
-            print(f"Error configuring Gemini with key: {str(e)}")
+            print(f"Error configuring Gemini: {e}")
             return None
-    else:
-        print("Warning: No valid GEMINI_API_KEY found. AI features will be disabled.")
-        return None
+    return None
 
 # Initialize model for initial check (optional, but good for startup validation)
 model = get_gemini_model()
@@ -420,7 +447,10 @@ def ask_gemini(prompt, history=None, attachment_path=None):
                 except Exception as u_err:
                     print(f"Error uploading file: {u_err}")
 
-        response = model.generate_content(content_parts)
+        response, err = generate_content_with_fallback(content_parts)
+        if err:
+            return f"<p><b>Error processing request.</b><br>{err}</p>"
+            
         answer = _get_gemini_text(response)
         
         if not answer:
@@ -567,11 +597,10 @@ def is_educational_content(content):
     )
     
     try:
-        model = get_gemini_model()
-        if model is None:
-            return True, "AI educational check unavailable (API key missing); allowing video."
-
-        response = model.generate_content(educational_check_prompt)
+        response, err = generate_content_with_fallback(educational_check_prompt)
+        if err:
+            return True, "AI educational check temporarily unavailable; allowing video."
+            
         response_text = _get_gemini_text(response)
         if not response_text:
             # If AI returned nothing usable, fall back to heuristic check
@@ -1572,7 +1601,7 @@ def analyze_resume():
         except Exception as p_err:
             print(f"Pinecone resume indexing warning: {p_err}")
 
-    model = get_gemini_model('gemini-2.5-flash')
+    model = get_gemini_model('gemini-flash-latest')
     if not model:
         return jsonify({"error": "AI model unavailable"}), 500
 
@@ -1600,10 +1629,10 @@ Resume Document Content:
 {extracted_text if extracted_text else "[Resume provided as attached image/document]"}
 """
     try:
-        if image_obj:
-            response = model.generate_content([prompt, image_obj])
-        else:
-            response = model.generate_content(prompt)
+        content_parts = [prompt, image_obj] if image_obj else prompt
+        response, err = generate_content_with_fallback(content_parts)
+        if err:
+            return jsonify({"error": f"AI Generation Error: {err}"}), 500
             
         report = _get_gemini_text(response)
 
@@ -1724,7 +1753,7 @@ def virtual_career_assessment():
                 "error": "No resume found. Please upload your resume file (PDF, DOCX, TXT, Image) first to start the Virtual Assessment!"
             }), 400
 
-        model = get_gemini_model('gemini-2.5-flash')
+        model = get_gemini_model('gemini-flash-latest')
         
         prompt = f"""
 You are a Senior Tech Recruiter and AI Virtual Placement Officer.
@@ -1753,12 +1782,10 @@ Ensure the response contains ONLY the JSON object.
         verdict = "Strong alignment for the target role."
         feedback = "Candidate shows solid foundational skills."
 
-        if model:
-            try:
-                if image_obj:
-                    res = model.generate_content([prompt, image_obj])
-                else:
-                    res = model.generate_content(prompt)
+        try:
+            content_parts = [prompt, image_obj] if image_obj else prompt
+            res, err = generate_content_with_fallback(content_parts)
+            if res:
                 txt = _get_gemini_text(res)
                 clean_txt = clean_json_text(txt) if 'clean_json_text' in globals() else txt.replace("```json", "").replace("```", "").strip()
                 eval_data = json.loads(clean_txt)
@@ -1767,8 +1794,8 @@ Ensure the response contains ONLY the JSON object.
                 experience_level = str(eval_data.get("experience_level", "fresher")).strip().lower()
                 verdict = str(eval_data.get("verdict", verdict))
                 feedback = str(eval_data.get("feedback", feedback))
-            except Exception as eval_err:
-                print(f"[Virtual Assessment Gemini Eval Error]: {eval_err}")
+        except Exception as eval_err:
+            print(f"[Virtual Assessment Gemini Eval Error]: {eval_err}")
 
         # Check threshold requirement
         if not threshold_passed or score < 60:

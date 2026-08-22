@@ -29,12 +29,12 @@ def get_gemini_model():
         print("Error: GEMINI_API_KEY not found.")
         return None
     genai.configure(api_key=api_key)
-    for model_name in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest']:
+    for model_name in ['gemini-flash-latest']:
         try:
             return genai.GenerativeModel(model_name)
         except Exception:
             continue
-    return genai.GenerativeModel('gemini-2.5-flash')
+    return genai.GenerativeModel('gemini-flash-latest')
 
 def clean_json_text(text):
     """Clean JSON text from markdown blocks and common errors."""
@@ -54,9 +54,17 @@ def clean_json_text(text):
     return text
 
 def generate_questions_batch(batch_size=5):
-    model = get_gemini_model()
-    if not model:
+    api_key = GEMINI_API_KEY
+    if not api_key and GEMINI_API_KEYS:
+        keys = [k.strip() for k in GEMINI_API_KEYS.split(',') if k.strip()]
+        if keys:
+            api_key = random.choice(keys)
+
+    if not api_key:
+        print("Error: GEMINI_API_KEY not found.")
         return []
+
+    genai.configure(api_key=api_key)
 
     prompt = f"""
     Generate {batch_size} unique Data Structures and Algorithms (DSA) coding problems.
@@ -77,16 +85,20 @@ def generate_questions_batch(batch_size=5):
     
     Ensure the JSON is valid.
     """
-    try:
-        print("Requesting Gemini...")
-        response = model.generate_content(prompt)
-        text = response.text
-        cleaned_json = clean_json_text(text)
-        questions = json.loads(cleaned_json)
-        return questions
-    except Exception as e:
-        print(f"Error generating questions: {e}")
-        return []
+    candidates = ['gemini-flash-latest']
+    for model_name in candidates:
+        try:
+            print(f"Requesting Gemini ({model_name})...")
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            text = response.text
+            cleaned_json = clean_json_text(text)
+            questions = json.loads(cleaned_json)
+            return questions
+        except Exception as e:
+            print(f"Error generating questions with {model_name}: {e}")
+            continue
+    return []
 
 def main():
     # Connect to MongoDB

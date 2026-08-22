@@ -20,17 +20,19 @@ def get_text_embedding(text):
     """
     if not text:
         return []
-    try:
-        res = genai.embed_content(
-            model="models/text-embedding-004",
-            content=text[:2000]
-        )
-        if isinstance(res, dict) and "embedding" in res:
-            return res["embedding"]
-        elif hasattr(res, "embedding"):
-            return res.embedding
-    except Exception as e:
-        print(f"[Pinecone] Embedding generation warning: {e}")
+    candidates = ["models/embedding-001", "embedding-001", "models/text-embedding-004", "text-embedding-004"]
+    for model_name in candidates:
+        try:
+            res = genai.embed_content(
+                model=model_name,
+                content=text[:2000]
+            )
+            if isinstance(res, dict) and "embedding" in res:
+                return res["embedding"]
+            elif hasattr(res, "embedding"):
+                return res.embedding
+        except Exception:
+            continue
     
     # Fallback deterministic pseudo-embedding (768 float array)
     import hashlib
