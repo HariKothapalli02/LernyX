@@ -25,8 +25,17 @@ from email.mime.multipart import MIMEMultipart
 import certifi
 import tempfile
 import threading
+import sys
 import socket
 import logging
+
+def _ignore_win_socket_error(args):
+    if issubclass(args.exc_type, OSError) and getattr(args.exc_value, 'winerror', None) == 10038:
+        return
+    sys.__excepthook__(args.exc_type, args.exc_value, args.exc_traceback)
+
+threading.excepthook = _ignore_win_socket_error
+
 import rag_utils
 import pinecone_utils
 import apify_utils
@@ -121,6 +130,7 @@ aptitude_attempts_collection = None
 aptitude_practice_history_collection = None
 chat_sessions_collection = None
 resume_reviews_collection = None
+virtual_placement_results_collection = None
 
 try:
     if not MONGODB_URI:
@@ -140,6 +150,7 @@ try:
     aptitude_practice_history_collection = db.aptitude_practice_history  # Store individual practice question attempts
     chat_sessions_collection = db.chat_sessions # Store persistent chat sessions
     resume_reviews_collection = db.resume_reviews # Store user resume reports
+    virtual_placement_results_collection = db.virtual_placement_results # Store persistent placement assessment & jobs
     # Test connection
     client.admin.command('ping')
     MONGODB_AVAILABLE = True
@@ -187,9 +198,12 @@ GEMINI_API_KEYS = os.environ.get("GEMINI_API_KEYS")
 
 def get_gemini_candidates(preferred_model=None):
     """
-    Returns the Gemini model candidates list prioritized with gemini-flash-latest.
+    Returns the Gemini model candidates list prioritized with gemini-2.5-flash and gemini-2.0-flash for extreme speed.
     """
-    return ['gemini-flash-latest']
+    c = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest']
+    if preferred_model:
+        c = [preferred_model] + [m for m in c if m != preferred_model]
+    return c
 
 def generate_content_with_fallback(content_parts, preferred_model=None):
     """
@@ -231,9 +245,10 @@ def generate_content_with_fallback(content_parts, preferred_model=None):
 
     return None, str(last_error) if last_error else "All candidate Gemini models failed."
 
-def get_gemini_model(preferred_model=None):
+def get_gemini_model(preferred_model="gemini-2.5-flash"):
     """
     Configures and returns a Gemini model instance using available API key.
+    Defaults to gemini-2.5-flash for maximum generation speed.
     """
     api_key = None
     if has_request_context() and current_user.is_authenticated and hasattr(current_user, 'api_key') and current_user.api_key:
@@ -248,7 +263,12 @@ def get_gemini_model(preferred_model=None):
     if api_key:
         try:
             genai.configure(api_key=api_key)
-            return genai.GenerativeModel('gemini-flash-latest')
+            target = preferred_model or "gemini-2.5-flash"
+            for candidate in [target, "gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest"]:
+                try:
+                    return genai.GenerativeModel(candidate)
+                except Exception:
+                    continue
         except Exception as e:
             print(f"Error configuring Gemini: {e}")
             return None
@@ -956,18 +976,60 @@ def compiler():
 
 def execute_code_engine(language, source_code, stdin=""):
     """
-    Executes code using Wandbox API (free, open online compiler) with local execution fallback.
+    Executes code using Piston v2 API (primary), Wandbox API (secondary),
+    or Local Subprocess execution (fallback for Python, Java, C).
     Returns dict: {"stdout": str, "stderr": str, "compile_output": str, "success": bool, "error": str}
     """
-    compiler_map = {
-        "python": "cpython-3.12.7",
-        "java": "openjdk-jdk-22+36",
-        "c": "gcc-13.2.0-c"
+    lang_lower = str(language).lower().strip()
+
+    # 1. Primary Execution Engine: Piston v2 API (Free, high-speed public code runner)
+    piston_map = {
+        "python": ("python", "main.py"),
+        "java": ("java", "Main.java"),
+        "c": ("c", "main.c"),
+        "cpp": ("cpp", "main.cpp"),
+        "c++": ("cpp", "main.cpp")
     }
-    lang_lower = str(language).lower()
-    compiler = compiler_map.get(lang_lower, "cpython-3.12.7")
-    
-    # 1. Try Wandbox API
+
+    if lang_lower in piston_map:
+        p_lang, p_filename = piston_map[lang_lower]
+        try:
+            piston_payload = {
+                "language": p_lang,
+                "version": "*",
+                "files": [{"name": p_filename, "content": source_code}],
+                "stdin": stdin
+            }
+            resp = requests.post("https://emkc.org/api/v2/piston/execute", json=piston_payload, timeout=10)
+            if resp.status_code == 200:
+                res_data = resp.json()
+                run_stage = res_data.get("run", {})
+                compile_stage = res_data.get("compile", {})
+                
+                stdout = run_stage.get("stdout", "")
+                stderr = run_stage.get("stderr", "")
+                compile_err = compile_stage.get("output", "") or compile_stage.get("stderr", "")
+                
+                exit_code = run_stage.get("code", 0)
+                is_success = (exit_code == 0) and not compile_err
+                
+                return {
+                    "stdout": stdout,
+                    "stderr": stderr,
+                    "compile_output": compile_err,
+                    "success": is_success,
+                    "error": None
+                }
+        except Exception as p_err:
+            print(f"Piston API execution error: {p_err}")
+
+    # 2. Secondary Execution Engine: Wandbox API
+    wandbox_compiler_map = {
+        "python": "cpython-head",
+        "java": "openjdk-head",
+        "c": "gcc-head"
+    }
+    compiler = wandbox_compiler_map.get(lang_lower, "cpython-head")
     try:
         payload = {
             "compiler": compiler,
@@ -977,7 +1039,7 @@ def execute_code_engine(language, source_code, stdin=""):
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Learnex-App"
         }
-        response = requests.post("https://wandbox.org/api/compile.json", json=payload, headers=headers, timeout=12)
+        response = requests.post("https://wandbox.org/api/compile.json", json=payload, headers=headers, timeout=10)
         if response.status_code == 200:
             res = response.json()
             status_code = str(res.get("status", "1"))
@@ -993,14 +1055,15 @@ def execute_code_engine(language, source_code, stdin=""):
                 "success": is_success,
                 "error": None
             }
-        else:
-            print(f"Wandbox API returned HTTP status {response.status_code}")
     except Exception as e:
         print(f"Wandbox API execution error: {e}")
-        
-    # 2. Local Fallback for Python if Wandbox API is unreachable
+
+    # 3. Local Subprocess Fallback (Local execution)
+    import subprocess
+    import tempfile
+    
     if lang_lower == "python":
-        import sys, subprocess
+        import sys
         try:
             proc = subprocess.run(
                 [sys.executable, "-c", source_code],
@@ -1018,6 +1081,89 @@ def execute_code_engine(language, source_code, stdin=""):
             }
         except Exception as py_err:
             print(f"Local python execution error: {py_err}")
+
+    elif lang_lower == "java":
+        try:
+            match = re.search(r'public\s+class\s+([A-Za-z0-9_]+)', source_code)
+            class_name = match.group(1) if match else "Main"
+            
+            with tempfile.TemporaryDirectory() as temp_dir:
+                java_file = os.path.join(temp_dir, f"{class_name}.java")
+                with open(java_file, "w", encoding="utf-8") as f:
+                    f.write(source_code)
+                
+                compile_proc = subprocess.run(
+                    ["javac", java_file],
+                    capture_output=True,
+                    text=True,
+                    timeout=8
+                )
+                if compile_proc.returncode != 0:
+                    return {
+                        "stdout": "",
+                        "stderr": compile_proc.stderr,
+                        "compile_output": compile_proc.stderr,
+                        "success": False,
+                        "error": "Java Compilation Error"
+                    }
+                
+                run_proc = subprocess.run(
+                    ["java", "-cp", temp_dir, class_name],
+                    input=stdin,
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                return {
+                    "stdout": run_proc.stdout,
+                    "stderr": run_proc.stderr,
+                    "compile_output": "",
+                    "success": run_proc.returncode == 0,
+                    "error": None
+                }
+        except Exception as java_err:
+            print(f"Local Java execution error: {java_err}")
+
+    elif lang_lower in ["c", "cpp"]:
+        try:
+            compiler_cmd = "gcc" if lang_lower == "c" else "g++"
+            with tempfile.TemporaryDirectory() as temp_dir:
+                src_file = os.path.join(temp_dir, f"main.{lang_lower}")
+                exe_file = os.path.join(temp_dir, "program.exe" if os.name == "nt" else "program")
+                with open(src_file, "w", encoding="utf-8") as f:
+                    f.write(source_code)
+                
+                compile_proc = subprocess.run(
+                    [compiler_cmd, src_file, "-o", exe_file],
+                    capture_output=True,
+                    text=True,
+                    timeout=8
+                )
+                if compile_proc.returncode != 0:
+                    return {
+                        "stdout": "",
+                        "stderr": compile_proc.stderr,
+                        "compile_output": compile_proc.stderr,
+                        "success": False,
+                        "error": "C/C++ Compilation Error"
+                    }
+                
+                run_proc = subprocess.run(
+                    [exe_file],
+                    input=stdin,
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                return {
+                    "stdout": run_proc.stdout,
+                    "stderr": run_proc.stderr,
+                    "compile_output": "",
+                    "success": run_proc.returncode == 0,
+                    "error": None
+                }
+        except Exception as c_err:
+            print(f"Local C execution error: {c_err}")
 
     return {
         "stdout": "",
@@ -1251,7 +1397,7 @@ def signup():
             "email": email,
             "password": hashed_password,
             "otp": otp,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
         # Send OTP
@@ -1280,7 +1426,7 @@ def verify_signup():
                 "username": signup_data["username"],
                 "email": signup_data["email"],
                 "password": signup_data["password"],
-                "created_at": datetime.utcnow()
+                "created_at": datetime.now(timezone.utc)
             }
             users_collection.insert_one(user_data)
             
@@ -1647,7 +1793,7 @@ Resume Document Content:
                             "filename": file.filename,
                             "target_role": target_role,
                             "report": report,
-                            "updated_at": datetime.utcnow()
+                            "updated_at": datetime.now(timezone.utc)
                         }
                     },
                     upsert=True
@@ -1697,7 +1843,8 @@ def virtual_career_assessment():
 
         target_role = data.get("target_role", "Software Engineer").strip()
         relocate = data.get("relocate", "Yes").strip()
-        preferred_locations = data.get("preferred_locations", "Bangalore, India").strip()
+        preferred_locations = data.get("preferred_locations", "Hyderabad").strip()
+        work_mode = data.get("work_mode", "onsite").strip().lower()
         answers = data.get("answers", "")
         
         extracted_resume_text = ""
@@ -1753,55 +1900,65 @@ def virtual_career_assessment():
                 "error": "No resume found. Please upload your resume file (PDF, DOCX, TXT, Image) first to start the Virtual Assessment!"
             }), 400
 
-        model = get_gemini_model('gemini-flash-latest')
-        
         prompt = f"""
 You are a Senior Tech Recruiter and AI Virtual Placement Officer.
-Evaluate the candidate's readiness and profile alignment for the target job role: "{target_role}".
-Willingness to Relocate: {relocate}
-Preferred Job Locations: {preferred_locations}
-Candidate Interview / Response Notes: {answers}
-Resume / Profile Evaluation Context:
-{extracted_resume_text[:3000] if extracted_resume_text else "[Resume provided as image]"}
+Carefully analyze the candidate's resume content below:
 
-Evaluate candidate's overall profile alignment score out of 100 for this target role and location, and determine their experience level (e.g. "fresher" if student/recent grad/<2 years exp, or "experienced").
+Resume Content:
+{extracted_resume_text[:3500] if extracted_resume_text else "[Resume provided as attached image]"}
 
-Format output as a valid JSON object strictly with these fields:
+Target Role: "{target_role}"
+Work Mode Preference: {work_mode.upper()}
+Preferred Location: {preferred_locations}
+
+INSTRUCTIONS:
+1. Experience Level Detection:
+   - Carefully count total full-time professional experience.
+   - If total full-time experience is < 2 years (or student / intern / recent graduate), classify as "fresher".
+   - If total full-time experience is >= 2 years, classify as "experienced".
+
+2. Profile Score Evaluation:
+   - Calculate candidate readiness score (0 to 100) for "{target_role}".
+
+Return ONLY a valid JSON object strictly with these fields:
 {{
   "score": 85,
-  "threshold_passed": true,
   "experience_level": "fresher",
+  "experience_label": "Fresher / Entry Level (0-2 Years)",
   "verdict": "string summary verdict",
   "feedback": "string detailed actionable feedback explaining key strengths or missing skills to improve"
 }}
-Ensure the response contains ONLY the JSON object.
 """
-        score = 75
+        score = 80
         threshold_passed = True
         experience_level = "fresher"
+        experience_label = "Fresher / Entry Level (0-2 Years)"
         verdict = "Strong alignment for the target role."
         feedback = "Candidate shows solid foundational skills."
 
         try:
             content_parts = [prompt, image_obj] if image_obj else prompt
-            res, err = generate_content_with_fallback(content_parts)
+            res, err = generate_content_with_fallback(content_parts, preferred_model="gemini-2.5-flash")
             if res:
                 txt = _get_gemini_text(res)
                 clean_txt = clean_json_text(txt) if 'clean_json_text' in globals() else txt.replace("```json", "").replace("```", "").strip()
                 eval_data = json.loads(clean_txt)
-                score = int(eval_data.get("score", 75))
-                threshold_passed = bool(eval_data.get("threshold_passed", score >= 60))
+                score = int(eval_data.get("score", 80))
+                threshold_passed = score >= 60
                 experience_level = str(eval_data.get("experience_level", "fresher")).strip().lower()
+                experience_label = str(eval_data.get("experience_label", "Fresher / Entry Level" if experience_level == "fresher" else "Experienced Professional"))
                 verdict = str(eval_data.get("verdict", verdict))
                 feedback = str(eval_data.get("feedback", feedback))
         except Exception as eval_err:
             print(f"[Virtual Assessment Gemini Eval Error]: {eval_err}")
 
         # Check threshold requirement
-        if not threshold_passed or score < 60:
+        if score < 60:
             return jsonify({
                 "score": score,
                 "threshold_passed": False,
+                "experience_level": experience_level,
+                "experience_label": experience_label,
                 "verdict": verdict,
                 "message": f"⚠️ Profile Match Score: {score}%. Your profile does not meet the minimum 60% threshold for '{target_role}' positions in {preferred_locations} yet.",
                 "feedback": feedback,
@@ -1809,28 +1966,91 @@ Ensure the response contains ONLY the JSON object.
                 "jobs": []
             })
 
-        # Threshold passed (>= 60%) -> Scrape/Fetch 20 live LinkedIn job postings using Apify with 24h MongoDB cache
+        # Threshold passed (>= 60%) -> Scrape/Fetch 21 fresh live LinkedIn job postings matching candidate experience level
         jobs = apify_utils.fetch_linkedin_jobs(
             role=target_role,
             location=preferred_locations,
             experience_level=experience_level,
             relocate=relocate,
-            max_results=20,
+            work_mode=work_mode,
+            max_results=21,
             db=db if MONGODB_AVAILABLE else None
         )
 
-        return jsonify({
+        resp_payload = {
             "score": score,
             "threshold_passed": True,
+            "experience_level": experience_level,
+            "experience_label": experience_label,
             "verdict": verdict,
-            "message": f"🎉 Profile Match Score: {score}%! You passed the Virtual Assessment threshold for '{target_role}'. Here are 20 recommended LinkedIn job postings matching your profile & relocation preferences:",
+            "message": f"🎉 Profile Match Score: {score}%! [{experience_label}] You passed the Virtual Assessment threshold for '{target_role}'. Here are 21 fresh LinkedIn job postings filtered for your experience level ({experience_label}):",
             "feedback": feedback,
             "jobs": jobs
-        })
+        }
+
+        # Store persistent assessment and matched jobs in MongoDB
+        if MONGODB_AVAILABLE and virtual_placement_results_collection is not None:
+            try:
+                virtual_placement_results_collection.update_one(
+                    {"user_id": str(current_user.id)},
+                    {
+                        "$set": {
+                            "user_id": str(current_user.id),
+                            "target_role": target_role,
+                            "work_mode": work_mode,
+                            "preferred_locations": preferred_locations,
+                            "relocate": relocate,
+                            "score": score,
+                            "threshold_passed": True,
+                            "experience_level": experience_level,
+                            "experience_label": experience_label,
+                            "verdict": verdict,
+                            "feedback": feedback,
+                            "message": resp_payload["message"],
+                            "jobs": jobs,
+                            "updated_at": datetime.now(timezone.utc)
+                        }
+                    },
+                    upsert=True
+                )
+            except Exception as db_err:
+                print(f"[MongoDB Virtual Placement Save Error]: {db_err}")
+
+        return jsonify(resp_payload)
 
     except Exception as e:
         print(f"Error in virtual career assessment: {e}")
         return jsonify({"error": f"Assessment server error: {str(e)}"}), 500
+
+@app.route("/api/latest-virtual-placement", methods=["GET"])
+@login_required
+def get_latest_virtual_placement():
+    """Retrieve saved virtual placement assessment results and matched jobs for current user."""
+    if not MONGODB_AVAILABLE or virtual_placement_results_collection is None:
+        return jsonify({"result": None})
+    try:
+        doc = virtual_placement_results_collection.find_one({"user_id": str(current_user.id)})
+        if not doc:
+            return jsonify({"result": None})
+            
+        return jsonify({
+            "result": {
+                "target_role": doc.get("target_role"),
+                "work_mode": doc.get("work_mode"),
+                "preferred_locations": doc.get("preferred_locations"),
+                "score": doc.get("score"),
+                "threshold_passed": doc.get("threshold_passed"),
+                "experience_level": doc.get("experience_level"),
+                "experience_label": doc.get("experience_label"),
+                "verdict": doc.get("verdict"),
+                "feedback": doc.get("feedback"),
+                "message": doc.get("message"),
+                "jobs": doc.get("jobs", []),
+                "updated_at": doc.get("updated_at").isoformat() if doc.get("updated_at") else None
+            }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/aptitude")
 @login_required
@@ -2023,7 +2243,7 @@ def create_custom_quiz():
         "num_questions": num_questions or len(quiz_data.get("questions", [])),
         "difficulty": difficulty or "custom",
         "quiz_data": quiz_data,
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
         "active": True,
         "source": "custom"  # manual or AI topic based
     }
@@ -2214,7 +2434,7 @@ def submit_custom_quiz(code):
         "percentage": round((score / total_questions) * 100, 2) if total_questions else 0,
         "user_answers": user_answers,
         "correct_answers": correct_answers,
-        "submitted_at": datetime.utcnow()
+        "submitted_at": datetime.now(timezone.utc)
     }
     custom_quiz_attempts_collection.insert_one(attempt)
 
@@ -2576,7 +2796,7 @@ def _api_videoquiz_logic():
                     "difficulty": difficulty,
                     "questions": quiz_data.get("questions", []),
                     "notes": quiz_data.get("notes", ""),
-                    "created_at": datetime.utcnow(),
+                    "created_at": datetime.now(timezone.utc),
                     "created_by": current_user.id
                 }
                 result = quizzes_collection.insert_one(quiz_doc)
@@ -2597,7 +2817,7 @@ def _api_videoquiz_logic():
                     "video_url": yt_url,
                     "num_questions": num_questions,
                     "difficulty": difficulty,
-                    "generated_at": datetime.utcnow()
+                    "generated_at": datetime.now(timezone.utc)
                 }
                 result = user_quiz_history_collection.insert_one(history_doc)
                 print(f"Stored quiz history for user {current_user.id}, inserted_id: {result.inserted_id}")
@@ -2826,7 +3046,7 @@ def save_quiz_score():
             "percentage": round((score / total_questions) * 100, 2) if total_questions > 0 else 0,
             "user_answers": user_answers,
             "correct_answers": correct_answers,
-            "completed_at": datetime.utcnow()
+            "completed_at": datetime.now(timezone.utc)
         }
         
         quiz_scores_collection.insert_one(score_doc)
@@ -3073,7 +3293,7 @@ def submit_aptitude_quiz():
             "user_answers": user_answers,
             "correct_answers": correct_answers,
             "question_ids": question_ids,
-            "completed_at": datetime.utcnow()
+            "completed_at": datetime.now(timezone.utc)
         }
         
         aptitude_attempts_collection.insert_one(attempt)
@@ -3162,7 +3382,7 @@ def generate_aptitude_questions():
                 
                 for q in questions:
                     q["difficulty"] = difficulty
-                    q["created_at"] = datetime.utcnow()
+                    q["created_at"] = datetime.now(timezone.utc)
                 
                 if questions:
                     aptitude_questions_collection.insert_many(questions)
@@ -3217,7 +3437,7 @@ def submit_aptitude_answer():
             "selected_option": int(selected_option),
             "correct_option": int(correct_option),
             "is_correct": is_correct,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
         
         aptitude_practice_history_collection.insert_one(attempt)
@@ -3673,7 +3893,7 @@ def generate_questions():
         for q in questions:
             # Check for duplicates
             if not db.dsa_questions.find_one({"title": q["title"]}):
-                q["created_at"] = datetime.utcnow()
+                q["created_at"] = datetime.now(timezone.utc)
                 db.dsa_questions.insert_one(q)
                 count += 1
                 

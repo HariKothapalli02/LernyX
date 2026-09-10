@@ -4,7 +4,7 @@ import re
 import math
 from pymongo import MongoClient, UpdateOne
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 MONGODB_URI = "mongodb+srv://harikothapalli61_db_user:Kothapalli555@cluster0.5nukjmu.mongodb.net/"
 DB_NAME = "videoquiz_db"
@@ -137,7 +137,7 @@ def audit_and_fix_questions():
                         "$set": {
                             "correct": new_correct,
                             "explanation": new_explanation,
-                            "verified_at": datetime.utcnow()
+                            "verified_at": datetime.now(timezone.utc)
                         }
                     }
                 )

@@ -4,3 +4,5 @@ __pycache__/
 otp_debug.log
 debug_email.py
 
+api.txt
+generate_dsa_questions.py

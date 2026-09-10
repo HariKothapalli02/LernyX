@@ -4,7 +4,7 @@ import json
 import re
 from pymongo import MongoClient
 import certifi
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 import time
 import random
@@ -118,7 +118,7 @@ def main():
         for q in questions:
             # Check for duplicates
             if not collection.find_one({"title": q["title"]}):
-                q["created_at"] = datetime.utcnow()
+                q["created_at"] = datetime.now(timezone.utc)
                 collection.insert_one(q)
                 inserted_count += 1
         

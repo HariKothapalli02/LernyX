@@ -3,7 +3,7 @@ import json
 import re
 from pymongo import MongoClient, UpdateOne
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 MONGODB_URI = "mongodb+srv://harikothapalli61_db_user:Kothapalli555@cluster0.5nukjmu.mongodb.net/"
 DB_NAME = "videoquiz_db"
@@ -113,7 +113,7 @@ def audit_dsa_questions():
                     {
                         "$set": {
                             "test_cases": updated_test_cases,
-                            "audited_at": datetime.utcnow()
+                            "audited_at": datetime.now(timezone.utc)
                         }
                     }
                 )

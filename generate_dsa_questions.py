@@ -4,7 +4,7 @@ import json
 import re
 from pymongo import MongoClient
 import certifi
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 import time
 import random
@@ -29,12 +29,12 @@ def get_gemini_model():
         print("Error: GEMINI_API_KEY not found.")
         return None
     genai.configure(api_key=api_key)
-    for model_name in ['gemini-flash-latest']:
+    for model_name in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest']:
         try:
             return genai.GenerativeModel(model_name)
         except Exception:
             continue
-    return genai.GenerativeModel('gemini-flash-latest')
+    return genai.GenerativeModel('gemini-2.5-flash')
 
 def clean_json_text(text):
     """Clean JSON text from markdown blocks and common errors."""
@@ -85,7 +85,7 @@ def generate_questions_batch(batch_size=5):
     
     Ensure the JSON is valid.
     """
-    candidates = ['gemini-flash-latest']
+    candidates = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest']
     for model_name in candidates:
         try:
             print(f"Requesting Gemini ({model_name})...")
@@ -135,7 +135,7 @@ def main():
         for q in questions:
             # Check for duplicates
             if not collection.find_one({"title": q["title"]}):
-                q["created_at"] = datetime.utcnow()
+                q["created_at"] = datetime.now(timezone.utc)
                 collection.insert_one(q)
                 inserted_count += 1
         

@@ -11,7 +11,7 @@
         </span>
         <h1 class="display-4 fw-bold text-white mb-3 tracking-tight">Virtual Placement & LinkedIn Job Matcher</h1>
         <p class="lead text-secondary mx-auto" style="max-width: 700px;">
-            Upload your resume, set your relocation preferences, and let our AI Virtual Officer evaluate your profile to unlock 20 matched LinkedIn job postings.
+            Upload your resume, set your relocation preferences, and let our AI Virtual Officer evaluate your profile to unlock 21 matched LinkedIn job postings.
         </p>
     </div>
 
@@ -34,31 +34,26 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label fw-medium text-white">Target Job Role / Title <span class="text-danger">*</span></label>
-                        <input type="text" id="target_role_input" class="form-control form-control-lg bg-dark text-white border-secondary" placeholder="e.g., Full Stack Developer, Java Engineer" value="Software Engineer" required>
+                        <label class="form-label fw-medium text-white"><i class="bi bi-briefcase text-primary me-2"></i>Target Job Role / Title <span class="text-danger">*</span></label>
+                        <input type="text" id="target_role_input" class="form-control form-control-lg bg-dark text-white border-secondary" placeholder="e.g., Software Engineer, Full Stack Developer, Data Analyst" value="Software Engineer" required>
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label fw-medium text-white">Willingness to Relocate?</label>
-                        <select id="relocate_select" class="form-select form-select-lg bg-dark text-white border-secondary">
-                            <option value="Yes" selected>Yes - Willing to Relocate</option>
-                            <option value="No">No - Remote Only / Local</option>
+                        <label class="form-label fw-medium text-white"><i class="bi bi-laptop text-primary me-2"></i>Work Location Preference <span class="text-danger">*</span></label>
+                        <select id="work_mode_select" class="form-select form-select-lg bg-dark text-white border-secondary" onchange="toggleLocationInput()">
+                            <option value="onsite" selected>🏢 On-Site / Hybrid (Specific Location/City)</option>
+                            <option value="remote">🌐 Remote Only (Work from Anywhere)</option>
                         </select>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-medium text-white">Preferred Job Locations / Cities</label>
-                        <input type="text" id="locations_input" class="form-control form-control-lg bg-dark text-white border-secondary" placeholder="e.g., Bangalore, London, New York, Remote" value="Bangalore, India">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-medium text-white">Quick Virtual Notes / Key Skills</label>
-                        <input type="text" id="answers_input" class="form-control form-control-lg bg-dark text-white border-secondary" placeholder="e.g., Proficient in Java, Spring Boot, React, Problem Solving">
+                    <div class="col-md-12" id="city_location_wrapper">
+                        <label class="form-label fw-medium text-white"><i class="bi bi-geo-alt text-primary me-2"></i>Preferred Job City / Location <span class="text-danger">*</span></label>
+                        <input type="text" id="locations_input" class="form-control form-control-lg bg-dark text-white border-secondary" placeholder="e.g., Hyderabad, Bangalore, Mumbai, London" value="Hyderabad">
                     </div>
                 </div>
 
                 <button type="submit" id="assessment-btn" class="btn btn-primary btn-lg mt-4 w-100 fw-bold py-3 shadow" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; font-size: 1.1rem;">
-                    <i class="bi bi-cpu me-2"></i>Run AI Virtual Assessment & LinkedIn Matcher
+                    <i class="bi bi-cpu me-2"></i>Run AI Virtual Assessment & Live LinkedIn Matcher
                 </button>
             </form>
         </div>
@@ -67,8 +62,8 @@
     <!-- Loading Spinner -->
     <div id="assessment-loading" class="d-none text-center py-5">
         <div class="spinner-border text-primary" role="status" style="width: 3.5rem; height: 3.5rem;"></div>
-        <h4 class="text-white mt-4 fw-bold">Evaluating Profile & Scraping Live LinkedIn Job Posts...</h4>
-        <p class="text-muted">Apify API fetching 20 fresh job postings (24h MongoDB Cache active).</p>
+        <h4 class="text-white mt-4 fw-bold">Evaluating Profile & Scraping Fresh LinkedIn Job Posts...</h4>
+        <p class="text-muted"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Powered by AI Placement Officer & Ultra-Fast Live LinkedIn Scraper (Past 7 Days Freshness).</p>
     </div>
 
     <!-- Results Section -->
@@ -77,8 +72,8 @@
 
         <div id="jobs-section">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="fw-bold text-white mb-0"><i class="bi bi-linkedin text-primary me-2"></i>20 Recommended LinkedIn Job Postings</h3>
-                <span class="badge bg-dark text-info border border-info px-3 py-2 fs-6">Apify Live Search</span>
+                <h3 class="fw-bold text-white mb-0"><i class="bi bi-linkedin text-primary me-2"></i>21 Fresh LinkedIn Job Postings</h3>
+                <span class="badge bg-dark text-info border border-info px-3 py-2 fs-6"><i class="bi bi-lightning-fill text-warning me-1"></i>Fast Live Engine</span>
             </div>
             <div id="jobs-container" class="row g-4"></div>
         </div>
@@ -86,7 +81,24 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', checkSavedResume);
+    document.addEventListener('DOMContentLoaded', () => {
+        checkSavedResume();
+        checkSavedVirtualPlacement();
+    });
+
+    function toggleLocationInput() {
+        const mode = document.getElementById('work_mode_select').value;
+        const cityInput = document.getElementById('locations_input');
+        if (mode === 'remote') {
+            cityInput.value = 'Remote';
+            cityInput.disabled = true;
+        } else {
+            if (cityInput.value === 'Remote' || !cityInput.value) {
+                cityInput.value = 'Hyderabad';
+            }
+            cityInput.disabled = false;
+        }
+    }
 
     async function checkSavedResume() {
         try {
@@ -99,7 +111,7 @@
                     nameSpan.textContent = data.review.filename;
                     alertDiv.classList.remove('d-none');
                 }
-                if (data.review.target_role) {
+                if (data.review.target_role && !document.getElementById('target_role_input').value) {
                     document.getElementById('target_role_input').value = data.review.target_role;
                 }
                 window.hasSavedResume = true;
@@ -111,19 +123,108 @@
         }
     }
 
+    async function checkSavedVirtualPlacement() {
+        try {
+            const resp = await fetch('/api/latest-virtual-placement');
+            const data = await resp.json();
+            if (resp.ok && data.result) {
+                const res = data.result;
+                if (res.target_role) document.getElementById('target_role_input').value = res.target_role;
+                if (res.work_mode) {
+                    document.getElementById('work_mode_select').value = res.work_mode;
+                    toggleLocationInput();
+                }
+                if (res.preferred_locations) document.getElementById('locations_input').value = res.preferred_locations;
+                
+                if (res.message || (res.jobs && res.jobs.length > 0)) {
+                    renderPlacementResults(res);
+                }
+            }
+        } catch (err) {
+            console.error('Error loading saved placement assessment:', err);
+        }
+    }
+
+    function renderPlacementResults(data) {
+        const results = document.getElementById('assessment-results');
+        const banner = document.getElementById('status-banner');
+        const jobsContainer = document.getElementById('jobs-container');
+
+        results.classList.remove('d-none');
+        
+        if (!data.threshold_passed) {
+            banner.className = 'alert alert-warning border-warning text-white p-4 rounded-3 shadow';
+            banner.innerHTML = `
+                <div class="d-flex align-items-start gap-3">
+                    <i class="bi bi-exclamation-triangle-fill display-5 text-warning"></i>
+                    <div>
+                        <h4 class="fw-bold text-warning mb-2">${escapeHtml(data.message)}</h4>
+                        <p class="mb-3 fs-5">${escapeHtml(data.feedback)}</p>
+                        <div class="badge bg-dark fs-6 text-warning border border-warning p-2">${escapeHtml(data.recommendation || 'Complete technical projects and try again.')}</div>
+                    </div>
+                </div>
+            `;
+            jobsContainer.innerHTML = '';
+            document.getElementById('jobs-section').classList.add('d-none');
+        } else {
+            banner.className = 'alert alert-success border-success text-white p-4 rounded-3 shadow';
+            banner.innerHTML = `
+                <div class="d-flex align-items-start gap-3">
+                    <i class="bi bi-check-circle-fill display-5 text-success"></i>
+                    <div>
+                        <div class="mb-2">
+                            <span class="badge bg-warning text-dark px-3 py-2 fs-6 me-2 shadow-sm"><i class="bi bi-person-badge-fill me-1"></i>Detected Level: ${escapeHtml(data.experience_label || 'Fresher / Entry Level')}</span>
+                            <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm"><i class="bi bi-graph-up-arrow me-1"></i>Score: ${data.score}%</span>
+                        </div>
+                        <h4 class="fw-bold text-success mb-2">${escapeHtml(data.message)}</h4>
+                        <p class="mb-0 text-white-50 fs-6">${escapeHtml(data.feedback)}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('jobs-section').classList.remove('d-none');
+            const jobs = data.jobs || [];
+            if (jobs.length === 0) {
+                jobsContainer.innerHTML = '<div class="col-12 text-center text-muted py-5 fs-5">No matching job posts found for this location. Try adjusting location filters.</div>';
+            } else {
+                jobsContainer.innerHTML = jobs.map((job, idx) => `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 p-4 shadow" style="background: rgba(17, 24, 39, 0.85); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(15px); border-radius: 14px;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-primary px-2 py-1">Job #${idx + 1}</span>
+                                <div>
+                                    <span class="badge bg-success text-white me-1" style="font-size: 0.72rem;"><i class="bi bi-clock-history me-1"></i>${escapeHtml(job.posting_age || 'Fresh')}</span>
+                                    <span class="badge bg-dark text-info border border-info" style="font-size: 0.72rem;">${escapeHtml(job.work_mode || 'On-Site / Hybrid')}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3 p-2 rounded" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.3);">
+                                <div class="text-info fw-bold fs-6"><i class="bi bi-building me-2"></i>${escapeHtml(job.company)}</div>
+                            </div>
+
+                            <h5 class="fw-bold text-white mb-2" style="font-size: 1.1rem;">${escapeHtml(job.title)}</h5>
+                            <div class="text-secondary small mb-3"><i class="bi bi-geo-alt me-1 text-danger"></i>${escapeHtml(job.location || 'Remote')}</div>
+                            <p class="text-white-50 small flex-grow-1 mb-3" style="font-size: 0.88rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${escapeHtml(job.description)}</p>
+                            <a href="${escapeHtml(job.link)}" target="_blank" class="btn btn-outline-info w-100 mt-2 fw-bold py-2 shadow-sm">
+                                <i class="bi bi-linkedin me-1"></i>Apply on LinkedIn <i class="bi bi-box-arrow-up-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    }
+
     async function runVirtualAssessmentPage(event) {
         event.preventDefault();
         const fileInput = document.getElementById('assessment_resume_file');
         const role = document.getElementById('target_role_input').value.trim();
-        const relocate = document.getElementById('relocate_select').value;
+        const workMode = document.getElementById('work_mode_select').value;
         const locations = document.getElementById('locations_input').value.trim();
-        const answers = document.getElementById('answers_input').value.trim();
 
         const btn = document.getElementById('assessment-btn');
         const loading = document.getElementById('assessment-loading');
         const results = document.getElementById('assessment-results');
-        const banner = document.getElementById('status-banner');
-        const jobsContainer = document.getElementById('jobs-container');
 
         const hasFile = fileInput.files && fileInput.files.length > 0;
         if (!hasFile && !window.hasSavedResume) {
@@ -136,9 +237,9 @@
             formData.append('file', fileInput.files[0]);
         }
         formData.append('target_role', role);
-        formData.append('relocate', relocate);
+        formData.append('work_mode', workMode);
         formData.append('preferred_locations', locations);
-        formData.append('answers', answers);
+        formData.append('relocate', workMode === 'remote' ? 'No' : 'Yes');
 
         btn.disabled = true;
         loading.classList.remove('d-none');
@@ -156,62 +257,7 @@
                 return;
             }
 
-            results.classList.remove('d-none');
-            
-            if (!data.threshold_passed) {
-                banner.className = 'alert alert-warning border-warning text-white p-4 rounded-3 shadow';
-                banner.innerHTML = `
-                    <div class="d-flex align-items-start gap-3">
-                        <i class="bi bi-exclamation-triangle-fill display-5 text-warning"></i>
-                        <div>
-                            <h4 class="fw-bold text-warning mb-2">${escapeHtml(data.message)}</h4>
-                            <p class="mb-3 fs-5">${escapeHtml(data.feedback)}</p>
-                            <div class="badge bg-dark fs-6 text-warning border border-warning p-2">${escapeHtml(data.recommendation)}</div>
-                        </div>
-                    </div>
-                `;
-                jobsContainer.innerHTML = '';
-                document.getElementById('jobs-section').classList.add('d-none');
-            } else {
-                banner.className = 'alert alert-success border-success text-white p-4 rounded-3 shadow';
-                banner.innerHTML = `
-                    <div class="d-flex align-items-start gap-3">
-                        <i class="bi bi-check-circle-fill display-5 text-success"></i>
-                        <div>
-                            <h4 class="fw-bold text-success mb-2">${escapeHtml(data.message)}</h4>
-                            <p class="mb-0 text-white-50 fs-6">${escapeHtml(data.feedback)}</p>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('jobs-section').classList.remove('d-none');
-                const jobs = data.jobs || [];
-                if (jobs.length === 0) {
-                    jobsContainer.innerHTML = '<div class="col-12 text-center text-muted py-5 fs-5">No matching job posts found for this location. Try adjusting location filters.</div>';
-                } else {
-                    jobsContainer.innerHTML = jobs.map((job, idx) => `
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 p-4 shadow" style="background: rgba(17, 24, 39, 0.85); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(15px); border-radius: 14px;">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="badge bg-primary px-2 py-1">Job #${idx + 1}</span>
-                                    <span class="badge bg-dark text-warning border border-warning">${escapeHtml(job.experience_tag || 'Fresher / Entry Level')}</span>
-                                </div>
-                                
-                                <div class="mb-3 p-2 rounded" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.3);">
-                                    <div class="text-info fw-bold fs-6"><i class="bi bi-building me-2"></i>${escapeHtml(job.company)}</div>
-                                </div>
-
-                                <h5 class="fw-bold text-white mb-2" style="font-size: 1.1rem;">${escapeHtml(job.title)}</h5>
-                                <div class="text-secondary small mb-3"><i class="bi bi-geo-alt me-1 text-danger"></i>${escapeHtml(job.location || 'Remote')}</div>
-                                <p class="text-white-50 small flex-grow-1 mb-3" style="font-size: 0.88rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${escapeHtml(job.description)}</p>
-                                <a href="${escapeHtml(job.link)}" target="_blank" class="btn btn-outline-info w-100 mt-2 fw-bold py-2 shadow-sm">
-                                    <i class="bi bi-linkedin me-1"></i>Apply on LinkedIn <i class="bi bi-box-arrow-up-right ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            }
+            renderPlacementResults(data);
 
             // Smooth scroll down to results
             results.scrollIntoView({ behavior: 'smooth' });
