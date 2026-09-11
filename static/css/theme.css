@@ -360,3 +360,39 @@ h1 {
         margin-left: 0 !important;
     }
 }
+
+/* Responsive Mobile Utility Fixes for Virtual Assessment & Cards */
+.text-break {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.badge {
+    white-space: normal;
+    text-align: left;
+    max-width: 100%;
+}
+
+@media (max-width: 576px) {
+    .alert {
+        padding: 0.875rem !important;
+    }
+
+    .badge {
+        font-size: 0.8rem !important;
+        padding: 0.35rem 0.6rem !important;
+    }
+
+    #status-banner h4,
+    #status-banner h5 {
+        font-size: 1.1rem !important;
+    }
+
+    #status-banner p {
+        font-size: 0.88rem !important;
+    }
+
+    .card {
+        padding: 1rem !important;
+    }
+}

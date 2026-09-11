@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, redirect, url_for, flash, session, has_request_context
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, redirect, url_for, flash, session, has_request_context, make_response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import google.generativeai as genai
 import os
@@ -107,6 +107,27 @@ except ImportError:
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "your-secret-key-change-this-in-production")
+
+def ensure_pwa_icons(app_inst):
+    try:
+        icons_dir = os.path.join(app_inst.static_folder, "icons")
+        os.makedirs(icons_dir, exist_ok=True)
+        icon_192 = os.path.join(icons_dir, "icon-192.png")
+        if not os.path.exists(icon_192) and PIL_AVAILABLE:
+            from PIL import Image, ImageDraw
+            for size, fname in [(192, "icon-192.png"), (512, "icon-512.png"), (512, "maskable-512.png"), (180, "apple-touch-icon.png")]:
+                is_maskable = "maskable" in fname
+                img = Image.new("RGBA", (size, size), (15, 23, 42, 255))
+                draw = ImageDraw.Draw(img)
+                padding = 0 if is_maskable else int(size * 0.05)
+                draw.rounded_rectangle([padding, padding, size - padding, size - padding], radius=int(size * 0.2), fill=(15, 23, 42, 255), outline=(99, 102, 241, 255), width=max(2, int(size * 0.02)))
+                cx, cy, r = size // 2, size // 2, int(size * 0.28)
+                draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(99, 102, 241, 255))
+                img.save(os.path.join(icons_dir, fname), "PNG")
+    except Exception as e:
+        print(f"PWA icon generation note: {e}")
+
+ensure_pwa_icons(app)
 
 EMAIL_ADDRESS = os.environ.get("EMAIL_ADDRESS")
 SMTP_USERNAME = os.environ.get("SMTP_USERNAME")
@@ -969,6 +990,16 @@ def sitemap():
 def robots():
     robots_txt = "User-agent: *\nAllow: /\n\n# Sitemaps\nSitemap: https://lernyx.vercel.app/sitemap.xml"
     return robots_txt, 200, {'Content-Type': 'text/plain'}
+
+@app.route('/manifest.json')
+def pwa_manifest():
+    return send_from_directory(app.static_folder, 'manifest.json', mimetype='application/json')
+
+@app.route('/sw.js')
+def pwa_serviceworker():
+    response = make_response(send_from_directory(app.static_folder, 'sw.js', mimetype='application/javascript'))
+    response.headers['Service-Worker-Allowed'] = '/'
+    return response
 
 @app.route("/compiler")
 @login_required

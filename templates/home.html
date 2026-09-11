@@ -253,27 +253,31 @@
             results.classList.remove('d-none');
             
             if (!data.threshold_passed) {
-                banner.className = 'alert alert-warning border-warning text-white p-4 rounded';
+                banner.className = 'alert alert-warning border-warning text-white p-3 p-md-4 rounded-3 shadow text-break overflow-hidden';
                 banner.innerHTML = `
-                    <div class="d-flex align-items-start gap-3">
-                        <i class="bi bi-exclamation-triangle-fill display-6 text-warning"></i>
-                        <div>
-                            <h5 class="fw-bold text-warning mb-1">${escapeHtml(data.message)}</h5>
-                            <p class="mb-2">${escapeHtml(data.feedback)}</p>
-                            <div class="badge bg-dark fs-6 text-warning border border-warning">${escapeHtml(data.recommendation)}</div>
+                    <div class="d-flex flex-column flex-sm-row align-items-start gap-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-2 text-warning flex-shrink-0 mb-2 mb-sm-0"></i>
+                        <div class="w-100 min-w-0">
+                            <h5 class="fw-bold text-warning mb-1 text-break" style="font-size: clamp(1rem, 3vw, 1.3rem);">${escapeHtml(data.message)}</h5>
+                            <p class="mb-2 text-break">${escapeHtml(data.feedback)}</p>
+                            <div class="badge bg-dark fs-6 text-warning border border-warning p-2 text-wrap text-start mw-100">${escapeHtml(data.recommendation)}</div>
                         </div>
                     </div>
                 `;
                 jobsContainer.innerHTML = '';
                 document.getElementById('jobs-section').classList.add('d-none');
             } else {
-                banner.className = 'alert alert-success border-success text-white p-4 rounded';
+                banner.className = 'alert alert-success border-success text-white p-3 p-md-4 rounded-3 shadow text-break overflow-hidden';
                 banner.innerHTML = `
-                    <div class="d-flex align-items-start gap-3">
-                        <i class="bi bi-check-circle-fill display-6 text-success"></i>
-                        <div>
-                            <h5 class="fw-bold text-success mb-1">${escapeHtml(data.message)}</h5>
-                            <p class="mb-0 text-white-50">${escapeHtml(data.feedback)}</p>
+                    <div class="d-flex flex-column flex-sm-row align-items-start gap-3">
+                        <i class="bi bi-check-circle-fill fs-2 text-success flex-shrink-0 mb-2 mb-sm-0"></i>
+                        <div class="w-100 min-w-0">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                <span class="badge bg-warning text-dark px-2 px-sm-3 py-2 fs-6 shadow-sm text-wrap text-start mw-100"><i class="bi bi-person-badge-fill me-1"></i>Detected Level: ${escapeHtml(data.experience_label || 'Fresher / Entry Level')}</span>
+                                <span class="badge bg-primary px-2 px-sm-3 py-2 fs-6 shadow-sm text-wrap text-start"><i class="bi bi-graph-up-arrow me-1"></i>Score: ${data.score}%</span>
+                            </div>
+                            <h5 class="fw-bold text-success mb-1 text-break" style="font-size: clamp(1rem, 3vw, 1.3rem);">${escapeHtml(data.message)}</h5>
+                            <p class="mb-0 text-white-50 text-break">${escapeHtml(data.feedback)}</p>
                         </div>
                     </div>
                 `;
@@ -284,16 +288,16 @@
                     jobsContainer.innerHTML = '<div class="col-12 text-center text-muted py-4">No matching job posts found for this location. Try adjusting location filters.</div>';
                 } else {
                     jobsContainer.innerHTML = jobs.map((job, idx) => `
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 p-3" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 p-3 shadow" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); word-break: break-word; overflow: hidden;">
+                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
                                     <span class="badge bg-primary">Job #${idx + 1}</span>
                                     <span class="badge bg-dark text-info border border-info">${escapeHtml(job.location || 'Remote')}</span>
                                 </div>
-                                <h6 class="fw-bold text-white mb-1 text-truncate">${escapeHtml(job.title)}</h6>
-                                <div class="text-secondary small mb-2"><i class="bi bi-building me-1"></i>${escapeHtml(job.company)}</div>
-                                <p class="text-muted small flex-grow-1 text-truncate-2" style="font-size: 0.82rem;">${escapeHtml(job.description)}</p>
-                                <a href="${escapeHtml(job.link)}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mt-2 fw-bold">
+                                <h6 class="fw-bold text-white mb-1 text-break" style="font-size: 0.95rem; line-height: 1.3;">${escapeHtml(job.title)}</h6>
+                                <div class="text-secondary small mb-2 text-break"><i class="bi bi-building me-1"></i>${escapeHtml(job.company)}</div>
+                                <p class="text-muted small flex-grow-1 text-break" style="font-size: 0.82rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${escapeHtml(job.description)}</p>
+                                <a href="${escapeHtml(job.link)}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mt-2 fw-bold py-2">
                                     <i class="bi bi-linkedin me-1"></i>Apply on LinkedIn <i class="bi bi-box-arrow-up-right ms-1"></i>
                                 </a>
                             </div>
