@@ -144,11 +144,11 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Enter Gemini API Key</h5>
+                <h5 class="modal-title">Enter AI API Key</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>To generate new questions, please enter your Gemini API Key.</p>
+                <p>To generate new questions, please enter your AI API Key.</p>
                 <input type="text" id="gemini-api-key" class="form-control" placeholder="AIzaSy...">
             </div>
             <div class="modal-footer">
@@ -222,7 +222,7 @@
     function submitGeneration() {
         const apiKey = document.getElementById('gemini-api-key').value || localStorage.getItem('gemini_api_key');
         if (!apiKey) {
-            alert("Please enter your Gemini API Key.");
+            alert("Please enter your AI API Key.");
             return;
         }
 
@@ -374,7 +374,8 @@
                 } else {
                     let outputHtml = '';
                     const stdout = data.stdout ? data.stdout.trim() : "";
-                    const isCorrect = stdout === expected.trim();
+                    const isAccepted = (!data.status || data.status.description === "Accepted") && !data.stderr;
+                    const isCorrect = isAccepted && (stdout === expected.trim());
 
                     outputHtml += `<div class="mb-2">
                     <span class="badge bg-${isCorrect ? 'success' : 'danger'}">${isCorrect ? 'Passed Example' : 'Failed Example'}</span>

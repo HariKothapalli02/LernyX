@@ -196,85 +196,86 @@ def load_user(user_id):
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_API_KEYS = os.environ.get("GEMINI_API_KEYS")
 
-def get_gemini_candidates(preferred_model=None):
-    """
-    Returns the Gemini model candidates list prioritized with gemini-2.5-flash and gemini-2.0-flash for extreme speed.
-    """
-    c = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest']
-    if preferred_model:
-        c = [preferred_model] + [m for m in c if m != preferred_model]
-    return c
+_api_key_lock = threading.Lock()
+_api_key_counter = 0
 
-def generate_content_with_fallback(content_parts, preferred_model=None):
+def get_all_api_keys():
+    """Extract and clean all available API keys from environment."""
+    keys = []
+    if GEMINI_API_KEYS:
+        keys.extend([k.strip() for k in GEMINI_API_KEYS.split(',') if k.strip()])
+    if GEMINI_API_KEY and GEMINI_API_KEY.strip() not in keys:
+        keys.append(GEMINI_API_KEY.strip())
+    return keys
+
+def get_next_api_key():
     """
-    Generate content with Gemini API, trying candidate models sequentially.
-    If a model returns a 404 or "not available" error, automatically retries with the next model.
-    Returns (response, error_message).
+    Strict Round-Robin load balancer across all 9 API keys.
+    Sequentially rotates key per request to balance traffic evenly.
     """
-    api_key = None
+    global _api_key_counter
     if has_request_context() and current_user.is_authenticated and hasattr(current_user, 'api_key') and current_user.api_key:
-        api_key = current_user.api_key
-    if not api_key and GEMINI_API_KEYS:
-        keys = [k.strip() for k in GEMINI_API_KEYS.split(',') if k.strip()]
-        if keys:
-            api_key = random.choice(keys)
-    if not api_key and GEMINI_API_KEY:
-        api_key = GEMINI_API_KEY
+        return current_user.api_key
+        
+    all_keys = get_all_api_keys()
+    if not all_keys:
+        return None
+        
+    with _api_key_lock:
+        key = all_keys[_api_key_counter % len(all_keys)]
+        _api_key_counter = (_api_key_counter + 1) % len(all_keys)
+        return key
 
-    if not api_key:
+GEMINI_MODEL_STRICT = "gemini-2.5-flash"
+
+def generate_content_with_fallback(content_parts, preferred_model=None, temperature=0.7):
+    """
+    Generate content using strictly 'gemini-2.5-flash'.
+    Uses Round-Robin API key load balancing with feature-specific temperature configuration.
+    """
+    all_keys = get_all_api_keys()
+    if not all_keys and (has_request_context() and current_user.is_authenticated and getattr(current_user, 'api_key', None)):
+        all_keys = [current_user.api_key]
+        
+    if not all_keys:
         return None, "No valid GEMINI_API_KEY found."
 
-    try:
-        genai.configure(api_key=api_key)
-    except Exception as conf_err:
-        return None, f"Error configuring Gemini API: {conf_err}"
-
-    candidates = get_gemini_candidates(preferred_model)
+    attempts = len(all_keys)
     last_error = None
 
-    for model_name in candidates:
+    for _ in range(attempts):
+        key = get_next_api_key()
         try:
-            model_inst = genai.GenerativeModel(model_name)
+            genai.configure(api_key=key)
+            gen_config = genai.types.GenerationConfig(temperature=temperature) if temperature is not None else None
+            model_inst = genai.GenerativeModel(GEMINI_MODEL_STRICT, generation_config=gen_config)
             response = model_inst.generate_content(content_parts)
             return response, None
         except Exception as e:
             last_error = e
             err_msg = str(e)
-            print(f"[Gemini Fallback] Model '{model_name}' failed: {err_msg}")
+            print(f"[Gemini Round-Robin Key Balance] Key ending '...{key[-6:] if key else ''}' failed: {err_msg}")
+            # If key rate limited or failed, rotate to next key in pool
             continue
 
-    return None, str(last_error) if last_error else "All candidate Gemini models failed."
+    return None, str(last_error) if last_error else "All Gemini API keys failed."
 
-def get_gemini_model(preferred_model="gemini-2.5-flash"):
+def get_gemini_model(preferred_model=None, temperature=0.7):
     """
-    Configures and returns a Gemini model instance using available API key.
-    Defaults to gemini-2.5-flash for maximum generation speed.
+    Configures and returns a 'gemini-2.5-flash' model instance with specific temperature configuration.
     """
-    api_key = None
-    if has_request_context() and current_user.is_authenticated and hasattr(current_user, 'api_key') and current_user.api_key:
-        api_key = current_user.api_key
-    if not api_key and GEMINI_API_KEYS:
-        keys = [k.strip() for k in GEMINI_API_KEYS.split(',') if k.strip()]
-        if keys:
-            api_key = random.choice(keys)
-    if not api_key and GEMINI_API_KEY:
-        api_key = GEMINI_API_KEY
-
-    if api_key:
+    key = get_next_api_key()
+    if key:
         try:
-            genai.configure(api_key=api_key)
-            target = preferred_model or "gemini-2.5-flash"
-            for candidate in [target, "gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest"]:
-                try:
-                    return genai.GenerativeModel(candidate)
-                except Exception:
-                    continue
+            genai.configure(api_key=key)
+            gen_config = genai.types.GenerationConfig(temperature=temperature) if temperature is not None else None
+            return genai.GenerativeModel(GEMINI_MODEL_STRICT, generation_config=gen_config)
         except Exception as e:
             print(f"Error configuring Gemini: {e}")
             return None
     return None
 
-# Initialize model for initial check (optional, but good for startup validation)
+# Initialize model instance for strict gemini-2.5-flash
 model = get_gemini_model()
 
 def _get_gemini_text(response):
@@ -977,7 +978,7 @@ def compiler():
 def execute_code_engine(language, source_code, stdin=""):
     """
     Executes code using Piston v2 API (primary), Wandbox API (secondary),
-    or Local Subprocess execution (fallback for Python, Java, C).
+    Judge0 CE API (tertiary), or Local Subprocess execution (fallback).
     Returns dict: {"stdout": str, "stderr": str, "compile_output": str, "success": bool, "error": str}
     """
     lang_lower = str(language).lower().strip()
@@ -987,8 +988,8 @@ def execute_code_engine(language, source_code, stdin=""):
         "python": ("python", "main.py"),
         "java": ("java", "Main.java"),
         "c": ("c", "main.c"),
-        "cpp": ("cpp", "main.cpp"),
-        "c++": ("cpp", "main.cpp")
+        "cpp": ("c++", "main.cpp"),
+        "c++": ("c++", "main.cpp")
     }
 
     if lang_lower in piston_map:
@@ -1010,15 +1011,17 @@ def execute_code_engine(language, source_code, stdin=""):
                 stderr = run_stage.get("stderr", "")
                 compile_err = compile_stage.get("output", "") or compile_stage.get("stderr", "")
                 
-                exit_code = run_stage.get("code", 0)
-                is_success = (exit_code == 0) and not compile_err
+                run_code = run_stage.get("code", 0) if run_stage else 0
+                compile_code = compile_stage.get("code", 0) if compile_stage else 0
+                
+                is_success = (compile_code == 0) and (run_code == 0)
                 
                 return {
                     "stdout": stdout,
                     "stderr": stderr,
                     "compile_output": compile_err,
                     "success": is_success,
-                    "error": None
+                    "error": None if is_success else (compile_err or stderr or "Execution failed")
                 }
         except Exception as p_err:
             print(f"Piston API execution error: {p_err}")
@@ -1027,7 +1030,9 @@ def execute_code_engine(language, source_code, stdin=""):
     wandbox_compiler_map = {
         "python": "cpython-head",
         "java": "openjdk-head",
-        "c": "gcc-head"
+        "c": "gcc-head-c",
+        "cpp": "gcc-head",
+        "c++": "gcc-head"
     }
     compiler = wandbox_compiler_map.get(lang_lower, "cpython-head")
     try:
@@ -1047,20 +1052,55 @@ def execute_code_engine(language, source_code, stdin=""):
             stderr = res.get("program_error", "")
             compile_err = res.get("compiler_error", "") or res.get("compiler_output", "")
             
-            is_success = (status_code == "0") and not compile_err
+            is_success = (status_code == "0")
             return {
                 "stdout": stdout,
                 "stderr": stderr,
                 "compile_output": compile_err,
                 "success": is_success,
-                "error": None
+                "error": None if is_success else (compile_err or stderr or "Execution failed")
             }
     except Exception as e:
         print(f"Wandbox API execution error: {e}")
 
-    # 3. Local Subprocess Fallback (Local execution)
+    # 3. Tertiary Execution Engine: Judge0 CE Public API
+    judge0_map = {
+        "c": 50,
+        "cpp": 54,
+        "c++": 54,
+        "java": 62,
+        "python": 71
+    }
+    if lang_lower in judge0_map:
+        try:
+            j_lang_id = judge0_map[lang_lower]
+            j_payload = {
+                "source_code": source_code,
+                "language_id": j_lang_id,
+                "stdin": stdin
+            }
+            j_resp = requests.post("https://ce.judge0.com/submissions?wait=true", json=j_payload, timeout=10)
+            if j_resp.status_code in [200, 201]:
+                j_data = j_resp.json()
+                stdout = j_data.get("stdout") or ""
+                stderr = j_data.get("stderr") or ""
+                compile_output = j_data.get("compile_output") or ""
+                status_id = j_data.get("status", {}).get("id", 0)
+                is_success = (status_id == 3)
+                return {
+                    "stdout": stdout,
+                    "stderr": stderr,
+                    "compile_output": compile_output,
+                    "success": is_success,
+                    "error": None if is_success else j_data.get("status", {}).get("description", "Error")
+                }
+        except Exception as j_err:
+            print(f"Judge0 API execution error: {j_err}")
+
+    # 4. Local Subprocess Fallback (Local execution)
     import subprocess
     import tempfile
+    import shutil
     
     if lang_lower == "python":
         import sys
@@ -1077,7 +1117,7 @@ def execute_code_engine(language, source_code, stdin=""):
                 "stderr": proc.stderr,
                 "compile_output": "",
                 "success": proc.returncode == 0,
-                "error": None
+                "error": None if proc.returncode == 0 else proc.stderr
             }
         except Exception as py_err:
             print(f"Local python execution error: {py_err}")
@@ -1119,7 +1159,7 @@ def execute_code_engine(language, source_code, stdin=""):
                     "stderr": run_proc.stderr,
                     "compile_output": "",
                     "success": run_proc.returncode == 0,
-                    "error": None
+                    "error": None if run_proc.returncode == 0 else run_proc.stderr
                 }
         except Exception as java_err:
             print(f"Local Java execution error: {java_err}")
@@ -1127,41 +1167,45 @@ def execute_code_engine(language, source_code, stdin=""):
     elif lang_lower in ["c", "cpp"]:
         try:
             compiler_cmd = "gcc" if lang_lower == "c" else "g++"
-            with tempfile.TemporaryDirectory() as temp_dir:
-                src_file = os.path.join(temp_dir, f"main.{lang_lower}")
-                exe_file = os.path.join(temp_dir, "program.exe" if os.name == "nt" else "program")
-                with open(src_file, "w", encoding="utf-8") as f:
-                    f.write(source_code)
+            if not shutil.which(compiler_cmd):
+                compiler_cmd = "clang" if lang_lower == "c" else "clang++"
                 
-                compile_proc = subprocess.run(
-                    [compiler_cmd, src_file, "-o", exe_file],
-                    capture_output=True,
-                    text=True,
-                    timeout=8
-                )
-                if compile_proc.returncode != 0:
+            if shutil.which(compiler_cmd):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    src_file = os.path.join(temp_dir, f"main.{lang_lower}")
+                    exe_file = os.path.join(temp_dir, "program.exe" if os.name == "nt" else "program")
+                    with open(src_file, "w", encoding="utf-8") as f:
+                        f.write(source_code)
+                    
+                    compile_proc = subprocess.run(
+                        [compiler_cmd, src_file, "-o", exe_file],
+                        capture_output=True,
+                        text=True,
+                        timeout=8
+                    )
+                    if compile_proc.returncode != 0:
+                        return {
+                            "stdout": "",
+                            "stderr": compile_proc.stderr,
+                            "compile_output": compile_proc.stderr,
+                            "success": False,
+                            "error": "C/C++ Compilation Error"
+                        }
+                    
+                    run_proc = subprocess.run(
+                        [exe_file],
+                        input=stdin,
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
                     return {
-                        "stdout": "",
-                        "stderr": compile_proc.stderr,
-                        "compile_output": compile_proc.stderr,
-                        "success": False,
-                        "error": "C/C++ Compilation Error"
+                        "stdout": run_proc.stdout,
+                        "stderr": run_proc.stderr,
+                        "compile_output": "",
+                        "success": run_proc.returncode == 0,
+                        "error": None if run_proc.returncode == 0 else run_proc.stderr
                     }
-                
-                run_proc = subprocess.run(
-                    [exe_file],
-                    input=stdin,
-                    capture_output=True,
-                    text=True,
-                    timeout=5
-                )
-                return {
-                    "stdout": run_proc.stdout,
-                    "stderr": run_proc.stderr,
-                    "compile_output": "",
-                    "success": run_proc.returncode == 0,
-                    "error": None
-                }
         except Exception as c_err:
             print(f"Local C execution error: {c_err}")
 
@@ -1747,7 +1791,7 @@ def analyze_resume():
         except Exception as p_err:
             print(f"Pinecone resume indexing warning: {p_err}")
 
-    model = get_gemini_model('gemini-flash-latest')
+    model = get_gemini_model()
     if not model:
         return jsonify({"error": "AI model unavailable"}), 500
 
@@ -1776,7 +1820,7 @@ Resume Document Content:
 """
     try:
         content_parts = [prompt, image_obj] if image_obj else prompt
-        response, err = generate_content_with_fallback(content_parts)
+        response, err = generate_content_with_fallback(content_parts, temperature=0.4)
         if err:
             return jsonify({"error": f"AI Generation Error: {err}"}), 500
             
@@ -1792,6 +1836,7 @@ Resume Document Content:
                             "user_id": str(current_user.id),
                             "filename": file.filename,
                             "target_role": target_role,
+                            "extracted_text": extracted_text,
                             "report": report,
                             "updated_at": datetime.now(timezone.utc)
                         }
@@ -1825,6 +1870,445 @@ def get_latest_resume_review():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+def generate_resume_docx(data, template_id="classic_navy"):
+    """
+    Generates an ATS-friendly, professional Word (.docx) resume using python-docx with 5 selectable templates.
+    """
+    import io
+    import docx
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml import parse_xml
+
+    doc = docx.Document()
+
+    # Template style configurations
+    templates_config = {
+        "classic_navy": {
+            "primary": RGBColor(30, 58, 138),     # Navy #1E3A8A
+            "secondary": RGBColor(59, 130, 246),  # Blue #3B82F6
+            "dark": RGBColor(17, 24, 39),         # Charcoal #111827
+            "muted": RGBColor(75, 85, 99),        # Gray #4B5563
+            "border_color": "1E3A8A",
+            "border_size": "12",
+            "font_name": "Arial",
+            "align_header": WD_ALIGN_PARAGRAPH.LEFT,
+            "name_size": 22,
+            "header_size": 12,
+            "margin": 0.75
+        },
+        "minimal_executive": {
+            "primary": RGBColor(31, 41, 55),      # Slate #1F2937
+            "secondary": RGBColor(107, 114, 128), # Muted #6B7280
+            "dark": RGBColor(17, 24, 39),         # Charcoal #111827
+            "muted": RGBColor(107, 114, 128),     # Gray #6B7280
+            "border_color": "D1D5DB",
+            "border_size": "8",
+            "font_name": "Georgia",
+            "align_header": WD_ALIGN_PARAGRAPH.CENTER,
+            "name_size": 24,
+            "header_size": 12,
+            "margin": 0.75
+        },
+        "tech_teal": {
+            "primary": RGBColor(13, 148, 136),    # Teal #0D9488
+            "secondary": RGBColor(20, 184, 166),  # Light Teal #14B8A6
+            "dark": RGBColor(17, 24, 39),         # Dark Gray #111827
+            "muted": RGBColor(75, 85, 99),        # Gray #4B5563
+            "border_color": "0D9488",
+            "border_size": "14",
+            "font_name": "Segoe UI",
+            "align_header": WD_ALIGN_PARAGRAPH.LEFT,
+            "name_size": 22,
+            "header_size": 12,
+            "margin": 0.65
+        },
+        "creative_burgundy": {
+            "primary": RGBColor(136, 19, 55),     # Burgundy #881337
+            "secondary": RGBColor(159, 18, 57),   # Rose #9F1239
+            "dark": RGBColor(24, 24, 27),         # Off Black #18181B
+            "muted": RGBColor(82, 82, 91),        # Neutral Gray #52525B
+            "border_color": "881337",
+            "border_size": "12",
+            "font_name": "Calibri",
+            "align_header": WD_ALIGN_PARAGRAPH.LEFT,
+            "name_size": 23,
+            "header_size": 12,
+            "margin": 0.7
+        },
+        "ats_standard": {
+            "primary": RGBColor(0, 0, 0),         # Pure Black #000000
+            "secondary": RGBColor(51, 51, 51),    # Dark Gray #333333
+            "dark": RGBColor(0, 0, 0),            # Black #000000
+            "muted": RGBColor(75, 75, 75),        # Gray #4B4B4B
+            "border_color": "000000",
+            "border_size": "8",
+            "font_name": "Times New Roman",
+            "align_header": WD_ALIGN_PARAGRAPH.LEFT,
+            "name_size": 20,
+            "header_size": 11.5,
+            "margin": 0.75
+        }
+    }
+
+    cfg = templates_config.get(template_id, templates_config["classic_navy"])
+
+    # Set page margins
+    for section in doc.sections:
+        section.top_margin = Inches(cfg["margin"])
+        section.bottom_margin = Inches(cfg["margin"])
+        section.left_margin = Inches(cfg["margin"])
+        section.right_margin = Inches(cfg["margin"])
+
+    PRIMARY_COLOR = cfg["primary"]
+    TEXT_DARK = cfg["dark"]
+    TEXT_MUTED = cfg["muted"]
+    FONT_NAME = cfg["font_name"]
+
+    def add_section_header(title):
+        p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(12)
+        p.paragraph_format.space_after = Pt(4)
+        run = p.add_run(title.upper())
+        run.bold = True
+        run.font.size = Pt(cfg["header_size"])
+        run.font.color.rgb = PRIMARY_COLOR
+        run.font.name = FONT_NAME
+        
+        # Add bottom border under heading XML
+        pPr = p._p.get_or_add_pPr()
+        pBdr = parse_xml(f'<w:pBdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                         f'<w:bottom w:val="single" w:sz="{cfg["border_size"]}" w:space="4" w:color="{cfg["border_color"]}"/>'
+                         f'</w:pBdr>')
+        pPr.append(pBdr)
+
+    # 1. Header Section (Name & Target Role & Contact)
+    name = data.get("full_name") or data.get("name") or "Candidate Name"
+    target_role = data.get("target_role") or "Software Engineer"
+    contact_info = data.get("contact", {})
+
+    p_name = doc.add_paragraph()
+    p_name.paragraph_format.space_before = Pt(0)
+    p_name.paragraph_format.space_after = Pt(2)
+    p_name.alignment = cfg["align_header"]
+    run_name = p_name.add_run(name)
+    run_name.bold = True
+    run_name.font.size = Pt(cfg["name_size"])
+    run_name.font.color.rgb = PRIMARY_COLOR
+    run_name.font.name = FONT_NAME
+
+    p_role = doc.add_paragraph()
+    p_role.paragraph_format.space_after = Pt(4)
+    p_role.alignment = cfg["align_header"]
+    run_role = p_role.add_run(target_role)
+    run_role.bold = True
+    run_role.font.size = Pt(12)
+    run_role.font.color.rgb = TEXT_MUTED
+    run_role.font.name = FONT_NAME
+
+    # Contact Info Line
+    contact_parts = []
+    if isinstance(contact_info, dict):
+        for k in ["email", "phone", "location", "linkedin", "github"]:
+            if contact_info.get(k):
+                contact_parts.append(str(contact_info[k]))
+    elif isinstance(contact_info, list):
+        contact_parts = [str(x) for x in contact_info]
+    elif isinstance(contact_info, str) and contact_info:
+        contact_parts = [contact_info]
+
+    if contact_parts:
+        p_contact = doc.add_paragraph()
+        p_contact.paragraph_format.space_after = Pt(8)
+        p_contact.alignment = cfg["align_header"]
+        run_contact = p_contact.add_run(" | ".join(contact_parts))
+        run_contact.font.size = Pt(9.5)
+        run_contact.font.color.rgb = TEXT_MUTED
+        run_contact.font.name = FONT_NAME
+
+    # 2. Professional Summary
+    summary = data.get("summary")
+    if summary:
+        add_section_header("Professional Summary")
+        p_sum = doc.add_paragraph()
+        p_sum.paragraph_format.space_after = Pt(6)
+        r_sum = p_sum.add_run(str(summary))
+        r_sum.font.size = Pt(10)
+        r_sum.font.color.rgb = TEXT_DARK
+        r_sum.font.name = FONT_NAME
+
+    # 3. Work Experience
+    experience = data.get("experience", [])
+    if experience:
+        add_section_header("Work Experience")
+        for exp in experience:
+            p_exp = doc.add_paragraph()
+            p_exp.paragraph_format.space_before = Pt(4)
+            p_exp.paragraph_format.space_after = Pt(2)
+            
+            title = exp.get("title", "")
+            company = exp.get("company", "")
+            dates = exp.get("dates", "")
+            location = exp.get("location", "")
+            
+            r_title = p_exp.add_run(title)
+            r_title.bold = True
+            r_title.font.size = Pt(11)
+            r_title.font.color.rgb = TEXT_DARK
+            r_title.font.name = FONT_NAME
+            
+            if company:
+                r_comp = p_exp.add_run(f" — {company}")
+                r_comp.italic = True
+                r_comp.font.size = Pt(10.5)
+                r_comp.font.color.rgb = TEXT_MUTED
+                r_comp.font.name = FONT_NAME
+                
+            if dates or location:
+                meta_str = " | ".join([x for x in [dates, location] if x])
+                r_meta = p_exp.add_run(f"\n{meta_str}")
+                r_meta.font.size = Pt(9)
+                r_meta.font.color.rgb = TEXT_MUTED
+                r_meta.font.name = FONT_NAME
+                
+            bullets = exp.get("bullets", [])
+            for b in bullets:
+                p_b = doc.add_paragraph(style='List Bullet')
+                p_b.paragraph_format.space_after = Pt(2)
+                p_b.paragraph_format.space_before = Pt(0)
+                r_b = p_b.add_run(str(b))
+                r_b.font.size = Pt(10)
+                r_b.font.color.rgb = TEXT_DARK
+                r_b.font.name = FONT_NAME
+
+    # 4. Key Projects
+    projects = data.get("projects", [])
+    if projects:
+        add_section_header("Key Projects")
+        for proj in projects:
+            p_p = doc.add_paragraph()
+            p_p.paragraph_format.space_before = Pt(4)
+            p_p.paragraph_format.space_after = Pt(2)
+            
+            p_name = proj.get("name", "")
+            tech_stack = proj.get("tech_stack", "")
+            
+            r_pname = p_p.add_run(p_name)
+            r_pname.bold = True
+            r_pname.font.size = Pt(11)
+            r_pname.font.color.rgb = TEXT_DARK
+            r_pname.font.name = FONT_NAME
+            
+            if tech_stack:
+                r_tech = p_p.add_run(f" ({tech_stack})")
+                r_tech.italic = True
+                r_tech.font.size = Pt(9.5)
+                r_tech.font.color.rgb = PRIMARY_COLOR
+                r_tech.font.name = FONT_NAME
+                
+            bullets = proj.get("bullets", [])
+            for b in bullets:
+                p_b = doc.add_paragraph(style='List Bullet')
+                p_b.paragraph_format.space_after = Pt(2)
+                p_b.paragraph_format.space_before = Pt(0)
+                r_b = p_b.add_run(str(b))
+                r_b.font.size = Pt(10)
+                r_b.font.color.rgb = TEXT_DARK
+                r_b.font.name = FONT_NAME
+
+    # 5. Technical Skills
+    skills = data.get("skills")
+    if skills:
+        add_section_header("Technical Skills")
+        if isinstance(skills, dict):
+            for cat, item_list in skills.items():
+                p_sk = doc.add_paragraph()
+                p_sk.paragraph_format.space_after = Pt(2)
+                r_cat = p_sk.add_run(f"• {cat}: ")
+                r_cat.bold = True
+                r_cat.font.size = Pt(10)
+                r_cat.font.color.rgb = TEXT_DARK
+                r_cat.font.name = FONT_NAME
+                
+                items_str = ", ".join(item_list) if isinstance(item_list, list) else str(item_list)
+                r_val = p_sk.add_run(items_str)
+                r_val.font.size = Pt(10)
+                r_val.font.color.rgb = TEXT_DARK
+                r_val.font.name = FONT_NAME
+        elif isinstance(skills, list):
+            p_sk = doc.add_paragraph()
+            p_sk.paragraph_format.space_after = Pt(4)
+            r_sk = p_sk.add_run(", ".join([str(s) for s in skills]))
+            r_sk.font.size = Pt(10)
+            r_sk.font.color.rgb = TEXT_DARK
+            r_sk.font.name = FONT_NAME
+
+    # 6. Education & Certifications
+    education = data.get("education", [])
+    if education:
+        add_section_header("Education & Certifications")
+        for edu in education:
+            p_e = doc.add_paragraph()
+            p_e.paragraph_format.space_after = Pt(2)
+            deg = edu.get("degree", "")
+            inst = edu.get("institution", "")
+            year = edu.get("year", "")
+            score = edu.get("score", "")
+            
+            r_deg = p_e.add_run(deg)
+            r_deg.bold = True
+            r_deg.font.size = Pt(10.5)
+            r_deg.font.color.rgb = TEXT_DARK
+            r_deg.font.name = FONT_NAME
+            
+            if inst:
+                r_inst = p_e.add_run(f" — {inst}")
+                r_inst.font.size = Pt(10)
+                r_inst.font.color.rgb = TEXT_MUTED
+                r_inst.font.name = FONT_NAME
+                
+            if year or score:
+                meta = " | ".join([x for x in [year, score] if x])
+                r_m = p_e.add_run(f" ({meta})")
+                r_m.font.size = Pt(9.5)
+                r_m.font.color.rgb = TEXT_MUTED
+                r_m.font.name = FONT_NAME
+
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+@app.route("/api/export-improved-resume-docx", methods=["POST", "GET"])
+@login_required
+def export_improved_resume_docx():
+    """Generates and downloads a styled, ATS-optimized Word (.docx) resume preserving actual candidate details."""
+    try:
+        import io
+        review = None
+        if MONGODB_AVAILABLE and resume_reviews_collection is not None:
+            review = resume_reviews_collection.find_one({"user_id": str(current_user.id)})
+            
+        target_role = "Software Engineer"
+        report = ""
+        extracted_text = ""
+        
+        if review:
+            target_role = review.get("target_role", "Software Engineer")
+            report = review.get("report", "")
+            extracted_text = review.get("extracted_text", "")
+
+        template_id = request.args.get("template")
+
+        # Allow request JSON payload to override if provided
+        if request.is_json and request.get_json():
+            req_data = request.get_json()
+            if req_data.get("resume_text"):
+                extracted_text = req_data.get("resume_text")
+            if req_data.get("target_role"):
+                target_role = req_data.get("target_role")
+            if req_data.get("report"):
+                report = req_data.get("report")
+            if req_data.get("template"):
+                template_id = req_data.get("template")
+
+        if not template_id and request.form:
+            template_id = request.form.get("template")
+            
+        if not template_id:
+            template_id = "classic_navy"
+
+        if not extracted_text and not report:
+            return jsonify({"error": "No saved resume text found. Please upload your resume first!"}), 400
+
+        prompt = f"""
+You are an expert ATS Resume Designer & Senior Tech Recruiter.
+Generate a 100% complete, professionally rewritten, ATS-friendly resume JSON for the target role of "{target_role}".
+
+STRICT MANDATORY RULES:
+1. CANDIDATE DETAILS: Extract and preserve the candidate's EXACT REAL full name, REAL email, REAL phone number, REAL location, REAL LinkedIn URL, and REAL GitHub URL from the candidate's Original Resume Text below.
+   - DO NOT use dummy placeholders like "Candidate Name", "John Doe", "email@example.com", or fake phone numbers.
+2. PROJECTS & EXPERIENCE: Preserve ALL real project names (e.g. "Nyaya Vyavastha", "LernyX", "Fitness Tracking", "Automated Email Sender", "Real-time Weather Application") and companies from the original resume. Rewrite and enhance the bullet points using strong action verbs, quantifiable metrics (e.g., %, ms, ₹), and ATS keywords.
+3. SKILLS & EDUCATION: Preserve candidate's exact real technical skills, degree, institution, years, and CGPA/score from the original resume.
+
+RETURN ONLY A VALID JSON OBJECT (no markdown, no prose, just JSON) with this exact structure:
+{{
+  "full_name": "EXACT CANDIDATE REAL NAME FROM RESUME",
+  "target_role": "{target_role}",
+  "contact": {{
+    "email": "exact candidate email from resume",
+    "phone": "exact candidate phone number from resume",
+    "location": "exact candidate location from resume",
+    "linkedin": "exact candidate linkedin url from resume",
+    "github": "exact candidate github url from resume"
+  }},
+  "summary": "3-4 sentence powerful executive summary tailored for {target_role}.",
+  "experience": [
+    {{
+      "title": "Role Title",
+      "company": "Company Name",
+      "dates": "Dates",
+      "location": "Location",
+      "bullets": [
+        "Enhanced bullet point with action verb and impact metric."
+      ]
+    }}
+  ],
+  "projects": [
+    {{
+      "name": "Exact Project Title from Resume",
+      "tech_stack": "Exact Technologies Used",
+      "bullets": [
+        "Enhanced bullet point with action verb and impact metric."
+      ]
+    }}
+  ],
+  "skills": {{
+    "Languages": ["..."],
+    "Frameworks & Libraries": ["..."],
+    "Databases & Cloud": ["..."],
+    "Tools & Methodologies": ["..."]
+  }},
+  "education": [
+    {{
+      "degree": "Exact Degree Name",
+      "institution": "Exact Institution / College Name",
+      "year": "Years",
+      "score": "CGPA / GPA / Percentage"
+    }}
+  ]
+}}
+
+Candidate Original Resume Text:
+{extracted_text[:4500]}
+
+AI Audit Report & Recommendations:
+{report[:3500]}
+"""
+        response, err = generate_content_with_fallback(prompt, preferred_model="gemini-2.5-flash", temperature=0.1)
+        if err or not response:
+            return jsonify({"error": f"Failed to generate structured resume: {err}"}), 500
+            
+        txt = _get_gemini_text(response)
+        clean_txt = clean_json_text(txt) if 'clean_json_text' in globals() else txt.replace("```json", "").replace("```", "").strip()
+        resume_json = json.loads(clean_txt)
+        
+        docx_buffer = generate_resume_docx(resume_json, template_id=template_id)
+        
+        cand_name = resume_json.get("full_name", current_user.username).replace(" ", "_")
+        safe_filename = f"Revised_Resume_{cand_name}_{template_id}.docx"
+        return send_file(
+            docx_buffer,
+            as_attachment=True,
+            download_name=safe_filename,
+            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+    except Exception as e:
+        print(f"Error exporting improved resume DOCX: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Failed to generate Word document: {str(e)}"}), 500
 
 @app.route("/virtual-placement")
 @login_required
@@ -1938,7 +2422,7 @@ Return ONLY a valid JSON object strictly with these fields:
 
         try:
             content_parts = [prompt, image_obj] if image_obj else prompt
-            res, err = generate_content_with_fallback(content_parts, preferred_model="gemini-2.5-flash")
+            res, err = generate_content_with_fallback(content_parts, preferred_model="gemini-2.5-flash", temperature=0.3)
             if res:
                 txt = _get_gemini_text(res)
                 clean_txt = clean_json_text(txt) if 'clean_json_text' in globals() else txt.replace("```json", "").replace("```", "").strip()
@@ -2300,7 +2784,8 @@ def ai_generate_custom_quiz():
     )
 
     try:
-        response = model.generate_content(prompt)
+        quiz_model = get_gemini_model(temperature=0.2) or model
+        response = quiz_model.generate_content(prompt)
         response_text = _get_gemini_text(response)
         if not response_text:
             raise json.JSONDecodeError("empty AI response", "", 0)
@@ -2744,7 +3229,8 @@ def _api_videoquiz_logic():
     )
     try:
         print("Sending prompt to Gemini...")
-        response = model.generate_content(quiz_prompt)
+        quiz_model = get_gemini_model(temperature=0.2) or model
+        response = quiz_model.generate_content(quiz_prompt)
         print("Gemini response received.")
         response_text = _get_gemini_text(response)
         if not response_text:
@@ -3366,7 +3852,8 @@ def generate_aptitude_questions():
             )
             
             try:
-                response = model.generate_content(prompt)
+                quiz_model = get_gemini_model(temperature=0.2) or model
+                response = quiz_model.generate_content(prompt)
                 response_text = _get_gemini_text(response)
                 
                 if response_text.startswith("```"):
