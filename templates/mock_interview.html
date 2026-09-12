@@ -3,46 +3,46 @@
 {% block title %}AI Voice Mock Interview - LernyX{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-3 py-md-4">
     <!-- Page Header -->
-    <div class="text-center mb-4 fade-in-up">
-        <span class="badge bg-dark border border-white px-3 py-2 fs-6 mb-2">
-            <i class="bi bi-soundwave me-2"></i>AI VOICE MOCK INTERVIEW
+    <div class="text-center mb-3 mb-md-4 fade-in-up">
+        <span class="badge bg-black text-white border border-secondary px-3 py-1.5 mono-font mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em; border-radius: 0px !important;">
+            <i class="bi bi-soundwave me-1 text-pink"></i>AI VOICE MOCK INTERVIEW
         </span>
-        <h1 class="display-4 fw-bold text-white mb-2 tracking-tight">1-on-1 Interactive Mock Interview</h1>
-        <p class="lead text-secondary mx-auto" style="max-width: 720px;">
-            Experience a realistic technical mock interview tailored to your resume. Speak your answers in English or type them—our AI evaluates your accuracy and technical depth in real-time.
+        <h1 class="h3 h-md-2 fw-bold text-white mb-2 tracking-tight">1-on-1 Interactive Mock Interview</h1>
+        <p class="small text-secondary mx-auto mb-0" style="max-width: 600px; font-size: 0.85rem; line-height: 1.4;">
+            Experience a realistic technical mock interview tailored to your resume with real-time speech AI evaluation.
         </p>
     </div>
 
     <!-- 1. SETUP CARD (Pre-Interview) -->
-    <div id="setup-card" class="card mb-5">
-        <div class="card-body p-4 p-md-5">
-            <h4 class="fw-bold text-white mb-4"><i class="bi bi-sliders text-white me-2"></i>INTERVIEW CONFIGURATION</h4>
+    <div id="setup-card" class="card mb-4 mb-md-5 bg-black border border-secondary shadow-lg" style="border-radius: 0px !important;">
+        <div class="card-body p-3 p-md-4">
+            <h5 class="fw-bold text-white mb-3 text-uppercase tracking-tight" style="font-size: 0.95rem;"><i class="bi bi-sliders text-white me-2"></i>Interview Configuration</h5>
             
-            <div id="saved-resume-alert" class="alert alert-dark py-3 px-4 mb-4 d-none border border-white d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <i class="bi bi-file-earmark-check-fill text-white me-2 fs-5"></i>
-                    <span class="text-white">Active Resume Detected: <strong id="saved-resume-name" class="text-white mono-font">Saved Resume</strong></span>
+            <div id="saved-resume-alert" class="alert alert-dark py-2 px-3 mb-3 d-none border border-secondary bg-black d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-radius: 0px !important;">
+                <div class="d-flex align-items-center gap-2 text-truncate" style="max-width: 75%;">
+                    <i class="bi bi-file-earmark-check-fill text-white fs-6 flex-shrink-0"></i>
+                    <span class="text-white small text-truncate">Resume: <strong id="saved-resume-name" class="text-white mono-font">Saved Resume</strong></span>
                 </div>
-                <span class="badge bg-black text-white border border-white px-3 py-2"><i class="bi bi-check-circle-fill me-1 text-white"></i>READY</span>
+                <span class="badge bg-black text-white border border-secondary px-2 py-1" style="border-radius: 0px !important; font-size: 0.68rem;"><i class="bi bi-check-circle-fill me-1 text-success"></i>READY</span>
             </div>
 
             <form id="start-interview-form" onsubmit="startInterview(event)">
-                <div class="row g-4">
+                <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label fw-bold text-white"><i class="bi bi-file-earmark-arrow-up text-white me-2"></i>Upload Candidate Resume (Optional)</label>
-                        <input type="file" id="interview_resume_file" class="form-control form-control-lg" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg">
-                        <small class="text-muted">Supports PDF, DOCX, TXT, or Image files. If empty, your saved resume will be used.</small>
+                        <label class="form-label fw-bold text-white small mono-font mb-1"><i class="bi bi-file-earmark-arrow-up text-white me-2"></i>Upload Candidate Resume (Optional)</label>
+                        <input type="file" id="interview_resume_file" class="form-control bg-black text-white border-secondary" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" style="border-radius: 0px !important; font-size: 0.82rem;">
+                        <div class="form-text text-secondary small mt-1" style="font-size: 0.75rem;">Supports PDF, DOCX, TXT, or Image files. If empty, your saved resume will be used.</div>
                     </div>
 
-                    <div class="col-md-12">
-                        <label class="form-label fw-bold text-white"><i class="bi bi-briefcase text-white me-2"></i>Target Job Role / Position <span class="text-danger">*</span></label>
-                        <input type="text" id="target_role_input" class="form-control form-control-lg" placeholder="e.g., Full Stack Developer, Java Backend Engineer, Data Analyst" value="Software Engineer" required>
+                    <div class="col-12">
+                        <label class="form-label fw-bold text-white small mono-font mb-1"><i class="bi bi-briefcase text-white me-2"></i>Target Job Role / Position <span class="text-danger">*</span></label>
+                        <input type="text" id="target_role_input" class="form-control bg-black text-white border-secondary" placeholder="e.g., Full Stack Developer, Java Backend Engineer" value="Software Engineer" required style="border-radius: 0px !important; font-size: 0.88rem; padding: 0.6rem 0.85rem;">
                     </div>
                 </div>
 
-                <button type="submit" id="start-btn" class="btn btn-primary btn-lg mt-4 w-100 fw-bold py-3">
+                <button type="submit" id="start-btn" class="btn btn-light text-black fw-bold py-2.5 px-4 mt-3 w-100" style="border-radius: 0px !important; font-size: 0.88rem; letter-spacing: 0.03em;">
                     <i class="bi bi-play-circle-fill me-2"></i>START AI VOICE MOCK INTERVIEW
                 </button>
             </form>

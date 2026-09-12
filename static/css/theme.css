@@ -769,6 +769,11 @@ body {
     }
 
     body {
+        padding-bottom: 0;
+    }
+
+    body.has-bottom-bar,
+    body:has(.mobile-glass-bottom-bar) {
         padding-bottom: 70px;
     }
 

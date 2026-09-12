@@ -40,8 +40,8 @@
                         <div class="text-center welcome-screen-box fade-in-up">
                             <!-- Mascot Emblem Box -->
                             <div class="mascot-circle-wrapper mb-3">
-                                <div class="mascot-emblem-box">
-                                    <i class="bi bi-robot fs-4 text-white"></i>
+                                <div class="mascot-emblem-box" style="background: rgba(6, 182, 212, 0.12); border-color: rgba(6, 182, 212, 0.45); box-shadow: 0 0 16px rgba(6, 182, 212, 0.25);">
+                                    <i class="bi bi-robot fs-4" style="color: #06b6d4;"></i>
                                 </div>
                             </div>
 
@@ -55,7 +55,7 @@
                                 <div class="col-sm-6">
                                     <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Explain the concept of ')">
                                         <span class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-lightbulb text-white fs-6"></i>
+                                            <i class="bi bi-lightbulb-fill fs-6" style="color: #f59e0b;"></i>
                                             <span>Explain a concept</span>
                                         </span>
                                         <i class="bi bi-arrow-right text-secondary small"></i>
@@ -64,7 +64,7 @@
                                 <div class="col-sm-6">
                                     <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Can you help me debug this code?\n\n```\n\n```')">
                                         <span class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-code-slash text-white fs-6"></i>
+                                            <i class="bi bi-code-slash fs-6" style="color: #00f2fe;"></i>
                                             <span>Debug my code</span>
                                         </span>
                                         <i class="bi bi-arrow-right text-secondary small"></i>
@@ -73,7 +73,7 @@
                                 <div class="col-sm-6">
                                     <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Give me system design ideas for ')">
                                         <span class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-layers text-white fs-6"></i>
+                                            <i class="bi bi-layers-fill fs-6" style="color: #a855f7;"></i>
                                             <span>System design ideas</span>
                                         </span>
                                         <i class="bi bi-arrow-right text-secondary small"></i>
@@ -82,7 +82,7 @@
                                 <div class="col-sm-6">
                                     <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Help me solve a DSA problem related to ')">
                                         <span class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-bullseye text-white fs-6"></i>
+                                            <i class="bi bi-bullseye fs-6" style="color: #10b981;"></i>
                                             <span>Solve DSA problem</span>
                                         </span>
                                         <i class="bi bi-arrow-right text-secondary small"></i>
@@ -178,10 +178,24 @@
 
     .chat-page-wrapper {
         height: calc(100vh - var(--navbar-height));
+        height: calc(100dvh - var(--navbar-height));
         overflow: hidden;
         width: 100%;
         padding: 0 !important;
         margin: 0 !important;
+    }
+
+    @media (max-width: 991.98px) {
+        body {
+            padding-bottom: 0 !important;
+        }
+
+        .chat-page-wrapper {
+            height: calc(100vh - 48px) !important;
+            height: calc(100dvh - 48px) !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
     }
 
     .chat-page-wrapper .card {

@@ -18,21 +18,21 @@
                 <!-- Hero Metric Badges Box -->
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     <div class="hero-metric-box">
-                        <i class="bi bi-book fs-5 text-white"></i>
+                        <i class="bi bi-book fs-5 text-cyan"></i>
                         <div>
                             <strong class="d-block text-white leading-none">6+</strong>
                             <small class="text-secondary" style="font-size: 0.75rem;">Learning Tools</small>
                         </div>
                     </div>
                     <div class="hero-metric-box">
-                        <i class="bi bi-people fs-5 text-white"></i>
+                        <i class="bi bi-people fs-5 text-amber"></i>
                         <div>
                             <strong class="d-block text-white leading-none">10K+</strong>
                             <small class="text-secondary" style="font-size: 0.75rem;">Practice Questions</small>
                         </div>
                     </div>
                     <div class="hero-metric-box">
-                        <i class="bi bi-bar-chart-line fs-5 text-white"></i>
+                        <i class="bi bi-bar-chart-line fs-5 text-emerald"></i>
                         <div>
                             <strong class="d-block text-white leading-none">Smarter</strong>
                             <small class="text-secondary" style="font-size: 0.75rem;">Learning with AI</small>
@@ -65,8 +65,8 @@
             <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="tool-card-icon-box">
-                            <i class="bi bi-chat-square-quote fs-3 text-white"></i>
+                        <div class="tool-card-icon-box icon-box-cyan">
+                            <i class="bi bi-chat-square-quote-fill fs-3 text-cyan"></i>
                         </div>
                         <a href="{{ url_for('chat_main') }}" class="tool-card-corner-arrow" title="Open AI Chatbot">
                             <i class="bi bi-arrow-right fs-6"></i>
@@ -77,7 +77,7 @@
                 </div>
                 <a href="{{ url_for('chat_main') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-chat-dots-fill fs-6"></i>
+                        <i class="bi bi-chat-dots-fill fs-6 text-cyan"></i>
                         <span class="fw-bold">OPEN CHAT</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -90,8 +90,8 @@
             <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="tool-card-icon-box">
-                            <i class="bi bi-play-btn-fill fs-3 text-white"></i>
+                        <div class="tool-card-icon-box icon-box-red">
+                            <i class="bi bi-play-btn-fill fs-3 text-red"></i>
                         </div>
                         <a href="{{ url_for('videoquiz') }}" class="tool-card-corner-arrow" title="Start Video Quiz">
                             <i class="bi bi-arrow-right fs-6"></i>
@@ -102,7 +102,7 @@
                 </div>
                 <a href="{{ url_for('videoquiz') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-play-fill fs-5"></i>
+                        <i class="bi bi-play-fill fs-5 text-red"></i>
                         <span class="fw-bold">START QUIZ</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -115,8 +115,8 @@
             <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="tool-card-icon-box">
-                            <i class="bi bi-pencil-square fs-3 text-white"></i>
+                        <div class="tool-card-icon-box icon-box-emerald">
+                            <i class="bi bi-pencil-square fs-3 text-emerald"></i>
                         </div>
                         <a href="{{ url_for('custom_quiz_builder') }}" class="tool-card-corner-arrow" title="Build Custom Quiz">
                             <i class="bi bi-arrow-right fs-6"></i>
@@ -127,7 +127,7 @@
                 </div>
                 <a href="{{ url_for('custom_quiz_builder') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-plus-lg fs-6"></i>
+                        <i class="bi bi-plus-lg fs-6 text-emerald"></i>
                         <span class="fw-bold">BUILD QUIZ</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -140,8 +140,8 @@
             <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="tool-card-icon-box">
-                            <i class="bi bi-journal-check fs-3 text-white"></i>
+                        <div class="tool-card-icon-box icon-box-amber">
+                            <i class="bi bi-journal-check fs-3 text-amber"></i>
                         </div>
                         <a href="{{ url_for('custom_quiz_exam') }}" class="tool-card-corner-arrow" title="Enter Exam Code">
                             <i class="bi bi-arrow-right fs-6"></i>
@@ -152,7 +152,7 @@
                 </div>
                 <a href="{{ url_for('custom_quiz_exam') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-file-earmark-check-fill fs-6"></i>
+                        <i class="bi bi-file-earmark-check-fill fs-6 text-amber"></i>
                         <span class="fw-bold">ENTER CODE</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -165,8 +165,8 @@
             <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="tool-card-icon-box">
-                            <i class="bi bi-puzzle-fill fs-3 text-white"></i>
+                        <div class="tool-card-icon-box icon-box-purple">
+                            <i class="bi bi-puzzle-fill fs-3 text-purple"></i>
                         </div>
                         <a href="{{ url_for('aptitude_quiz') }}" class="tool-card-corner-arrow" title="Start Aptitude Practice">
                             <i class="bi bi-arrow-right fs-6"></i>
@@ -177,7 +177,7 @@
                 </div>
                 <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-bullseye fs-6"></i>
+                        <i class="bi bi-bullseye fs-6 text-purple"></i>
                         <span class="fw-bold">START PRACTICE</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -190,8 +190,8 @@
             <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="tool-card-icon-box">
-                            <i class="bi bi-code-slash fs-3 text-white"></i>
+                        <div class="tool-card-icon-box icon-box-blue">
+                            <i class="bi bi-code-slash fs-3 text-blue"></i>
                         </div>
                         <a href="{{ url_for('compiler') }}" class="tool-card-corner-arrow" title="Start Coding Practice">
                             <i class="bi bi-arrow-right fs-6"></i>
@@ -202,7 +202,7 @@
                 </div>
                 <a href="{{ url_for('compiler') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-code fs-5"></i>
+                        <i class="bi bi-code fs-5 text-blue"></i>
                         <span class="fw-bold">START CODING</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -211,54 +211,31 @@
         </div>
     </div>
 
-    <!-- AI Career & Interview Suite Section Header -->
-    <div class="d-flex align-items-center justify-content-between mb-3 mt-4">
-        <div class="d-flex align-items-center gap-2">
-            <span class="mono-font text-secondary small">[ SUITE ]</span>
-            <h5 class="fw-bold text-white mb-0 tracking-tight text-uppercase">AI Career & Interview Suite</h5>
-        </div>
-        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.72rem;">2 ADVANCED ENGINES</span>
-    </div>
+    <!-- AI Career & Placement Section Header -->
+    <h5 class="fw-bold text-white mb-3 mt-4 tracking-tight text-uppercase">AI Career & Placement</h5>
 
-    <!-- 2 Column Career & Interview Suite Cards -->
+    <!-- 2 Column Career Suite Cards -->
     <div class="row g-3">
         <!-- 1. AI Voice Mock Interview Card -->
         <div class="col-lg-6">
             <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
                 <div>
-                    <!-- Header Badges -->
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="tool-card-icon-box">
-                            <i class="bi bi-mic-fill fs-3 text-white"></i>
+                        <div class="tool-card-icon-box icon-box-pink">
+                            <i class="bi bi-mic-fill fs-3 text-pink"></i>
                         </div>
-                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.7rem;">
-                            <i class="bi bi-soundwave me-1"></i>Web Speech Engine
-                        </span>
+                        <a href="{{ url_for('mock_interview') }}" class="tool-card-corner-arrow" title="Take Mock Interview">
+                            <i class="bi bi-arrow-right fs-6"></i>
+                        </a>
                     </div>
-
-                    <h4 class="fw-bold text-white mb-2">AI Voice Mock Interview</h4>
-                    <p class="text-secondary small mb-3" style="line-height: 1.5;">
-                        Conduct a 1-on-1 voice-enabled AI Mock Interview based on your uploaded resume with real-time audio recognition and instant score evaluation.
-                    </p>
-
-                    <!-- Feature Tags -->
-                    <div class="d-flex flex-wrap gap-1.5 mb-4">
-                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
-                            <i class="bi bi-mic me-1 text-white"></i>Real-time Audio
-                        </span>
-                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
-                            <i class="bi bi-file-earmark-person me-1 text-white"></i>Resume Analysis
-                        </span>
-                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
-                            <i class="bi bi-graph-up-arrow me-1 text-white"></i>Instant Scoring
-                        </span>
-                    </div>
+                    <h5 class="fw-bold text-white mb-2">MOCK INTERVIEW</h5>
+                    <p class="text-secondary small mb-4">1-on-1 voice AI mock interviews with real-time scoring and feedback.</p>
                 </div>
 
                 <a href="{{ url_for('mock_interview') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-mic-fill fs-6"></i>
-                        <span class="fw-bold">TAKE MOCK INTERVIEW</span>
+                        <i class="bi bi-mic-fill fs-6 text-pink"></i>
+                        <span class="fw-bold">START MOCK INTERVIEW</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
                 </a>
@@ -269,39 +246,22 @@
         <div class="col-lg-6">
             <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
                 <div>
-                    <!-- Header Badges -->
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="tool-card-icon-box">
-                            <i class="bi bi-briefcase-fill fs-3 text-white"></i>
+                        <div class="tool-card-icon-box icon-box-sky">
+                            <i class="bi bi-briefcase-fill fs-3 text-sky"></i>
                         </div>
-                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.7rem;">
-                            <i class="bi bi-building me-1"></i>Career Engine
-                        </span>
+                        <a href="{{ url_for('virtual_placement') }}" class="tool-card-corner-arrow" title="Start Virtual Assessment">
+                            <i class="bi bi-arrow-right fs-6"></i>
+                        </a>
                     </div>
-
-                    <h4 class="fw-bold text-white mb-2">AI Virtual Placement Officer</h4>
-                    <p class="text-secondary small mb-3" style="line-height: 1.5;">
-                        Conduct an interactive assessment based on your resume & relocation preferences to unlock matched LinkedIn job listings.
-                    </p>
-
-                    <!-- Feature Tags -->
-                    <div class="d-flex flex-wrap gap-1.5 mb-4">
-                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
-                            <i class="bi bi-geo-alt me-1 text-white"></i>Relocation Match
-                        </span>
-                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
-                            <i class="bi bi-linkedin me-1 text-white"></i>LinkedIn Jobs
-                        </span>
-                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
-                            <i class="bi bi-rocket-takeoff me-1 text-white"></i>Career Map
-                        </span>
-                    </div>
+                    <h5 class="fw-bold text-white mb-2">PLACEMENT OFFICER</h5>
+                    <p class="text-secondary small mb-4">Resume assessment, relocation matching & LinkedIn job listings.</p>
                 </div>
 
                 <a href="{{ url_for('virtual_placement') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-rocket-takeoff fs-6"></i>
-                        <span class="fw-bold">START VIRTUAL ASSESSMENT</span>
+                        <i class="bi bi-rocket-takeoff fs-6 text-sky"></i>
+                        <span class="fw-bold">START ASSESSMENT</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
                 </a>
@@ -369,6 +329,64 @@
         justify-content: center;
         background: #000000;
         flex-shrink: 0;
+        transition: all 0.25s ease;
+    }
+
+    /* Colored Icon Boxes & Text Colors for Home Page Tools */
+    .text-cyan { color: #06b6d4 !important; }
+    .icon-box-cyan {
+        background: rgba(6, 182, 212, 0.12) !important;
+        border: 1px solid rgba(6, 182, 212, 0.45) !important;
+        box-shadow: 0 0 16px rgba(6, 182, 212, 0.22) !important;
+    }
+
+    .text-red { color: #ef4444 !important; }
+    .icon-box-red {
+        background: rgba(239, 68, 68, 0.12) !important;
+        border: 1px solid rgba(239, 68, 68, 0.45) !important;
+        box-shadow: 0 0 16px rgba(239, 68, 68, 0.22) !important;
+    }
+
+    .text-emerald { color: #10b981 !important; }
+    .icon-box-emerald {
+        background: rgba(16, 185, 129, 0.12) !important;
+        border: 1px solid rgba(16, 185, 129, 0.45) !important;
+        box-shadow: 0 0 16px rgba(16, 185, 129, 0.22) !important;
+    }
+
+    .text-amber { color: #f59e0b !important; }
+    .icon-box-amber {
+        background: rgba(245, 158, 11, 0.12) !important;
+        border: 1px solid rgba(245, 158, 11, 0.45) !important;
+        box-shadow: 0 0 16px rgba(245, 158, 11, 0.22) !important;
+    }
+
+    .text-purple { color: #a855f7 !important; }
+    .icon-box-purple {
+        background: rgba(168, 85, 247, 0.12) !important;
+        border: 1px solid rgba(168, 85, 247, 0.45) !important;
+        box-shadow: 0 0 16px rgba(168, 85, 247, 0.22) !important;
+    }
+
+    .text-blue { color: #3b82f6 !important; }
+    .icon-box-blue {
+        background: rgba(59, 130, 246, 0.12) !important;
+        border: 1px solid rgba(59, 130, 246, 0.45) !important;
+        box-shadow: 0 0 16px rgba(59, 130, 246, 0.22) !important;
+    }
+
+    .text-pink { color: #ec4899 !important; }
+    .icon-box-pink {
+        background: rgba(236, 72, 153, 0.12) !important;
+        border: 1px solid rgba(236, 72, 153, 0.45) !important;
+        box-shadow: 0 0 16px rgba(236, 72, 153, 0.22) !important;
+    }
+
+    .text-sky { color: #0ea5e9 !important; }
+    .icon-box-sky {
+        background: rgba(14, 165, 233, 0.12) !important;
+        border: 1px solid rgba(14, 165, 233, 0.45) !important;
+        box-shadow: 0 0 16px rgba(14, 165, 233, 0.22) !important;
     }
 
     .tool-card-corner-arrow {
