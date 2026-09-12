@@ -152,6 +152,7 @@ aptitude_practice_history_collection = None
 chat_sessions_collection = None
 resume_reviews_collection = None
 virtual_placement_results_collection = None
+mock_interviews_collection = None
 
 try:
     if not MONGODB_URI:
@@ -172,6 +173,7 @@ try:
     chat_sessions_collection = db.chat_sessions # Store persistent chat sessions
     resume_reviews_collection = db.resume_reviews # Store user resume reports
     virtual_placement_results_collection = db.virtual_placement_results # Store persistent placement assessment & jobs
+    mock_interviews_collection = db.mock_interviews # Store mock interview session scores & feedback
     # Test connection
     client.admin.command('ping')
     MONGODB_AVAILABLE = True
@@ -1597,6 +1599,16 @@ def delete_account():
                 {"user_id": user_id_str}
             ]
         })
+
+        # 9. Delete mock interview sessions
+        if mock_interviews_collection is not None:
+            mock_interviews_collection.delete_many({
+                "$or": [
+                    {"user_id": user_id_obj},
+                    {"user_id": user_id_str},
+                    {"user_id_obj": user_id_obj}
+                ]
+            })
         
         # Logout user
         logout_user()
@@ -2564,6 +2576,665 @@ def get_latest_virtual_placement():
                 "updated_at": doc.get("updated_at").isoformat() if doc.get("updated_at") else None
             }
         })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/mock-interview")
+@app.route("/mock_interview")
+@login_required
+def mock_interview():
+    """AI Voice Mock Interview main page."""
+    return render_template("mock_interview.html")
+
+@app.route("/api/mock-interview/start", methods=["POST"])
+@login_required
+def api_mock_interview_start():
+    """Start an AI Voice Mock Interview session based on uploaded/saved resume and target role."""
+    try:
+        if request.is_json:
+            data = request.get_json() or {}
+        else:
+            data = request.form
+
+        target_role = data.get("target_role", "Software Engineer").strip()
+        extracted_resume_text = ""
+        resume_filename = "Saved Resume"
+        image_obj = None
+
+        # 1. Check if a fresh resume file is uploaded
+        if 'file' in request.files and request.files['file'].filename != '':
+            file = request.files['file']
+            resume_filename = secure_filename(file.filename)
+            try:
+                fname_lower = resume_filename.lower()
+                if fname_lower.endswith(".pdf"):
+                    if PYPDF_AVAILABLE:
+                        reader = PdfReader(file)
+                        for page in reader.pages:
+                            txt = page.extract_text()
+                            if txt:
+                                extracted_resume_text += txt + "\n"
+                elif fname_lower.endswith((".png", ".jpg", ".jpeg", ".webp")):
+                    if PIL_AVAILABLE:
+                        image_obj = Image.open(file.stream)
+                elif fname_lower.endswith((".txt", ".md")):
+                    extracted_resume_text = file.read().decode('utf-8', errors='ignore')
+                elif fname_lower.endswith(".docx"):
+                    try:
+                        import docx
+                        doc = docx.Document(file)
+                        extracted_resume_text = "\n".join([p.text for p in doc.paragraphs if p.text])
+                    except Exception:
+                        file.seek(0)
+                        extracted_resume_text = file.read().decode('utf-8', errors='ignore')
+                else:
+                    extracted_resume_text = file.read().decode('utf-8', errors='ignore')
+            except Exception as parse_err:
+                print(f"[Mock Interview File Parse Warning]: {parse_err}")
+
+        # 2. If no fresh file, check MongoDB for saved resume review
+        if not extracted_resume_text and not image_obj:
+            if MONGODB_AVAILABLE and resume_reviews_collection is not None:
+                user_review = resume_reviews_collection.find_one({"user_id": str(current_user.id)})
+                if user_review:
+                    extracted_resume_text = user_review.get("report", "") or user_review.get("extracted_text", "")
+                    resume_filename = user_review.get("filename", "Saved Resume")
+
+        # 3. Generate 5 realistic interview questions using Gemini 2.5 Flash
+        prompt = f"""
+You are a Senior Technical Hiring Manager conducting a 1-on-1 technical mock interview for the position of "{target_role}".
+Based on the candidate's resume content below, generate exactly 5 high-quality, realistic interview questions.
+
+Candidate Resume Context:
+{extracted_resume_text[:4000] if extracted_resume_text else "[Generic candidate profile for target role: " + target_role + "]"}
+
+Requirements for the Questions:
+1. Question 1: Self-introduction & background tailored to projects/skills on resume.
+2. Question 2: Technical/Coding question focused on core language, algorithms, or framework mentioned in resume.
+3. Question 3: System Design / Architecture / Project Deep Dive question based on a specific project mentioned in resume.
+4. Question 4: Problem-solving / Edge case handling scenario relevant to {target_role}.
+5. Question 5: Behavioral & Situational teamwork/conflict question in a tech engineering context.
+
+Return ONLY a valid JSON object strictly matching this format (no markdown code blocks, no prose):
+{{
+  "target_role": "{target_role}",
+  "questions": [
+    {{
+      "id": 1,
+      "category": "Background & Introduction",
+      "question": "Question text here",
+      "key_focus": "What the interviewer is looking for"
+    }},
+    {{
+      "id": 2,
+      "category": "Technical & Language Deep Dive",
+      "question": "Question text here",
+      "key_focus": "What the interviewer is looking for"
+    }},
+    {{
+      "id": 3,
+      "category": "Project Architecture & System Design",
+      "question": "Question text here",
+      "key_focus": "What the interviewer is looking for"
+    }},
+    {{
+      "id": 4,
+      "category": "Problem Solving & Trade-offs",
+      "question": "Question text here",
+      "key_focus": "What the interviewer is looking for"
+    }},
+    {{
+      "id": 5,
+      "category": "Behavioral & Engineering Mindset",
+      "question": "Question text here",
+      "key_focus": "What the interviewer is looking for"
+    }}
+  ]
+}}
+"""
+        content_parts = [prompt, image_obj] if image_obj else prompt
+        res, err = generate_content_with_fallback(content_parts, preferred_model="gemini-2.5-flash", temperature=0.3)
+        if err or not res:
+            return jsonify({"error": f"Failed to generate interview questions: {err}"}), 500
+
+        txt = _get_gemini_text(res)
+        clean_txt = clean_json_text(txt) if 'clean_json_text' in globals() else txt.replace("```json", "").replace("```", "").strip()
+        interview_data = json.loads(clean_txt)
+
+        return jsonify({
+            "success": True,
+            "resume_filename": resume_filename,
+            "target_role": target_role,
+            "questions": interview_data.get("questions", []),
+            "resume_summary": extracted_resume_text[:500] if extracted_resume_text else "Resume loaded successfully."
+        })
+
+    except Exception as e:
+        print(f"Error starting mock interview: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Failed to start mock interview: {str(e)}"}), 500
+
+def _run_code_execution_agent(user_answer):
+    """Sub-agent to detect, parse, and analyze code snippets in candidate answers."""
+    import re, ast
+    code_match = re.search(r'```(?:python|py|js|javascript|sql)?\s*\n?([\s\S]*?)\n?```', user_answer, re.IGNORECASE)
+    code_str = code_match.group(1).strip() if code_match else ""
+
+    if not code_str:
+        # Fallback regex for inline python/js code snippets
+        inline_match = re.search(r'(?:def\s+\w+|function\s+\w+|class\s+\w+|import\s+\w+|for\s+\w+\s+in|SELECT\s+.*FROM)\s*[\s\S]+', user_answer, re.IGNORECASE)
+        if inline_match and len(user_answer.split()) > 3:
+            code_str = inline_match.group(0).strip()
+
+    if not code_str:
+        return {"has_code": False, "syntax_valid": None, "complexity": "N/A", "verdict": "Conceptual / Non-coding response."}
+
+    # Attempt AST parsing for Python code
+    syntax_valid = True
+    syntax_error_msg = ""
+    try:
+        ast.parse(code_str)
+    except SyntaxError as se:
+        syntax_valid = False
+        syntax_error_msg = f"Syntax Error: {se.msg} (Line {se.lineno})"
+    except Exception:
+        syntax_valid = True # Could be JS/SQL
+
+    # Basic Big-O Complexity Estimator
+    complexity = "O(1) Constant Time"
+    nested_loops = len(re.findall(r'\b(for|while)\b', code_str, re.IGNORECASE))
+    if nested_loops >= 2:
+        complexity = "O(N²) Quadratic Time"
+    elif nested_loops == 1:
+        complexity = "O(N) Linear Time"
+
+    verdict = "Valid code structure with clean syntax." if syntax_valid else f"Code contains syntax issues: {syntax_error_msg}"
+    return {
+        "has_code": True,
+        "syntax_valid": syntax_valid,
+        "complexity": complexity,
+        "verdict": verdict,
+        "extracted_code": code_str[:300]
+    }
+
+
+def sanitize_technical_transcript(text, category="", question=""):
+    """
+    Exhaustive Technical Dictionary Auto-Correction Post-Processor.
+    Replaces common Speech-to-Text phonetic misspellings with precise technical software engineering terms across all major technical domains.
+    """
+    if not text:
+        return text
+
+    replacements = [
+        # 1. Complexity & Math Notation
+        (r'\b(o|order)\s+of\s+n\s+log\s+n\b', 'O(N log N)'),
+        (r'\b(o|order)\s+n\s+log\s+n\b', 'O(N log N)'),
+        (r'\b(o|order)\s+of\s+n\s+square(d)?\b', 'O(N^2)'),
+        (r'\b(o|order)\s+n\s+square(d)?\b', 'O(N^2)'),
+        (r'\b(o|order)\s+of\s+n\s+cube(d)?\b', 'O(N^3)'),
+        (r'\b(o|order)\s+n\s+cube(d)?\b', 'O(N^3)'),
+        (r'\b(o|order)\s+of\s+2\s+(to\s+the\s+n|power\s+n)\b', 'O(2^N)'),
+        (r'\b(o|order)\s+2\s+power\s+n\b', 'O(2^N)'),
+        (r'\b(o|order)\s+of\s+n\s+factorial\b', 'O(N!)'),
+        (r'\b(o|order)\s+of\s+n\b', 'O(N)'),
+        (r'\b(o|order)\s+n\b', 'O(N)'),
+        (r'\b(o|order)\s+of\s+1\b', 'O(1)'),
+        (r'\b(o|order)\s+1\b', 'O(1)'),
+        (r'\b(o|order)\s+of\s+log\s+n\b', 'O(log N)'),
+        (r'\b(o|order)\s+log\s+n\b', 'O(log N)'),
+
+        # 2. DSA Data Structures & Algorithms
+        (r'\b(hush\s*map|hash\s*map|hashmap|hash\s*tables?)\b', 'HashMap'),
+        (r'\b(hush\s*set|hash\s*set|hashset)\b', 'HashSet'),
+        (r'\b(array\s*list|arraylist)\b', 'ArrayList'),
+        (r'\b(linked\s*list|link\s*list|linklist|singly\s*linked\s*list|doubly\s*linked\s*list)\b', 'LinkedList'),
+        (r'\b(double\s*ended\s*queue|deque|dequeue)\b', 'Deque'),
+        (r'\b(priority\s*queue|priorityqueue)\b', 'PriorityQueue'),
+        (r'\b(min\s*heap|max\s*heap)\b', 'Heap (Min/Max)'),
+        (r'\b(binary\s*search\s*tree|binary\s*tree|bst)\b', 'Binary Search Tree (BST)'),
+        (r'\b(avl\s*tree|red\s*black\s*tree)\b', 'AVL / Red-Black Tree'),
+        (r'\b(prefix\s*tree|trie)\b', 'Trie'),
+        (r'\b(segment\s*tree|fenwick\s*tree)\b', 'Segment Tree'),
+        (r'\b(die\s*kstra|dij\s*kstra|dijkstras?)\b', "Dijkstra's Algorithm"),
+        (r'\b(bellman\s*ford)\b', 'Bellman-Ford Algorithm'),
+        (r'\b(floyd\s*warshall)\b', 'Floyd-Warshall Algorithm'),
+        (r'\b(kruskal|kruskals?|prim|prims?)\b', "Kruskal's / Prim's Algorithm"),
+        (r'\b(topological\s*sort|topo\s*sort)\b', 'Topological Sort'),
+        (r'\b(depth\s*first\s*search|dfs)\b', 'Depth-First Search (DFS)'),
+        (r'\b(breadth\s*first\s*search|bfs)\b', 'Breadth-First Search (BFS)'),
+        (r'\b(two\s*pointers?)\b', 'Two Pointers'),
+        (r'\b(sliding\s*window)\b', 'Sliding Window'),
+        (r'\b(binary\s*search)\b', 'Binary Search'),
+        (r'\b(quick\s*sort|quicksort)\b', 'QuickSort'),
+        (r'\b(merge\s*sort|mergesort)\b', 'MergeSort'),
+        (r'\b(heap\s*sort|heapsort)\b', 'HeapSort'),
+        (r'\b(dynamic\s*programming|memoization|tabulation)\b', 'Dynamic Programming'),
+        (r'\b(back\s*tracking|backtracking)\b', 'Backtracking'),
+        (r'\b(kadane|kadanes\s*algorithm)\b', "Kadane's Algorithm"),
+        (r'\b(knapsack\s*problem|0\s*1\s*knapsack)\b', 'Knapsack Problem'),
+
+        # 3. OOP & Design Patterns
+        (r'\b(poly\s*morphism|polymorphism)\b', 'Polymorphism'),
+        (r'\b(in\s*capsulation|encapsulation)\b', 'Encapsulation'),
+        (r'\b(in\s*heritance|inheritance)\b', 'Inheritance'),
+        (r'\b(ab\s*straction|abstraction)\b', 'Abstraction'),
+        (r'\b(solid\s*principles?)\b', 'SOLID Principles'),
+        (r'\b(singleton\s*pattern|singleton)\b', 'Singleton Pattern'),
+        (r'\b(factory\s*pattern|abstract\s*factory)\b', 'Factory Pattern'),
+        (r'\b(builder\s*pattern)\b', 'Builder Pattern'),
+        (r'\b(observer\s*pattern|pub\s*sub|publisher\s*subscriber)\b', 'Observer / Pub-Sub Pattern'),
+        (r'\b(decorator\s*pattern)\b', 'Decorator Pattern'),
+        (r'\b(strategy\s*pattern|state\s*pattern)\b', 'Strategy Pattern'),
+        (r'\b(dependency\s*injection|inversion\s*of\s*control|ioc)\b', 'Dependency Injection (DI / IoC)'),
+
+        # 4. System Design & Cloud Architecture
+        (r'\b(micro\s*services?|microservice\s*architecture)\b', 'Microservices Architecture'),
+        (r'\b(monolith|monolithic)\b', 'Monolithic Architecture'),
+        (r'\b(server\s*less|aws\s*lambda)\b', 'Serverless (AWS Lambda)'),
+        (r'\b(load\s*balancer|load\s*balancing|round\s*robin)\b', 'Load Balancer'),
+        (r'\b(reverse\s*proxy|nginx|envoy)\b', 'Reverse Proxy (NGINX / Envoy)'),
+        (r'\b(api\s*gateway|kong\s*gateway)\b', 'API Gateway'),
+        (r'\b(event\s*driven\s*architecture|event\s*driven)\b', 'Event-Driven Architecture'),
+        (r'\b(message\s*queue|rabbit\s*mq|rabbitmq|apache\s*kafka|kafka)\b', 'Message Queue (Kafka / RabbitMQ)'),
+        (r'\b(circuit\s*breaker|hystrix|resilience4j)\b', 'Circuit Breaker'),
+        (r'\b(cdn|content\s*delivery\s*network|cloudflare)\b', 'CDN (Content Delivery Network)'),
+        (r'\b(cap\s*theorem)\b', 'CAP Theorem'),
+        (r'\b(eventual\s*consistency|strong\s*consistency)\b', 'Eventual / Strong Consistency'),
+        (r'\b(horizontal\s*scaling|scaling\s*out|vertical\s*scaling|scaling\s*up)\b', 'Horizontal / Vertical Scaling'),
+        (r'\b(rate\s*limiting|token\s*bucket|leaky\s*bucket)\b', 'Rate Limiting'),
+        (r'\b(database\s*sharding|sharding|read\s*replicas?)\b', 'Sharding / Replication'),
+
+        # 5. Databases & SQL / NoSQL
+        (r'\b(post\s*gres|post\s*gray|postgres|postgresql|postgre\s*sql)\b', 'PostgreSQL'),
+        (r'\b(my\s*sql|mysql)\b', 'MySQL'),
+        (r'\b(sq\s*lite|sqlite)\b', 'SQLite'),
+        (r'\b(oracle\s*db|sql\s*server|ms\s*sql)\b', 'SQL Server / Oracle DB'),
+        (r'\b(acid\s*properties?)\b', 'ACID Properties'),
+        (r'\b(inner\s*join|left\s*join|right\s*join|full\s*outer\s*join)\b', 'SQL Joins'),
+        (r'\b(database\s*indexing|b\s*tree\s*index|b-tree)\b', 'B-Tree Indexing'),
+        (r'\b(object\s*relational\s*mapping|orm)\b', 'ORM'),
+        (r'\b(mongo\s*db|mongodb|manga\s*db)\b', 'MongoDB'),
+        (r'\b(red\s*is|redis)\b', 'Redis'),
+        (r'\b(cassandra|apache\s*cassandra)\b', 'Apache Cassandra'),
+        (r'\b(dynamo\s*db|dynamodb)\b', 'DynamoDB'),
+        (r'\b(neo4j|graph\s*database)\b', 'Graph DB (Neo4j)'),
+        (r'\b(vector\s*database|pinecone|faiss|chroma\s*db)\b', 'Vector DB (Pinecone / FAISS)'),
+
+        # 6. Languages, Frameworks & Web Dev
+        (r'\b(java\s*script|javascript|js)\b', 'JavaScript'),
+        (r'\b(type\s*script|typescript|ts)\b', 'TypeScript'),
+        (r'\b(python|py)\b', 'Python'),
+        (r'\b(c\s*plus\s*plus|cpp|c\+\+)\b', 'C++'),
+        (r'\b(c\s*sharp|c#)\b', 'C#'),
+        (r'\b(go\s*lang|golang|go\s*language)\b', 'Go (Golang)'),
+        (r'\b(rust\s*lang|rust)\b', 'Rust'),
+        (r'\b(node\s*js|nodejs|node\.js)\b', 'Node.js'),
+        (r'\b(react\s*js|reactjs|react\.js)\b', 'React'),
+        (r'\b(next\s*js|nextjs|next\.js)\b', 'Next.js'),
+        (r'\b(express\s*js|expressjs)\b', 'Express.js'),
+        (r'\b(spring\s*boot|springboot)\b', 'Spring Boot'),
+        (r'\b(django|flask|fast\s*api|fastapi)\b', 'Django / FastAPI'),
+        (r'\b(hibernate|jpa|spring\s*data\s*jpa)\b', 'Hibernate / JPA'),
+        (r'\b(tail\s*wind|tailwind\s*css|bootstrap)\b', 'Tailwind CSS'),
+
+        # 7. DevOps, Cloud & Security
+        (r'\b(coober\s*netes|cube\s*netis|k8s|kubernetes)\b', 'Kubernetes'),
+        (r'\b(docker|containerization|docker\s*compose)\b', 'Docker'),
+        (r'\b(ci\s*cd|continuous\s*integration|continuous\s*deployment)\b', 'CI/CD'),
+        (r'\b(jenkins|github\s*actions|gitlab\s*ci)\b', 'Jenkins / GitHub Actions'),
+        (r'\b(terraform|ansible|infrastructure\s*as\s*code|iac)\b', 'Terraform (IaC)'),
+        (r'\b(prometheus|grafana)\b', 'Prometheus & Grafana'),
+        (r'\b(aws|amazon\s*web\s*services|aws\s*s3|s3\s*bucket|ec2)\b', 'AWS (S3 / EC2)'),
+        (r'\b(gcp|google\s*cloud|azure|microsoft\s*azure)\b', 'GCP / Azure'),
+        (r'\b(rest\s*api|restful\s*api|restful)\b', 'REST API'),
+        (r'\b(g\s*rpc|grpc)\b', 'gRPC'),
+        (r'\b(graph\s*ql|graphql)\b', 'GraphQL'),
+        (r'\b(json\s*web\s*token|jwt)\b', 'JWT'),
+        (r'\b(o\s*auth|oauth\s*2?)\b', 'OAuth2'),
+        (r'\b(cross\s*origin\s*resource\s*sharing|cors)\b', 'CORS'),
+        (r'\b(ssl|tls|https)\b', 'SSL/TLS'),
+        (r'\b(sql\s*injection|xss|cross\s*site\s*scripting|csrf)\b', 'SQL Injection / XSS'),
+
+        # 8. Artificial Intelligence & Machine Learning
+        (r'\b(machine\s*learning|ml|deep\s*learning|dl)\b', 'Machine Learning / Deep Learning'),
+        (r'\b(artificial\s*intelligence|ai)\b', 'Artificial Intelligence'),
+        (r'\b(large\s*language\s*model|llm|gen\s*ai|generative\s*ai)\b', 'LLM / Generative AI'),
+        (r'\b(natural\s*language\s*processing|nlp)\b', 'NLP'),
+        (r'\b(convolutional\s*neural\s*network|cnn)\b', 'CNN'),
+        (r'\b(recurrent\s*neural\s*network|rnn|lstm)\b', 'RNN / LSTM'),
+        (r'\b(transformer\s*model|attention\s*mechanism)\b', 'Transformers / Attention'),
+        (r'\b(retrieval\s*augmented\s*generation|rag)\b', 'RAG (Retrieval-Augmented Generation)'),
+        (r'\b(pie\s*torch|py\s*torch|pytorch)\b', 'PyTorch'),
+        (r'\b(tensor\s*flow|tensorflow)\b', 'TensorFlow'),
+        (r'\b(scikit\s*learn|sklearn|keras)\b', 'Scikit-Learn / Keras'),
+        (r'\b(pandas|num\s*py|numpy)\b', 'Pandas / NumPy'),
+        (r'\b(hugging\s*face|huggingface)\b', 'Hugging Face'),
+        (r'\b(gemini|openai|gpt\s*4|gpt-4)\b', 'Gemini / OpenAI')
+    ]
+
+    sanitized = text
+    for pattern, replacement in replacements:
+        sanitized = re.sub(pattern, replacement, sanitized, flags=re.IGNORECASE)
+
+    return sanitized
+
+
+@app.route("/api/mock-interview/evaluate-answer", methods=["POST"])
+@login_required
+def api_mock_interview_evaluate_answer():
+    """Adaptive Multi-Agent Evaluation: Technical Agent, Communication Agent (STAR), Code Agent & Dynamic Probing Probe Agent."""
+    try:
+        data = request.get_json() or {}
+        question_id = data.get("question_id", 1)
+        question_text = data.get("question", "")
+        category = data.get("category", "General")
+        user_answer = data.get("user_answer", "").strip()
+        target_role = data.get("target_role", "Software Engineer")
+        is_followup = data.get("is_followup", False)
+
+        if not question_text:
+            return jsonify({"error": "Missing question text"}), 400
+
+        # Run Technical Dictionary Auto-Correction Post-Processor on STT transcript
+        user_answer = sanitize_technical_transcript(user_answer, category, question_text)
+
+        if not user_answer or len(user_answer) < 5:
+            return jsonify({
+                "question_id": question_id,
+                "score": 0,
+                "score_label": "Needs Improvement",
+                "technical_score": 0,
+                "communication_score": 0,
+                "needs_followup": False,
+                "followup_question": "",
+                "feedback": "No answer or extremely brief response provided. Please provide a detailed response using technical details and the STAR method.",
+                "key_strengths": "Attempted to answer.",
+                "areas_to_improve": "Provide concrete examples, technical details, and structured reasoning.",
+                "ideal_answer_highlights": "State your approach, mention technologies used, explain trade-offs, and summarize results.",
+                "code_analysis": {"has_code": False, "verdict": "No response provided."}
+            })
+
+        # 1. Execute Code Analysis Agent
+        code_eval = _run_code_execution_agent(user_answer)
+
+        # 2. Multi-Agent Prompting (Technical Accuracy Agent, Communication STAR Agent, Probing Agent)
+        prompt = f"""
+You are a Panel of Expert AI Interview Agents evaluating a candidate for the position of "{target_role}".
+
+Question ({category}):
+"{question_text}"
+
+Candidate Answer (Speech-to-Text Sanitized Transcript):
+"{user_answer}"
+
+Is this answer to a follow-up probe?: {is_followup}
+
+AGENT PANEL ROLES & INSTRUCTIONS:
+1. Technical Accuracy Agent: Evaluate engineering depth, architecture, algorithm correctness, and domain concepts (Score 0-100). Note: The candidate response was captured via Speech-to-Text and may contain minor phonetic misspellings of technical terms (e.g., 'hash map' for HashMap, 'post gres' for PostgreSQL, 'die kstra' for Dijkstra). Phonetically interpret these as their intended software engineering terms during technical depth scoring and do NOT penalize the candidate's technical score for STT phonetic variations.
+2. Communication Agent: Evaluate response structure (STAR method: Situation, Task, Action, Result), articulation, and clarity (Score 0-100).
+3. Dynamic Probing Probe Agent:
+   - Check if the answer is vague, superficial, or missing critical implementation details (e.g. candidate just says "I used Docker" or "I wrote a script").
+   - If the answer is vague/incomplete AND `is_followup` is false, set `"needs_followup": true` and generate a sharp `"followup_question"` probing the candidate for specific technical depth (e.g., "How did you handle multi-stage builds and container orchestration in production?").
+   - Otherwise, set `"needs_followup": false` and `"followup_question": ""`.
+
+Return ONLY a valid JSON object strictly matching this format:
+{{
+  "technical_score": 85,
+  "technical_feedback": "Details on technical correctness and depth.",
+  "communication_score": 80,
+  "communication_feedback": "Details on STAR method structure and clarity.",
+  "needs_followup": false,
+  "followup_question": "",
+  "combined_score": 83,
+  "score_label": "Strong / Excellent / Good / Average / Needs Improvement",
+  "feedback": "Unified 2-3 sentence assessment summarizing candidate performance.",
+  "key_strengths": "Top technical or communication strengths shown.",
+  "areas_to_improve": "Specific technical details or structure missing.",
+  "ideal_answer_highlights": "Key points required for a 100/100 model response."
+}}
+"""
+        res, err = generate_content_with_fallback(prompt, preferred_model="gemini-2.5-flash", temperature=0.2)
+        if err or not res:
+            return jsonify({"error": f"Failed to evaluate answer: {err}"}), 500
+
+        txt = _get_gemini_text(res)
+        clean_txt = clean_json_text(txt) if 'clean_json_text' in globals() else txt.replace("```json", "").replace("```", "").strip()
+        eval_data = json.loads(clean_txt)
+
+        tech_score = int(eval_data.get("technical_score", 70))
+        comm_score = int(eval_data.get("communication_score", 70))
+        final_score = int(eval_data.get("combined_score", round(tech_score * 0.6 + comm_score * 0.4)))
+
+        # Deduct slightly if code syntax was broken
+        if code_eval.get("has_code") and not code_eval.get("syntax_valid"):
+            final_score = max(10, final_score - 15)
+            eval_data["score_label"] = "Needs Improvement (Syntax Errors)"
+
+        needs_flw = bool(eval_data.get("needs_followup", False)) and not is_followup
+
+        return jsonify({
+            "question_id": question_id,
+            "score": final_score,
+            "technical_score": tech_score,
+            "communication_score": comm_score,
+            "score_label": str(eval_data.get("score_label", "Good")),
+            "feedback": str(eval_data.get("feedback", "")),
+            "key_strengths": str(eval_data.get("key_strengths", "")),
+            "areas_to_improve": str(eval_data.get("areas_to_improve", "")),
+            "ideal_answer_highlights": str(eval_data.get("ideal_answer_highlights", "")),
+            "needs_followup": needs_flw,
+            "followup_question": str(eval_data.get("followup_question", "")),
+            "code_analysis": code_eval
+        })
+
+    except Exception as e:
+        print(f"Error evaluating mock interview answer: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Evaluation error: {str(e)}"}), 500
+
+@app.route("/api/mock-interview/complete", methods=["POST"])
+@login_required
+def api_mock_interview_complete():
+    """Hiring Committee Chair Agent: Synthesizes multi-agent evaluations into a final executive decision report."""
+    try:
+        data = request.get_json() or {}
+        target_role = data.get("target_role", "Software Engineer")
+        evaluations = data.get("evaluations", [])
+
+        if not evaluations:
+            return jsonify({"error": "No interview evaluations found"}), 400
+
+        scores = [int(e.get("score", 0)) for e in evaluations]
+        tech_scores = [int(e.get("technical_score", e.get("score", 0))) for e in evaluations]
+        comm_scores = [int(e.get("communication_score", e.get("score", 0))) for e in evaluations]
+        total_questions = len(scores)
+
+        overall_percentage = round(sum(scores) / total_questions, 1) if total_questions > 0 else 0.0
+        avg_tech = round(sum(tech_scores) / total_questions, 1) if total_questions > 0 else 0.0
+        avg_comm = round(sum(comm_scores) / total_questions, 1) if total_questions > 0 else 0.0
+
+        # Performance Verdict Tier
+        if overall_percentage >= 85:
+            verdict_badge = "Excellent - Ready for Technical Interviews"
+            verdict_class = "success"
+        elif overall_percentage >= 70:
+            verdict_badge = "Good - Qualified with Minor Refinements"
+            verdict_class = "primary"
+        elif overall_percentage >= 55:
+            verdict_badge = "Average - Needs Additional Practice"
+            verdict_class = "warning"
+        else:
+            verdict_badge = "Needs Significant Preparation"
+            verdict_class = "danger"
+
+        # Hiring Committee Chair Agent Synthesis Prompt
+        summary_prompt = f"""
+You are the Lead Hiring Committee Chair synthesizing a full 5-question technical mock interview for the role of "{target_role}".
+
+Note: Candidate responses were captured via Speech-to-Text. Phonetically interpret any minor STT phonetic misspellings of technical terms as their intended software engineering concepts.
+
+Candidate Metrics:
+- Overall Performance Score: {overall_percentage}% ({verdict_badge})
+- Technical Accuracy Average: {avg_tech}%
+- Communication STAR Average: {avg_comm}%
+
+Question-by-Question Multi-Agent Assessments:
+{json.dumps(evaluations, indent=2)}
+
+Synthesize a professional, hiring committee decision report:
+Return ONLY a valid JSON object strictly matching this format:
+{{
+  "overall_percentage": {overall_percentage},
+  "verdict_badge": "{verdict_badge}",
+  "executive_summary": "3-4 sentence holistic decision synthesizing technical depth, communication skills, and candidate readiness.",
+  "top_strengths": ["Key Strength 1", "Key Strength 2", "Key Strength 3"],
+  "key_improvements": ["Refinement Area 1", "Refinement Area 2", "Refinement Area 3"],
+  "readiness_recommendation": "Actionable recommendation for real company engineering interviews."
+}}
+"""
+        res, err = generate_content_with_fallback(summary_prompt, preferred_model="gemini-2.5-flash", temperature=0.2)
+        summary_data = {}
+        if res:
+            try:
+                txt = _get_gemini_text(res)
+                clean_txt = clean_json_text(txt) if 'clean_json_text' in globals() else txt.replace("```json", "").replace("```", "").strip()
+                summary_data = json.loads(clean_txt)
+            except Exception as p_err:
+                print(f"[Mock Interview Summary Parse Warning]: {p_err}")
+
+        final_report = {
+            "target_role": target_role,
+            "overall_percentage": overall_percentage,
+            "avg_technical_score": avg_tech,
+            "avg_communication_score": avg_comm,
+            "verdict_badge": summary_data.get("verdict_badge", verdict_badge),
+            "verdict_class": verdict_class,
+            "executive_summary": summary_data.get("executive_summary", f"The candidate achieved an overall score of {overall_percentage}% (Technical Depth: {avg_tech}%, Communication: {avg_comm}%) across {total_questions} questions for {target_role}."),
+            "top_strengths": summary_data.get("top_strengths", ["Solid technical fundamentals", "Structured STAR method responses"]),
+            "key_improvements": summary_data.get("key_improvements", ["Elaborate on production trade-offs", "Provide deeper architectural specifics"]),
+            "readiness_recommendation": summary_data.get("readiness_recommendation", "Practice deep-dive system design scenarios and re-take mock interview."),
+            "evaluations": evaluations,
+            "completed_at": datetime.now(timezone.utc).isoformat()
+        }
+
+        # Store result in MongoDB
+        if MONGODB_AVAILABLE and mock_interviews_collection is not None:
+            try:
+                user_id_val = str(current_user.id)
+                try:
+                    user_id_obj = ObjectId(current_user.id)
+                except Exception:
+                    user_id_obj = user_id_val
+
+                mock_interviews_collection.insert_one({
+                    "user_id": user_id_val,
+                    "user_id_obj": user_id_obj,
+                    "username": current_user.username,
+                    "target_role": target_role,
+                    "overall_percentage": overall_percentage,
+                    "avg_technical_score": avg_tech,
+                    "avg_communication_score": avg_comm,
+                    "verdict_badge": final_report["verdict_badge"],
+                    "verdict_class": verdict_class,
+                    "executive_summary": final_report["executive_summary"],
+                    "top_strengths": final_report["top_strengths"],
+                    "key_improvements": final_report["key_improvements"],
+                    "readiness_recommendation": final_report["readiness_recommendation"],
+                    "evaluations": evaluations,
+                    "completed_at": datetime.now(timezone.utc)
+                })
+            except Exception as db_err:
+                print(f"[MongoDB Mock Interview Save Error]: {db_err}")
+
+        return jsonify(final_report)
+
+    except Exception as e:
+        print(f"Error completing mock interview: {e}")
+        return jsonify({"error": f"Failed to finalize report: {str(e)}"}), 500
+
+@app.route("/api/user-mock-interviews", methods=["GET"])
+@login_required
+def get_user_mock_interviews():
+    """Get user's past mock interview sessions."""
+    if not MONGODB_AVAILABLE or mock_interviews_collection is None:
+        return jsonify({"interviews": []})
+
+    try:
+        limit = int(request.args.get("limit", 50))
+        user_ids = [str(current_user.id)]
+        try:
+            user_ids.append(ObjectId(current_user.id))
+        except Exception:
+            pass
+
+        interviews = list(mock_interviews_collection.find(
+            {"$or": [{"user_id": {"$in": user_ids}}, {"user_id_obj": {"$in": user_ids}}]}
+        ).sort("completed_at", -1).limit(limit))
+
+        formatted = []
+        for item in interviews:
+            completed_at = item.get("completed_at")
+            if isinstance(completed_at, datetime):
+                completed_at_iso = completed_at.isoformat()
+            elif isinstance(completed_at, str):
+                completed_at_iso = completed_at
+            else:
+                completed_at_iso = None
+
+            overall_percentage = item.get("overall_percentage", 0.0)
+
+            formatted.append({
+                "id": str(item["_id"]),
+                "target_role": item.get("target_role", "Software Engineer"),
+                "overall_percentage": overall_percentage,
+                "avg_technical_score": item.get("avg_technical_score", 0.0),
+                "avg_communication_score": item.get("avg_communication_score", 0.0),
+                "verdict_badge": item.get("verdict_badge", "Completed"),
+                "verdict_class": item.get("verdict_class", "success" if overall_percentage >= 85 else ("primary" if overall_percentage >= 70 else ("warning" if overall_percentage >= 55 else "danger"))),
+                "executive_summary": item.get("executive_summary", f"Completed mock interview for {item.get('target_role', 'Software Engineer')} with an overall score of {overall_percentage}%."),
+                "top_strengths": item.get("top_strengths", []),
+                "key_improvements": item.get("key_improvements", []),
+                "readiness_recommendation": item.get("readiness_recommendation", ""),
+                "evaluations": item.get("evaluations", []),
+                "completed_at": completed_at_iso
+            })
+
+        return jsonify({"interviews": formatted})
+    except Exception as e:
+        print(f"Error fetching mock interviews: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/user-mock-interviews/<interview_id>", methods=["DELETE"])
+@login_required
+def delete_user_mock_interview(interview_id):
+    """Delete a past mock interview record for current user."""
+    if not MONGODB_AVAILABLE or mock_interviews_collection is None:
+        return jsonify({"error": "Database unavailable"}), 500
+
+    try:
+        try:
+            int_obj_id = ObjectId(interview_id)
+        except Exception:
+            return jsonify({"error": "Invalid interview ID"}), 400
+
+        user_ids = [str(current_user.id)]
+        try:
+            user_ids.append(ObjectId(current_user.id))
+        except Exception:
+            pass
+
+        res = mock_interviews_collection.delete_one({
+            "_id": int_obj_id,
+            "$or": [{"user_id": {"$in": user_ids}}, {"user_id_obj": {"$in": user_ids}}]
+        })
+
+        if res.deleted_count == 0:
+            return jsonify({"error": "Interview session not found"}), 404
+
+        return jsonify({"success": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

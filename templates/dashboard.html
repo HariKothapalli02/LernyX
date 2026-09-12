@@ -51,6 +51,13 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="mock-interviews-tab-btn" data-bs-toggle="tab"
+                data-bs-target="#mock-interviews-tab" type="button" role="tab" aria-controls="mock-interviews-tab"
+                aria-selected="false" onclick="loadTab('mock-interviews')">
+                🎙️ Mock Interviews
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link fw-semibold" id="resume-tab-btn" data-bs-toggle="tab" data-bs-target="#resume-tab"
                 type="button" role="tab" aria-controls="resume-tab" aria-selected="false">
                 📄 Resume Review
@@ -96,6 +103,27 @@
                     <div class="text-center py-5 text-muted">
                         <div class="spinner-border text-primary" role="status"></div>
                         <p class="mt-2">Loading your custom quizzes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mock Interviews Tab -->
+        <div class="tab-pane fade" id="mock-interviews-tab" role="tabpanel" aria-labelledby="mock-interviews-tab-btn">
+            <div class="card"
+                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2"
+                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <h3 class="h5 mb-0 text-white"><i class="bi bi-mic-fill text-success me-2"></i>Past AI Voice Mock Interviews</h3>
+                    <a href="{{ url_for('mock_interview') }}" class="btn btn-sm btn-success fw-bold px-3 shadow"
+                        style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
+                        <i class="bi bi-play-circle-fill me-1"></i>Start New Interview
+                    </a>
+                </div>
+                <div class="card-body" id="mock-interviews-container">
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border text-success" role="status"></div>
+                        <p class="mt-2">Loading your mock interviews...</p>
                     </div>
                 </div>
             </div>
@@ -212,7 +240,9 @@
 <script>
     window.quizzesLoaded = false;
     window.customQuizzesLoaded = false;
+    window.mockInterviewsLoaded = false;
     window.resumeLoaded = false;
+    window.userMockInterviews = [];
 
     document.addEventListener('DOMContentLoaded', () => {
         loadQuizzes();
@@ -225,6 +255,8 @@
             loadQuizzes();
         } else if (tabName === 'custom' && !window.customQuizzesLoaded) {
             loadMyCustomQuizzes();
+        } else if (tabName === 'mock-interviews' && !window.mockInterviewsLoaded) {
+            loadUserMockInterviews();
         } else if (tabName === 'resume' && !window.resumeLoaded) {
             loadLatestResumeReview();
         }
@@ -526,8 +558,209 @@
 
     function escapeHtml(text) {
         const div = document.createElement('div');
-        div.textContent = text;
+        div.textContent = text || '';
         return div.innerHTML;
+    }
+
+    async function loadUserMockInterviews() {
+        const container = document.getElementById('mock-interviews-container');
+        if (!container) return;
+        try {
+            const resp = await fetch('/api/user-mock-interviews');
+            const data = await resp.json();
+
+            if (!resp.ok || data.error) {
+                container.innerHTML = `<div class="text-center text-danger p-4">Error loading mock interviews: ${escapeHtml(data.error || `HTTP ${resp.status}`)}</div>`;
+                return;
+            }
+
+            window.userMockInterviews = data.interviews || [];
+
+            if (window.userMockInterviews.length > 0) {
+                container.innerHTML = window.userMockInterviews.map(intv => {
+                    const dateStr = intv.completed_at ? new Date(intv.completed_at).toLocaleString() : 'Recently Completed';
+                    const score = intv.overall_percentage || 0;
+                    const badgeClass = intv.verdict_class || (score >= 85 ? 'success' : (score >= 70 ? 'primary' : (score >= 55 ? 'warning' : 'danger')));
+                    const evalCount = (intv.evaluations || []).length;
+
+                    return `
+                        <div class="card mb-3 border-start border-4 border-${badgeClass}" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1) !important;">
+                            <div class="card-body p-3 p-md-4">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                    <div>
+                                        <span class="badge bg-${badgeClass} mb-1 fs-6">${escapeHtml(intv.verdict_badge || 'Completed')}</span>
+                                        <h5 class="fw-bold text-white mb-1">${escapeHtml(intv.target_role)} Mock Interview</h5>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="display-6 fw-bold text-white mb-0">${score}%</div>
+                                        <small class="text-secondary">Overall Score</small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2 flex-wrap mb-3">
+                                    <span class="badge bg-dark text-info border border-info">Tech Depth: ${intv.avg_technical_score}%</span>
+                                    <span class="badge bg-dark text-warning border border-warning">Communication STAR: ${intv.avg_communication_score}%</span>
+                                    <span class="badge bg-dark text-light border border-secondary">${evalCount} Questions Assessed</span>
+                                </div>
+
+                                ${intv.executive_summary ? `
+                                    <p class="text-white-50 small mb-3 text-truncate" style="max-width: 100%;">
+                                        ${escapeHtml(intv.executive_summary)}
+                                    </p>
+                                ` : ''}
+
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top border-secondary">
+                                    <small class="text-secondary"><i class="bi bi-clock me-1"></i>Completed: ${dateStr}</small>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteMockInterview('${intv.id}')">
+                                            <i class="bi bi-trash me-1"></i>Delete
+                                        </button>
+                                        <button class="btn btn-success btn-sm fw-bold px-3" onclick="viewMockInterviewDetails('${intv.id}')" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
+                                            <i class="bi bi-eye-fill me-1"></i>View Full Report
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="p-3 rounded-circle d-inline-block mb-3" style="background: rgba(16, 185, 129, 0.1);">
+                            <i class="bi bi-mic-mute display-4 text-success"></i>
+                        </div>
+                        <h4 class="text-white fw-bold">No Mock Interviews Taken Yet</h4>
+                        <p class="text-muted mx-auto mb-4" style="max-width: 450px;">
+                            Practice 1-on-1 technical voice interviews powered by Gemini 2.5 Flash & get detailed scoring reports stored right here.
+                        </p>
+                        <a href="/mock-interview" class="btn btn-success btn-lg fw-bold px-4 shadow" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
+                            <i class="bi bi-play-circle-fill me-2"></i>Take Your First Mock Interview
+                        </a>
+                    </div>
+                `;
+            }
+
+            window.mockInterviewsLoaded = true;
+        } catch (error) {
+            console.error('Error loading mock interviews:', error);
+            container.innerHTML = `<div class="text-center text-danger p-4">Error loading mock interviews: ${escapeHtml(error.message)}</div>`;
+        }
+    }
+
+    async function deleteMockInterview(interviewId) {
+        if (!interviewId) return;
+        if (!confirm('Are you sure you want to delete this mock interview report from your history?')) return;
+
+        try {
+            const resp = await fetch(`/api/user-mock-interviews/${interviewId}`, { method: 'DELETE' });
+            const data = await resp.json();
+            if (!resp.ok || data.error) {
+                alert('Error: ' + (data.error || 'Failed to delete mock interview session'));
+                return;
+            }
+            window.mockInterviewsLoaded = false;
+            loadUserMockInterviews();
+        } catch (err) {
+            alert('Error deleting interview session: ' + err.message);
+        }
+    }
+
+    function viewMockInterviewDetails(interviewId) {
+        const intv = (window.userMockInterviews || []).find(x => x.id === interviewId);
+        if (!intv) {
+            alert('Mock interview details not found.');
+            return;
+        }
+
+        document.getElementById('modal-target-role').textContent = intv.target_role || 'Software Engineer';
+        document.getElementById('modal-score-percent').textContent = intv.overall_percentage;
+        document.getElementById('modal-verdict-badge').textContent = intv.verdict_badge || 'Completed';
+        document.getElementById('modal-verdict-badge').className = `badge bg-${intv.verdict_class || 'success'} px-3 py-2 fs-6 mb-2`;
+        document.getElementById('modal-executive-summary').textContent = intv.executive_summary || 'No summary available.';
+        document.getElementById('modal-recommendation').textContent = intv.readiness_recommendation || 'Continue practicing mock interview questions.';
+
+        // Strengths & Improvements
+        const sList = document.getElementById('modal-strengths-list');
+        sList.innerHTML = (intv.top_strengths || []).map(s => `<li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>${escapeHtml(s)}</li>`).join('');
+
+        const iList = document.getElementById('modal-improvements-list');
+        iList.innerHTML = (intv.key_improvements || []).map(i => `<li class="mb-2"><i class="bi bi-arrow-up-right-circle text-warning me-2"></i>${escapeHtml(i)}</li>`).join('');
+
+        // Question breakdown
+        const breakdownDiv = document.getElementById('modal-questions-breakdown');
+        const evals = intv.evaluations || [];
+        if (evals.length === 0) {
+            breakdownDiv.innerHTML = '<p class="text-white-50">No detailed question responses stored for this interview.</p>';
+        } else {
+            breakdownDiv.innerHTML = evals.map((ev, idx) => {
+                const scoreClass = ev.score >= 80 ? 'bg-success text-white' : (ev.score >= 60 ? 'bg-warning text-dark' : 'bg-danger text-white');
+                const codeBadge = (ev.code_analysis && ev.code_analysis.has_code) ? `
+                    <div class="mt-2 p-2 rounded small" style="background: rgba(13, 202, 240, 0.1); border: 1px solid rgba(13, 202, 240, 0.3);">
+                        <span class="text-info fw-bold"><i class="bi bi-code-slash me-1"></i>Code Execution Agent:</span> 
+                        Complexity: <strong class="text-white">${escapeHtml(ev.code_analysis.complexity)}</strong> | 
+                        Status: <span class="${ev.code_analysis.syntax_valid ? 'text-success' : 'text-danger'} fw-bold">${escapeHtml(ev.code_analysis.verdict)}</span>
+                    </div>
+                ` : '';
+
+                return `
+                <div class="card p-3 p-md-4 shadow border-0 text-white mb-3" style="background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 14px;">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <span class="badge bg-dark text-success border border-success px-3 py-2 fs-6">
+                            <i class="bi bi-patch-question me-1"></i>Question ${idx + 1}: ${escapeHtml(ev.category || 'Technical Question')}
+                        </span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-dark text-info border border-info px-2 py-1 small">Tech: ${ev.technical_score || ev.score}/100</span>
+                            <span class="badge bg-dark text-warning border border-warning px-2 py-1 small">STAR Comm: ${ev.communication_score || ev.score}/100</span>
+                            <span class="badge ${scoreClass} fs-6 px-3 py-2 shadow-sm fw-bold">Overall: ${ev.score}/100</span>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-white mb-3" style="line-height: 1.4;">
+                        <i class="bi bi-quote text-success me-1"></i>${escapeHtml(ev.question_text || ev.question)}
+                    </h6>
+
+                    <div class="p-3 rounded-3 mb-3 text-white" style="background: rgba(0, 0, 0, 0.35); border-left: 4px solid #10b981;">
+                        <small class="text-success fw-bold uppercase tracking-wider d-block mb-1">
+                            <i class="bi bi-person-fill me-1"></i>Your Answer (Spoken / Typed):
+                        </small>
+                        <p class="mb-0 text-white-50" style="white-space: pre-wrap;">${escapeHtml(ev.user_answer || 'No answer provided.')}</p>
+                        ${codeBadge}
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 h-100" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);">
+                                <h6 class="fw-bold text-success mb-2 small"><i class="bi bi-hand-thumbs-up-fill me-2"></i>Key Strengths</h6>
+                                <p class="small text-white-50 mb-0">${escapeHtml(ev.key_strengths || 'Understood basic concepts.')}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 h-100" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25);">
+                                <h6 class="fw-bold text-warning mb-2 small"><i class="bi bi-lightning-charge-fill me-2"></i>Areas to Improve</h6>
+                                <p class="small text-white-50 mb-0">${escapeHtml(ev.areas_to_improve || 'Provide more concrete examples.')}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-3 mb-2" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25);">
+                        <h6 class="fw-bold text-info mb-2 small"><i class="bi bi-star-fill me-2"></i>Ideal Model Answer Strategy</h6>
+                        <p class="small text-white-50 mb-0">${escapeHtml(ev.ideal_answer_highlights || 'Structure response with technical depth.')}</p>
+                    </div>
+
+                    <div class="pt-2 text-white-50 small border-top border-secondary mt-2">
+                        <strong class="text-white"><i class="bi bi-cpu-fill text-success me-1"></i>Multi-Agent Evaluation Panel Verdict:</strong> ${escapeHtml(ev.feedback || 'Evaluated successfully.')}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        const modalEl = document.getElementById('mockInterviewDetailModal');
+        if (window.bootstrap && bootstrap.Modal) {
+            const modalObj = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modalObj.show();
+        }
     }
 
     async function analyzeResume(event) {
@@ -802,6 +1035,73 @@
         <button type="button" id="confirm-download-btn" class="btn btn-success fw-bold px-4" onclick="downloadSelectedTemplateResume()">
           <i class="bi bi-download me-2"></i>Download Resume (Classic Navy)
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Detailed Mock Interview Report -->
+<div class="modal fade" id="mockInterviewDetailModal" tabindex="-1" aria-labelledby="mockInterviewDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content" style="background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 18px; color: #fff;">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title fw-bold text-white" id="mockInterviewDetailModalLabel">
+          <i class="bi bi-trophy-fill text-success me-2"></i><span id="modal-target-role">Software Engineer</span> Mock Interview Report
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <!-- Header Result -->
+        <div class="text-center mb-4">
+          <span class="badge bg-success px-3 py-2 rounded-pill fs-6 mb-2" id="modal-verdict-badge">
+            Executive Verdict
+          </span>
+          <h1 class="display-3 fw-bold text-white mb-1"><span id="modal-score-percent">0</span>%</h1>
+          <p class="text-secondary fs-6">Overall Performance Score</p>
+        </div>
+
+        <!-- Executive Summary -->
+        <div class="alert p-3 p-md-4 rounded-3 mb-4 text-white" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);">
+          <h6 class="fw-bold text-success mb-2"><i class="bi bi-clipboard-data-fill me-2"></i>Executive Performance Verdict</h6>
+          <p class="mb-0 text-white-50 small" id="modal-executive-summary"></p>
+        </div>
+
+        <!-- Top Strengths & Improvements -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="p-3 rounded-3 h-100" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+              <h6 class="fw-bold text-success mb-2"><i class="bi bi-check-circle-fill me-2"></i>Top Demonstrated Strengths</h6>
+              <ul id="modal-strengths-list" class="text-white-50 ps-3 mb-0 small"></ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded-3 h-100" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3);">
+              <h6 class="fw-bold text-warning mb-2"><i class="bi bi-tools me-2"></i>Key Areas to Refine</h6>
+              <ul id="modal-improvements-list" class="text-white-50 ps-3 mb-0 small"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendation Alert -->
+        <div class="alert alert-info p-3 mb-4 rounded-3 border-info" style="background: rgba(13, 202, 240, 0.15);">
+          <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-rocket-takeoff-fill fs-3 text-info flex-shrink-0"></i>
+            <div>
+              <strong class="text-info d-block small">Career Recommendation:</strong>
+              <span class="text-white-50 small" id="modal-recommendation"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Question Breakdown -->
+        <h5 class="fw-bold text-white mb-3"><i class="bi bi-list-check text-success me-2"></i>Question-by-Question Multi-Agent Assessment</h5>
+        <div id="modal-questions-breakdown"></div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Close</button>
+        <a href="/mock-interview" class="btn btn-success fw-bold" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
+          <i class="bi bi-arrow-counterclockwise me-1"></i>Retake Mock Interview
+        </a>
       </div>
     </div>
   </div>

@@ -1,0 +1,973 @@
+{% extends "base.html" %}
+
+{% block title %}AI Voice Mock Interview - LernyX{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="text-center mb-4 fade-in-up">
+        <span class="badge bg-success px-3 py-2 rounded-pill fs-6 mb-2 shadow" style="background: linear-gradient(135deg, #10b981, #3b82f6) !important;">
+            <i class="bi bi-soundwave me-2"></i>AI Voice Mock Interview
+        </span>
+        <h1 class="display-4 fw-bold text-white mb-2 tracking-tight">1-on-1 Interactive Mock Interview</h1>
+        <p class="lead text-secondary mx-auto" style="max-width: 720px;">
+            Experience a realistic technical mock interview tailored to your resume. Speak your answers in English or type them—our AI evaluates your accuracy and technical depth in real-time.
+        </p>
+    </div>
+
+    <!-- 1. SETUP CARD (Pre-Interview) -->
+    <div id="setup-card" class="card shadow-lg border-0 mb-5" style="background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12) !important; border-radius: 16px;">
+        <div class="card-body p-4 p-md-5">
+            <h4 class="fw-bold text-white mb-4"><i class="bi bi-sliders text-success me-2"></i>Interview Configuration</h4>
+            
+            <div id="saved-resume-alert" class="alert alert-info py-3 px-4 mb-4 d-none border-info rounded-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background: rgba(13, 202, 240, 0.15);">
+                <div>
+                    <i class="bi bi-file-earmark-check-fill text-info me-2 fs-5"></i>
+                    <span class="text-white">Active Resume Detected: <strong id="saved-resume-name" class="text-info">Saved Resume</strong></span>
+                </div>
+                <span class="badge bg-dark text-info border border-info px-3 py-2"><i class="bi bi-check-circle-fill me-1 text-success"></i>Ready</span>
+            </div>
+
+            <form id="start-interview-form" onsubmit="startInterview(event)">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <label class="form-label fw-bold text-white"><i class="bi bi-file-earmark-arrow-up text-success me-2"></i>Upload Candidate Resume (Optional)</label>
+                        <input type="file" id="interview_resume_file" class="form-control form-control-lg bg-dark text-white border-secondary" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg">
+                        <small class="text-muted">Supports PDF, DOCX, TXT, or Image files. If empty, your previously saved resume will be used.</small>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold text-white"><i class="bi bi-briefcase text-success me-2"></i>Target Job Role / Position <span class="text-danger">*</span></label>
+                        <input type="text" id="target_role_input" class="form-control form-control-lg bg-dark text-white border-secondary" placeholder="e.g., Full Stack Developer, Java Backend Engineer, Data Analyst" value="Software Engineer" required>
+                    </div>
+                </div>
+
+                <button type="submit" id="start-btn" class="btn btn-success btn-lg mt-4 w-100 fw-bold py-3 shadow" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none; font-size: 1.15rem;">
+                    <i class="bi bi-play-circle-fill me-2"></i>Start AI Voice Mock Interview
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div id="loading-state" class="d-none text-center py-5">
+        <div class="spinner-border text-success" role="status" style="width: 3.5rem; height: 3.5rem;"></div>
+        <h4 class="text-white mt-4 fw-bold" id="loading-title">Analyzing Resume & Preparing Interview Questions...</h4>
+        <p class="text-muted"><i class="bi bi-cpu-fill text-success me-1"></i>Powered by Gemini 2.5 Flash & Web Speech API Engine.</p>
+    </div>
+
+    <!-- 2. INTERVIEW ROOM CONTAINER -->
+    <div id="interview-room" class="d-none">
+        <!-- Interview Header & Progress Bar -->
+        <div class="card p-4 mb-4 border-0 shadow" style="background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1) !important;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                <div>
+                    <span class="badge bg-dark text-success border border-success px-3 py-2 fs-6 mb-1" id="q-category-badge">Background & Introduction</span>
+                    <h5 class="fw-bold text-white mb-0" id="interview-role-title">Software Engineer Mock Interview</h5>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fs-5 fw-bold text-success" id="question-progress-text">Question 1 of 5</span>
+                    <button type="button" class="btn btn-sm btn-outline-warning fw-bold px-3 py-1" onclick="forceFinishInterviewFromModal()">
+                        <i class="bi bi-flag-fill me-1"></i>Finish & View Result
+                    </button>
+                </div>
+            </div>
+            <div class="progress" style="height: 10px; background: rgba(255, 255, 255, 0.1);">
+                <div id="interview-progress-bar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 20%;"></div>
+            </div>
+        </div>
+
+        <!-- Question & Answer Area -->
+        <div class="card p-4 p-md-5 mb-4 border-0 shadow-lg" style="background: rgba(17, 24, 39, 0.9); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(16, 185, 129, 0.25) !important;">
+            <!-- Question Box -->
+            <div class="mb-4 p-4 rounded-3" style="background: rgba(16, 185, 129, 0.1); border-left: 5px solid #10b981;">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <span class="text-success fw-bold uppercase tracking-wider small"><i class="bi bi-patch-question-fill me-1"></i>Interviewer Question</span>
+                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill fw-bold px-3" onclick="speakCurrentQuestion()">
+                        <i class="bi bi-volume-up-fill me-1"></i>Listen Again
+                    </button>
+                </div>
+                <h3 class="fw-bold text-white mb-2" id="current-question-text" style="line-height: 1.4; font-size: 1.35rem;">
+                    "Loading question..."
+                </h3>
+                <small class="text-white-50"><i class="bi bi-info-circle me-1"></i>Key Focus: <span id="current-question-focus" class="text-light">Background experience & clarity</span></small>
+            </div>
+
+            <!-- Speech Audio Controls & Input Area -->
+            <div class="mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                    <label class="form-label fw-bold text-white fs-6 mb-0">
+                        <i class="bi bi-chat-quote-fill text-success me-2"></i>Your Response (Speak or Type):
+                    </label>
+
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <!-- Accent / Regional Language Selector -->
+                        <div class="d-flex align-items-center gap-1 bg-dark px-2 py-1 rounded border border-secondary">
+                            <i class="bi bi-translate text-success small"></i>
+                            <select id="speech-lang-select" class="form-select form-select-sm bg-dark text-white border-0 py-0 shadow-none" style="font-size: 0.85rem; cursor: pointer;" onchange="changeSpeechLanguage()">
+                                <option value="en-IN" selected>🇮🇳 English (India)</option>
+                                <option value="en-US">🇺🇸 English (US)</option>
+                                <option value="en-GB">🇬🇧 English (UK)</option>
+                                <option value="en-AU">🇦🇺 English (Australia)</option>
+                                <option value="en-CA">🇨🇦 English (Canada)</option>
+                            </select>
+                        </div>
+
+                        <!-- Mic Button -->
+                        <button type="button" id="mic-toggle-btn" class="btn btn-outline-success fw-bold px-3 shadow-sm d-flex align-items-center gap-2" onclick="toggleSpeechRecognition()">
+                            <i class="bi bi-mic-fill fs-5" id="mic-icon"></i>
+                            <span id="mic-btn-text">Start Speaking</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Mic Visualizer & Audio Meter Bar -->
+                <div id="speech-status-banner" class="alert alert-dark py-2 px-3 mb-2 d-none border-success small d-flex justify-content-between align-items-center flex-wrap gap-2" style="background: rgba(16, 185, 129, 0.1);">
+                    <div class="d-flex align-items-center gap-2 text-success fw-semibold">
+                        <span class="spinner-grow spinner-grow-sm text-danger" role="status"></span>
+                        <span id="speech-status-text">Listening... Speak clearly into your mic.</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-white-50 small"><i class="bi bi-soundwave me-1"></i>Volume Level:</span>
+                        <div class="progress" style="width: 120px; height: 10px; background: rgba(255, 255, 255, 0.15);">
+                            <div id="mic-volume-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%; transition: width 0.08s ease-out;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Textarea -->
+                <textarea id="user-answer-input" class="form-control bg-dark text-white border-secondary p-3" rows="6" placeholder="Click 'Start Speaking' and talk, or type your response here..."></textarea>
+                <div class="d-flex justify-content-between text-muted small mt-1">
+                    <span><i class="bi bi-shield-check me-1 text-success"></i>Echo & Noise Cancellation Active (<strong id="active-lang-label" class="text-white">English (en-IN)</strong>)</span>
+                    <span id="char-counter">0 characters</span>
+                </div>
+            </div>
+
+            <!-- Submit Answer Action -->
+            <button type="button" id="submit-answer-btn" class="btn btn-success btn-lg w-100 fw-bold py-3 shadow" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;" onclick="submitAnswer()">
+                <i class="bi bi-arrow-right-circle-fill me-2"></i>Submit Answer & Next Question
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. FINAL INTERVIEW REPORT & SCORE PERCENTAGE CARD -->
+    <div id="final-report-card" class="d-none">
+        <div class="card p-4 p-md-5 border-0 shadow-lg mb-5" style="background: rgba(17, 24, 39, 0.9); backdrop-filter: blur(20px); border-radius: 18px; border: 1px solid rgba(16, 185, 129, 0.3) !important;">
+            <!-- Header Result Badge -->
+            <div class="text-center mb-4">
+                <span class="badge px-3 py-2 rounded-pill fs-6 mb-2" id="report-verdict-badge" style="background: #10b981;">
+                    <i class="bi bi-trophy-fill me-2"></i>Excellent - Ready for Technical Interviews
+                </span>
+                <h1 class="display-3 fw-bold text-white mb-1"><span id="report-percentage-score">85</span>%</h1>
+                <p class="text-secondary fs-5">Overall Mock Interview Performance Score</p>
+            </div>
+
+            <!-- Executive Summary -->
+            <div class="alert p-4 rounded-3 mb-4 text-white" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);">
+                <h5 class="fw-bold text-success mb-2"><i class="bi bi-clipboard-data-fill me-2"></i>Executive Performance Verdict</h5>
+                <p class="mb-0 text-white-50 fs-6" id="report-executive-summary">Detailed executive summary...</p>
+            </div>
+
+            <!-- Top Strengths & Improvements -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="p-4 rounded-3 h-100" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+                        <h5 class="fw-bold text-success mb-3"><i class="bi bi-check-circle-fill me-2"></i>Top Demonstrated Strengths</h5>
+                        <ul id="report-strengths-list" class="text-white-50 ps-3 mb-0"></ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-4 rounded-3 h-100" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3);">
+                        <h5 class="fw-bold text-warning mb-3"><i class="bi bi-tools me-2"></i>Key Areas to Refine</h5>
+                        <ul id="report-improvements-list" class="text-white-50 ps-3 mb-0"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation Alert -->
+            <div class="alert alert-info p-3 mb-4 rounded-3 border-info" style="background: rgba(13, 202, 240, 0.15);">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-rocket-takeoff-fill fs-2 text-info flex-shrink-0"></i>
+                    <div>
+                        <strong class="text-info d-block">Career Recommendation:</strong>
+                        <span class="text-white-50" id="report-recommendation">Recommendation text...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Question Breakdown -->
+            <h4 class="fw-bold text-white mb-3"><i class="bi bi-list-check text-success me-2"></i>Detailed Per-Question Analysis & Enhancements</h4>
+            <div id="report-questions-breakdown" class="d-flex flex-column gap-4 mb-4"></div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+                <button type="button" class="btn btn-outline-light btn-lg px-4 fw-bold" onclick="location.reload()">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Retake Mock Interview
+                </button>
+                <a href="{{ url_for('home') }}" class="btn btn-success btn-lg px-4 fw-bold" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
+                    <i class="bi bi-house-door-fill me-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // State variables
+    let questionsList = [];
+    let currentQuestionIndex = 0;
+    let evaluationsList = [];
+    let targetRole = "Software Engineer";
+    let recognitionInstance = null;
+    let isListening = false;
+
+    // Enhanced STT & Web Audio State
+    let selectedSpeechLang = 'en-IN';
+    let mediaStreamInstance = null;
+    let audioContextInstance = null;
+    let analyserInstance = null;
+    let visualizerAnimFrame = null;
+    let accumulatedSpeechText = '';
+
+    // Adaptive Probing State
+    let isFollowupTurn = false;
+    let initialQuestionAnswer = "";
+
+    function sanitizeTechnicalTranscriptJS(text) {
+        if (!text) return text;
+
+        const replacements = [
+            // 1. Complexity & Math
+            [/\b(o|order)\s+of\s+n\s+log\s+n\b/gi, 'O(N log N)'],
+            [/\b(o|order)\s+n\s+log\s+n\b/gi, 'O(N log N)'],
+            [/\b(o|order)\s+of\s+n\s+square(d)?\b/gi, 'O(N^2)'],
+            [/\b(o|order)\s+n\s+square(d)?\b/gi, 'O(N^2)'],
+            [/\b(o|order)\s+of\s+n\s+cube(d)?\b/gi, 'O(N^3)'],
+            [/\b(o|order)\s+n\s+cube(d)?\b/gi, 'O(N^3)'],
+            [/\b(o|order)\s+of\s+2\s+(to\s+the\s+n|power\s+n)\b/gi, 'O(2^N)'],
+            [/\b(o|order)\s+2\s+power\s+n\b/gi, 'O(2^N)'],
+            [/\b(o|order)\s+of\s+n\s+factorial\b/gi, 'O(N!)'],
+            [/\b(o|order)\s+of\s+n\b/gi, 'O(N)'],
+            [/\b(o|order)\s+n\b/gi, 'O(N)'],
+            [/\b(o|order)\s+of\s+1\b/gi, 'O(1)'],
+            [/\b(o|order)\s+1\b/gi, 'O(1)'],
+            [/\b(o|order)\s+of\s+log\s+n\b/gi, 'O(log N)'],
+            [/\b(o|order)\s+log\s+n\b/gi, 'O(log N)'],
+
+            // 2. DSA Terms
+            [/\b(hush\s*map|hash\s*map|hashmap|hash\s*tables?)\b/gi, 'HashMap'],
+            [/\b(hush\s*set|hash\s*set|hashset)\b/gi, 'HashSet'],
+            [/\b(array\s*list|arraylist)\b/gi, 'ArrayList'],
+            [/\b(linked\s*list|link\s*list|linklist|singly\s*linked\s*list|doubly\s*linked\s*list)\b/gi, 'LinkedList'],
+            [/\b(double\s*ended\s*queue|deque|dequeue)\b/gi, 'Deque'],
+            [/\b(priority\s*queue|priorityqueue)\b/gi, 'PriorityQueue'],
+            [/\b(min\s*heap|max\s*heap)\b/gi, 'Heap (Min/Max)'],
+            [/\b(binary\s*search\s*tree|binary\s*tree|bst)\b/gi, 'Binary Search Tree (BST)'],
+            [/\b(avl\s*tree|red\s*black\s*tree)\b/gi, 'AVL / Red-Black Tree'],
+            [/\b(prefix\s*tree|trie)\b/gi, 'Trie'],
+            [/\b(segment\s*tree|fenwick\s*tree)\b/gi, 'Segment Tree'],
+            [/\b(die\s*kstra|dij\s*kstra|dijkstras?)\b/gi, "Dijkstra's Algorithm"],
+            [/\b(bellman\s*ford)\b/gi, 'Bellman-Ford Algorithm'],
+            [/\b(floyd\s*warshall)\b/gi, 'Floyd-Warshall Algorithm'],
+            [/\b(kruskal|kruskals?|prim|prims?)\b/gi, "Kruskal's / Prim's Algorithm"],
+            [/\b(topological\s*sort|topo\s*sort)\b/gi, 'Topological Sort'],
+            [/\b(depth\s*first\s*search|dfs)\b/gi, 'Depth-First Search (DFS)'],
+            [/\b(breadth\s*first\s*search|bfs)\b/gi, 'Breadth-First Search (BFS)'],
+            [/\b(two\s*pointers?)\b/gi, 'Two Pointers'],
+            [/\b(sliding\s*window)\b/gi, 'Sliding Window'],
+            [/\b(binary\s*search)\b/gi, 'Binary Search'],
+            [/\b(quick\s*sort|quicksort)\b/gi, 'QuickSort'],
+            [/\b(merge\s*sort|mergesort)\b/gi, 'MergeSort'],
+            [/\b(heap\s*sort|heapsort)\b/gi, 'HeapSort'],
+            [/\b(dynamic\s*programming|memoization|tabulation)\b/gi, 'Dynamic Programming'],
+            [/\b(back\s*tracking|backtracking)\b/gi, 'Backtracking'],
+            [/\b(kadane|kadanes\s*algorithm)\b/gi, "Kadane's Algorithm"],
+            [/\b(knapsack\s*problem|0\s*1\s*knapsack)\b/gi, 'Knapsack Problem'],
+
+            // 3. OOP & Design Patterns
+            [/\b(poly\s*morphism|polymorphism)\b/gi, 'Polymorphism'],
+            [/\b(in\s*capsulation|encapsulation)\b/gi, 'Encapsulation'],
+            [/\b(in\s*heritance|inheritance)\b/gi, 'Inheritance'],
+            [/\b(ab\s*straction|abstraction)\b/gi, 'Abstraction'],
+            [/\b(solid\s*principles?)\b/gi, 'SOLID Principles'],
+            [/\b(singleton\s*pattern|singleton)\b/gi, 'Singleton Pattern'],
+            [/\b(factory\s*pattern|abstract\s*factory)\b/gi, 'Factory Pattern'],
+            [/\b(builder\s*pattern)\b/gi, 'Builder Pattern'],
+            [/\b(observer\s*pattern|pub\s*sub|publisher\s*subscriber)\b/gi, 'Observer / Pub-Sub Pattern'],
+            [/\b(decorator\s*pattern)\b/gi, 'Decorator Pattern'],
+            [/\b(strategy\s*pattern|state\s*pattern)\b/gi, 'Strategy Pattern'],
+            [/\b(dependency\s*injection|inversion\s*of\s*control|ioc)\b/gi, 'Dependency Injection (DI / IoC)'],
+
+            // 4. System Design & Cloud
+            [/\b(micro\s*services?|microservice\s*architecture)\b/gi, 'Microservices Architecture'],
+            [/\b(monolith|monolithic)\b/gi, 'Monolithic Architecture'],
+            [/\b(server\s*less|aws\s*lambda)\b/gi, 'Serverless (AWS Lambda)'],
+            [/\b(load\s*balancer|load\s*balancing|round\s*robin)\b/gi, 'Load Balancer'],
+            [/\b(reverse\s*proxy|nginx|envoy)\b/gi, 'Reverse Proxy (NGINX / Envoy)'],
+            [/\b(api\s*gateway|kong\s*gateway)\b/gi, 'API Gateway'],
+            [/\b(event\s*driven\s*architecture|event\s*driven)\b/gi, 'Event-Driven Architecture'],
+            [/\b(message\s*queue|rabbit\s*mq|rabbitmq|apache\s*kafka|kafka)\b/gi, 'Message Queue (Kafka / RabbitMQ)'],
+            [/\b(circuit\s*breaker|hystrix|resilience4j)\b/gi, 'Circuit Breaker'],
+            [/\b(cdn|content\s*delivery\s*network|cloudflare)\b/gi, 'CDN (Content Delivery Network)'],
+            [/\b(cap\s*theorem)\b/gi, 'CAP Theorem'],
+            [/\b(eventual\s*consistency|strong\s*consistency)\b/gi, 'Eventual / Strong Consistency'],
+            [/\b(horizontal\s*scaling|scaling\s*out|vertical\s*scaling|scaling\s*up)\b/gi, 'Horizontal / Vertical Scaling'],
+            [/\b(rate\s*limiting|token\s*bucket|leaky\s*bucket)\b/gi, 'Rate Limiting'],
+            [/\b(database\s*sharding|sharding|read\s*replicas?)\b/gi, 'Sharding / Replication'],
+
+            // 5. Databases & SQL / NoSQL
+            [/\b(post\s*gres|post\s*gray|postgres|postgresql|postgre\s*sql)\b/gi, 'PostgreSQL'],
+            [/\b(my\s*sql|mysql)\b/gi, 'MySQL'],
+            [/\b(sq\s*lite|sqlite)\b/gi, 'SQLite'],
+            [/\b(oracle\s*db|sql\s*server|ms\s*sql)\b/gi, 'SQL Server / Oracle DB'],
+            [/\b(acid\s*properties?)\b/gi, 'ACID Properties'],
+            [/\b(inner\s*join|left\s*join|right\s*join|full\s*outer\s*join)\b/gi, 'SQL Joins'],
+            [/\b(database\s*indexing|b\s*tree\s*index|b-tree)\b/gi, 'B-Tree Indexing'],
+            [/\b(object\s*relational\s*mapping|orm)\b/gi, 'ORM'],
+            [/\b(mongo\s*db|mongodb|manga\s*db)\b/gi, 'MongoDB'],
+            [/\b(red\s*is|redis)\b/gi, 'Redis'],
+            [/\b(cassandra|apache\s*cassandra)\b/gi, 'Apache Cassandra'],
+            [/\b(dynamo\s*db|dynamodb)\b/gi, 'DynamoDB'],
+            [/\b(neo4j|graph\s*database)\b/gi, 'Graph DB (Neo4j)'],
+            [/\b(vector\s*database|pinecone|faiss|chroma\s*db)\b/gi, 'Vector DB (Pinecone / FAISS)'],
+
+            // 6. Languages & Frameworks
+            [/\b(java\s*script|javascript|js)\b/gi, 'JavaScript'],
+            [/\b(type\s*script|typescript|ts)\b/gi, 'TypeScript'],
+            [/\b(python|py)\b/gi, 'Python'],
+            [/\b(c\s*plus\s*plus|cpp|c\+\+)\b/gi, 'C++'],
+            [/\b(c\s*sharp|c#)\b/gi, 'C#'],
+            [/\b(go\s*lang|golang|go\s*language)\b/gi, 'Go (Golang)'],
+            [/\b(rust\s*lang|rust)\b/gi, 'Rust'],
+            [/\b(node\s*js|nodejs|node\.js)\b/gi, 'Node.js'],
+            [/\b(react\s*js|reactjs|react\.js)\b/gi, 'React'],
+            [/\b(next\s*js|nextjs|next\.js)\b/gi, 'Next.js'],
+            [/\b(express\s*js|expressjs)\b/gi, 'Express.js'],
+            [/\b(spring\s*boot|springboot)\b/gi, 'Spring Boot'],
+            [/\b(django|flask|fast\s*api|fastapi)\b/gi, 'Django / FastAPI'],
+            [/\b(hibernate|jpa|spring\s*data\s*jpa)\b/gi, 'Hibernate / JPA'],
+            [/\b(tail\s*wind|tailwind\s*css|bootstrap)\b/gi, 'Tailwind CSS'],
+
+            // 7. DevOps & Security
+            [/\b(coober\s*netes|cube\s*netis|k8s|kubernetes)\b/gi, 'Kubernetes'],
+            [/\b(docker|containerization|docker\s*compose)\b/gi, 'Docker'],
+            [/\b(ci\s*cd|continuous\s*integration|continuous\s*deployment)\b/gi, 'CI/CD'],
+            [/\b(jenkins|github\s*actions|gitlab\s*ci)\b/gi, 'Jenkins / GitHub Actions'],
+            [/\b(terraform|ansible|infrastructure\s*as\s*code|iac)\b/gi, 'Terraform (IaC)'],
+            [/\b(prometheus|grafana)\b/gi, 'Prometheus & Grafana'],
+            [/\b(aws|amazon\s*web\s*services|aws\s*s3|s3\s*bucket|ec2)\b/gi, 'AWS (S3 / EC2)'],
+            [/\b(gcp|google\s*cloud|azure|microsoft\s*azure)\b/gi, 'GCP / Azure'],
+            [/\b(rest\s*api|restful\s*api|restful)\b/gi, 'REST API'],
+            [/\b(g\s*rpc|grpc)\b/gi, 'gRPC'],
+            [/\b(graph\s*ql|graphql)\b/gi, 'GraphQL'],
+            [/\b(json\s*web\s*token|jwt)\b/gi, 'JWT'],
+            [/\b(o\s*auth|oauth\s*2?)\b/gi, 'OAuth2'],
+            [/\b(cross\s*origin\s*resource\s*sharing|cors)\b/gi, 'CORS'],
+            [/\b(ssl|tls|https)\b/gi, 'SSL/TLS'],
+            [/\b(sql\s*injection|xss|cross\s*site\s*scripting|csrf)\b/gi, 'SQL Injection / XSS'],
+
+            // 8. Artificial Intelligence & Machine Learning
+            [/\b(machine\s*learning|ml|deep\s*learning|dl)\b/gi, 'Machine Learning / Deep Learning'],
+            [/\b(artificial\s*intelligence|ai)\b/gi, 'Artificial Intelligence'],
+            [/\b(large\s*language\s*model|llm|gen\s*ai|generative\s*ai)\b/gi, 'LLM / Generative AI'],
+            [/\b(natural\s*language\s*processing|nlp)\b/gi, 'NLP'],
+            [/\b(convolutional\s*neural\s*network|cnn)\b/gi, 'CNN'],
+            [/\b(recurrent\s*neural\s*network|rnn|lstm)\b/gi, 'RNN / LSTM'],
+            [/\b(transformer\s*model|attention\s*mechanism)\b/gi, 'Transformers / Attention'],
+            [/\b(retrieval\s*augmented\s*generation|rag)\b/gi, 'RAG (Retrieval-Augmented Generation)'],
+            [/\b(pie\s*torch|py\s*torch|pytorch)\b/gi, 'PyTorch'],
+            [/\b(tensor\s*flow|tensorflow)\b/gi, 'TensorFlow'],
+            [/\b(scikit\s*learn|sklearn|keras)\b/gi, 'Scikit-Learn / Keras'],
+            [/\b(pandas|num\s*py|numpy)\b/gi, 'Pandas / NumPy'],
+            [/\b(hugging\s*face|huggingface)\b/gi, 'Hugging Face'],
+            [/\b(gemini|openai|gpt\s*4|gpt-4)\b/gi, 'Gemini / OpenAI']
+        ];
+
+        let result = text;
+        for (const [regex, replacement] of replacements) {
+            result = result.replace(regex, replacement);
+        }
+        return result;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        checkSavedResume();
+        setupAnswerInputListener();
+    });
+
+    function changeSpeechLanguage() {
+        const select = document.getElementById('speech-lang-select');
+        if (select) {
+            selectedSpeechLang = select.value;
+            const label = document.getElementById('active-lang-label');
+            if (label) label.textContent = `English (${selectedSpeechLang})`;
+            if (recognitionInstance && isListening) {
+                try { recognitionInstance.lang = selectedSpeechLang; } catch(e){}
+            }
+        }
+    }
+
+    function setupAnswerInputListener() {
+        const input = document.getElementById('user-answer-input');
+        const counter = document.getElementById('char-counter');
+        if (input && counter) {
+            input.addEventListener('input', () => {
+                counter.textContent = `${input.value.length} characters`;
+            });
+        }
+    }
+
+    async function checkSavedResume() {
+        try {
+            const resp = await fetch('/api/latest-resume-review');
+            const data = await resp.json();
+            if (resp.ok && data.review && data.review.filename) {
+                const alertDiv = document.getElementById('saved-resume-alert');
+                const nameSpan = document.getElementById('saved-resume-name');
+                if (alertDiv && nameSpan) {
+                    nameSpan.textContent = data.review.filename;
+                    alertDiv.classList.remove('d-none');
+                }
+                if (data.review.target_role) {
+                    document.getElementById('target_role_input').value = data.review.target_role;
+                }
+            }
+        } catch (err) {
+            console.error('Error checking saved resume:', err);
+        }
+    }
+
+    // --- WEB SPEECH API: TEXT-TO-SPEECH (TTS) ---
+    function speakCurrentQuestion() {
+        if (!('speechSynthesis' in window)) {
+            console.warn('Speech Synthesis not supported in this browser.');
+            return;
+        }
+
+        const rawText = document.getElementById('current-question-text').textContent.trim();
+        const questionText = rawText.replace(/^"/, '').replace(/"$/, '').trim();
+        if (!questionText) return;
+
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(questionText);
+        utterance.lang = selectedSpeechLang || 'en-IN';
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // --- ENHANCED WEB SPEECH API: SPEECH-TO-TEXT (STT) & WEB AUDIO ---
+    async function toggleSpeechRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            alert('Speech Recognition is not supported in your current browser. Please use Google Chrome, Microsoft Edge, or a Web Speech API-compatible browser.');
+            return;
+        }
+
+        const micBtn = document.getElementById('mic-toggle-btn');
+        const micIcon = document.getElementById('mic-icon');
+        const micText = document.getElementById('mic-btn-text');
+        const statusBanner = document.getElementById('speech-status-banner');
+        const answerInput = document.getElementById('user-answer-input');
+
+        if (isListening) {
+            stopSpeechRecognition(false);
+            return;
+        }
+
+        try {
+            // 4. Request Browser Mic Audio Stream with Explicit Echo & Noise Suppression
+            try {
+                mediaStreamInstance = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+                startAudioVisualizer(mediaStreamInstance);
+            } catch (micErr) {
+                console.warn('[Microphone Stream Acquisition Warning]:', micErr);
+            }
+
+            recognitionInstance = new SpeechRecognition();
+            recognitionInstance.lang = selectedSpeechLang || 'en-IN';
+            recognitionInstance.continuous = true;
+            recognitionInstance.interimResults = true;
+
+            // Preserve current manual input
+            accumulatedSpeechText = answerInput.value ? answerInput.value.trim() : '';
+
+            recognitionInstance.onstart = function() {
+                isListening = true;
+                if (micBtn) micBtn.className = 'btn btn-danger fw-bold px-3 shadow-sm d-flex align-items-center gap-2';
+                if (micIcon) micIcon.className = 'bi bi-mic-mute-fill fs-5';
+                if (micText) micText.textContent = 'Stop Recording';
+                if (statusBanner) statusBanner.classList.remove('d-none');
+            };
+
+            // 2. Real-Time Interim Transcript & Final Speech Result Aggregation
+            recognitionInstance.onresult = function(event) {
+                let finalTranscript = '';
+                let interimTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    accumulatedSpeechText += (accumulatedSpeechText ? ' ' : '') + finalTranscript.trim();
+                }
+
+                const liveText = accumulatedSpeechText + (interimTranscript ? (accumulatedSpeechText ? ' ' : '') + interimTranscript : '');
+                answerInput.value = sanitizeTechnicalTranscriptJS(liveText);
+                answerInput.dispatchEvent(new Event('input'));
+            };
+
+            recognitionInstance.onerror = function(event) {
+                console.error('Speech Recognition Error:', event.error);
+                if (event.error === 'not-allowed') {
+                    alert('Microphone access denied. Please grant microphone permissions in browser settings.');
+                    stopSpeechRecognition(true);
+                }
+            };
+
+            // 3. Auto-Keep-Alive Reconnection on Silent Pauses
+            recognitionInstance.onend = function() {
+                if (isListening) {
+                    console.log('[STT Keep-Alive]: Reconnecting speech engine after silent pause...');
+                    try {
+                        recognitionInstance.start();
+                    } catch (e) {
+                        setTimeout(() => {
+                            if (isListening && recognitionInstance) {
+                                try { recognitionInstance.start(); } catch (err) {}
+                            }
+                        }, 200);
+                    }
+                } else {
+                    stopSpeechUI();
+                }
+            };
+
+            recognitionInstance.start();
+
+        } catch (err) {
+            console.error('Failed to start Speech Recognition:', err);
+            stopSpeechRecognition(true);
+        }
+    }
+
+    function stopSpeechRecognition(forceStopAll = true) {
+        isListening = false;
+        if (recognitionInstance) {
+            try { recognitionInstance.stop(); } catch (e) {}
+        }
+        stopAudioVisualizer();
+        stopSpeechUI();
+    }
+
+    function stopSpeechUI() {
+        isListening = false;
+        const micBtn = document.getElementById('mic-toggle-btn');
+        const micIcon = document.getElementById('mic-icon');
+        const micText = document.getElementById('mic-btn-text');
+        const statusBanner = document.getElementById('speech-status-banner');
+
+        if (micBtn) micBtn.className = 'btn btn-outline-success fw-bold px-3 shadow-sm d-flex align-items-center gap-2';
+        if (micIcon) micIcon.className = 'bi bi-mic-fill fs-5';
+        if (micText) micText.textContent = 'Start Speaking';
+        if (statusBanner) statusBanner.classList.add('d-none');
+    }
+
+    // 5. Live Volume / Audio Waveform Meter Implementation
+    function startAudioVisualizer(stream) {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+
+            audioContextInstance = new AudioCtx();
+            const source = audioContextInstance.createMediaStreamSource(stream);
+            analyserInstance = audioContextInstance.createAnalyser();
+            analyserInstance.fftSize = 256;
+            source.connect(analyserInstance);
+
+            const bufferLength = analyserInstance.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            const volumeBar = document.getElementById('mic-volume-bar');
+
+            function updateVolumeMeter() {
+                if (!isListening || !analyserInstance) return;
+
+                analyserInstance.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength;
+                const volumePercent = Math.min(100, Math.round((average / 128) * 100));
+
+                if (volumeBar) {
+                    volumeBar.style.width = `${volumePercent}%`;
+                    if (volumePercent > 60) {
+                        volumeBar.className = 'progress-bar bg-danger';
+                    } else if (volumePercent > 20) {
+                        volumeBar.className = 'progress-bar bg-success';
+                    } else {
+                        volumeBar.className = 'progress-bar bg-info';
+                    }
+                }
+
+                visualizerAnimFrame = requestAnimationFrame(updateVolumeMeter);
+            }
+
+            updateVolumeMeter();
+        } catch (e) {
+            console.warn('[Audio Visualizer Error]:', e);
+        }
+    }
+
+    function stopAudioVisualizer() {
+        if (visualizerAnimFrame) {
+            cancelAnimationFrame(visualizerAnimFrame);
+            visualizerAnimFrame = null;
+        }
+        if (mediaStreamInstance) {
+            try {
+                mediaStreamInstance.getTracks().forEach(track => track.stop());
+            } catch (e) {}
+            mediaStreamInstance = null;
+        }
+        if (audioContextInstance) {
+            try { audioContextInstance.close(); } catch (e) {}
+            audioContextInstance = null;
+        }
+        const volumeBar = document.getElementById('mic-volume-bar');
+        if (volumeBar) volumeBar.style.width = '0%';
+    }
+
+    // --- START INTERVIEW FLOW ---
+    async function startInterview(event) {
+        event.preventDefault();
+        const roleInput = document.getElementById('target_role_input').value.trim();
+        const fileInput = document.getElementById('interview_resume_file');
+
+        targetRole = roleInput || "Software Engineer";
+
+        const setupCard = document.getElementById('setup-card');
+        const loadingState = document.getElementById('loading-state');
+        const room = document.getElementById('interview-room');
+
+        const formData = new FormData();
+        formData.append('target_role', targetRole);
+        if (fileInput.files && fileInput.files.length > 0) {
+            formData.append('file', fileInput.files[0]);
+        }
+
+        setupCard.classList.add('d-none');
+        loadingState.classList.remove('d-none');
+
+        try {
+            const resp = await fetch('/api/mock-interview/start', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+
+            if (!resp.ok || data.error) {
+                alert('Error starting interview: ' + (data.error || 'Unknown error'));
+                setupCard.classList.remove('d-none');
+                loadingState.classList.add('d-none');
+                return;
+            }
+
+            questionsList = data.questions || [];
+            if (questionsList.length === 0) {
+                alert('No interview questions could be generated. Please try again.');
+                setupCard.classList.remove('d-none');
+                loadingState.classList.add('d-none');
+                return;
+            }
+
+            currentQuestionIndex = 0;
+            evaluationsList = [];
+            isFollowupTurn = false;
+            initialQuestionAnswer = "";
+
+            loadingState.classList.add('d-none');
+            room.classList.remove('d-none');
+
+            document.getElementById('interview-role-title').textContent = `${targetRole} Mock Interview`;
+            renderCurrentQuestion();
+
+        } catch (err) {
+            alert('Failed to start interview: ' + err.message);
+            setupCard.classList.remove('d-none');
+            loadingState.classList.add('d-none');
+        }
+    }
+
+    function renderCurrentQuestion() {
+        if (currentQuestionIndex >= questionsList.length) {
+            finishInterview();
+            return;
+        }
+
+        isFollowupTurn = false;
+        initialQuestionAnswer = "";
+
+        const q = questionsList[currentQuestionIndex];
+        const total = questionsList.length;
+
+        document.getElementById('question-progress-text').textContent = `Question ${currentQuestionIndex + 1} of ${total}`;
+        document.getElementById('interview-progress-bar').style.width = `${((currentQuestionIndex + 1) / total) * 100}%`;
+
+        document.getElementById('q-category-badge').className = 'badge bg-dark text-success border border-success px-3 py-2 fs-6 mb-1';
+        document.getElementById('q-category-badge').textContent = q.category || 'Technical Question';
+        document.getElementById('current-question-text').textContent = `"${q.question}"`;
+        document.getElementById('current-question-focus').textContent = q.key_focus || 'Technical clarity & correctness';
+
+        const answerInput = document.getElementById('user-answer-input');
+        answerInput.value = '';
+        document.getElementById('char-counter').textContent = '0 characters';
+
+        const submitBtn = document.getElementById('submit-answer-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            if (currentQuestionIndex + 1 === total) {
+                submitBtn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Submit Final Answer & View Full Report';
+            } else {
+                submitBtn.innerHTML = '<i class="bi bi-arrow-right-circle-fill me-2"></i>Submit Answer & Next Question';
+            }
+        }
+
+        // Speak the question automatically
+        setTimeout(() => {
+            speakCurrentQuestion();
+        }, 300);
+    }
+
+    // --- SUBMIT ANSWER (Supports Dynamic Probing Follow-Ups) ---
+    async function submitAnswer() {
+        if (isListening) {
+            stopSpeechRecognition(true);
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+
+        const q = questionsList[currentQuestionIndex];
+        const answerInput = document.getElementById('user-answer-input').value.trim();
+        const submitBtn = document.getElementById('submit-answer-btn');
+
+        if (!answerInput) {
+            if (!confirm("You haven't spoken or typed an answer. Submit an empty response and proceed?")) {
+                return;
+            }
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Evaluating Response with Multi-Agent Panel...';
+
+        const payloadAnswer = isFollowupTurn ? (initialQuestionAnswer + "\n\n[Candidate Follow-Up Response]: " + answerInput) : answerInput;
+
+        try {
+            const resp = await fetch('/api/mock-interview/evaluate-answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question_id: q.id,
+                    question: q.question,
+                    category: q.category,
+                    user_answer: payloadAnswer,
+                    target_role: targetRole,
+                    is_followup: isFollowupTurn
+                })
+            });
+            const evalResult = await resp.json();
+
+            if (!resp.ok || evalResult.error) {
+                alert('Evaluation error: ' + (evalResult.error || 'Failed to process answer'));
+                submitBtn.disabled = false;
+                renderCurrentQuestion();
+                return;
+            }
+
+            // Check if Dynamic Follow-Up Agent triggers a probing question
+            if (evalResult.needs_followup && evalResult.followup_question && !isFollowupTurn) {
+                isFollowupTurn = true;
+                initialQuestionAnswer = answerInput;
+
+                // Update UI to display live follow-up probe
+                document.getElementById('q-category-badge').className = 'badge bg-warning text-dark px-3 py-2 fs-6 mb-1 shadow-sm';
+                document.getElementById('q-category-badge').textContent = 'Interviewer Follow-Up Probe';
+                document.getElementById('current-question-text').textContent = `"${evalResult.followup_question}"`;
+                document.getElementById('current-question-focus').textContent = 'Elaborate on specific implementation details, architecture & trade-offs.';
+
+                const inputEl = document.getElementById('user-answer-input');
+                inputEl.value = '';
+                document.getElementById('char-counter').textContent = '0 characters';
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-chat-left-text-fill me-2"></i>Submit Follow-Up Response & Continue';
+
+                setTimeout(() => {
+                    speakCurrentQuestion();
+                }, 300);
+                return;
+            }
+
+            evalResult.user_answer = payloadAnswer;
+            evalResult.question_text = q.question;
+            evalResult.category = q.category;
+            evaluationsList.push(evalResult);
+
+            // Immediately advance to next question
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questionsList.length) {
+                finishInterview();
+            } else {
+                renderCurrentQuestion();
+            }
+
+        } catch (err) {
+            alert('Error submitting answer: ' + err.message);
+            submitBtn.disabled = false;
+            renderCurrentQuestion();
+        }
+    }
+
+    // --- FINISH INTERVIEW & RENDER COMPREHENSIVE SCORE REPORT ---
+    async function finishInterview() {
+        document.getElementById('interview-room').classList.add('d-none');
+        const loadingState = document.getElementById('loading-state');
+        document.getElementById('loading-title').textContent = "Hiring Committee Chair Synthesizing Final Report...";
+        loadingState.classList.remove('d-none');
+
+        try {
+            const resp = await fetch('/api/mock-interview/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    target_role: targetRole,
+                    evaluations: evaluationsList
+                })
+            });
+            const report = await resp.json();
+
+            loadingState.classList.add('d-none');
+
+            if (!resp.ok || report.error) {
+                alert('Report generation error: ' + (report.error || 'Failed to generate final report'));
+                return;
+            }
+
+            renderFinalReport(report);
+
+        } catch (err) {
+            alert('Error completing interview: ' + err.message);
+            loadingState.classList.add('d-none');
+        }
+    }
+
+    function renderFinalReport(report) {
+        const reportCard = document.getElementById('final-report-card');
+        reportCard.classList.remove('d-none');
+
+        document.getElementById('report-percentage-score').textContent = report.overall_percentage;
+        const badgeSpan = document.getElementById('report-verdict-badge');
+        badgeSpan.innerHTML = `<i class="bi bi-trophy-fill me-2"></i>${escapeHtml(report.verdict_badge)}`;
+
+        document.getElementById('report-executive-summary').textContent = report.executive_summary || '';
+        document.getElementById('report-recommendation').textContent = report.readiness_recommendation || '';
+
+        // Strengths List
+        const sList = document.getElementById('report-strengths-list');
+        sList.innerHTML = (report.top_strengths || []).map(s => `<li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>${escapeHtml(s)}</li>`).join('');
+
+        // Improvements List
+        const iList = document.getElementById('report-improvements-list');
+        iList.innerHTML = (report.key_improvements || []).map(i => `<li class="mb-2"><i class="bi bi-arrow-up-right-circle text-warning me-2"></i>${escapeHtml(i)}</li>`).join('');
+
+        // Comprehensive Per-Question Breakdown List with Multi-Agent Indicators
+        const breakdownDiv = document.getElementById('report-questions-breakdown');
+        breakdownDiv.innerHTML = (report.evaluations || []).map((ev, idx) => {
+            const scoreClass = ev.score >= 80 ? 'bg-success text-white' : (ev.score >= 60 ? 'bg-warning text-dark' : 'bg-danger text-white');
+            const codeBadge = (ev.code_analysis && ev.code_analysis.has_code) ? `
+                <div class="mt-2 p-2 rounded small" style="background: rgba(13, 202, 240, 0.1); border: 1px solid rgba(13, 202, 240, 0.3);">
+                    <span class="text-info fw-bold"><i class="bi bi-code-slash me-1"></i>Code Execution Agent:</span> 
+                    Complexity: <strong class="text-white">${escapeHtml(ev.code_analysis.complexity)}</strong> | 
+                    Status: <span class="${ev.code_analysis.syntax_valid ? 'text-success' : 'text-danger'} fw-bold">${escapeHtml(ev.code_analysis.verdict)}</span>
+                </div>
+            ` : '';
+
+            return `
+            <div class="card p-4 shadow border-0 text-white fade-in-up" style="background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px;">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <span class="badge bg-dark text-success border border-success px-3 py-2 fs-6">
+                        <i class="bi bi-patch-question me-1"></i>Question ${idx + 1}: ${escapeHtml(ev.category || 'Technical Question')}
+                    </span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-dark text-info border border-info px-2 py-1 small">Tech: ${ev.technical_score || ev.score}/100</span>
+                        <span class="badge bg-dark text-warning border border-warning px-2 py-1 small">STAR Comm: ${ev.communication_score || ev.score}/100</span>
+                        <span class="badge ${scoreClass} fs-6 px-3 py-2 shadow-sm fw-bold">Overall: ${ev.score}/100</span>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-white mb-3" style="line-height: 1.4;">
+                    <i class="bi bi-quote text-success me-1"></i>${escapeHtml(ev.question_text)}
+                </h5>
+
+                <div class="p-3 rounded-3 mb-3 text-white" style="background: rgba(0, 0, 0, 0.35); border-left: 4px solid #10b981;">
+                    <small class="text-success fw-bold uppercase tracking-wider d-block mb-1">
+                        <i class="bi bi-person-fill me-1"></i>Your Response (Spoken / Typed):
+                    </small>
+                    <p class="mb-0 text-white-50" style="white-space: pre-wrap;">${escapeHtml(ev.user_answer || 'No answer was provided for this question.')}</p>
+                    ${codeBadge}
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3 h-100" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);">
+                            <h6 class="fw-bold text-success mb-2"><i class="bi bi-hand-thumbs-up-fill me-2"></i>Key Strengths</h6>
+                            <p class="small text-white-50 mb-0">${escapeHtml(ev.key_strengths || 'Demonstrated understanding of question concepts.')}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3 h-100" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25);">
+                            <h6 class="fw-bold text-warning mb-2"><i class="bi bi-lightning-charge-fill me-2"></i>Enhancements & Areas to Improve</h6>
+                            <p class="small text-white-50 mb-0">${escapeHtml(ev.areas_to_improve || 'Incorporate specific technical frameworks and trade-offs.')}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-3 mb-2" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25);">
+                    <h6 class="fw-bold text-info mb-2"><i class="bi bi-star-fill me-2"></i>Ideal Model Answer Strategy</h6>
+                    <p class="small text-white-50 mb-0">${escapeHtml(ev.ideal_answer_highlights || 'Structure response with concrete examples and technical depth.')}</p>
+                </div>
+
+                <div class="pt-2 text-white-50 small border-top border-secondary mt-2">
+                    <strong class="text-white"><i class="bi bi-cpu-fill text-success me-1"></i>Multi-Agent Evaluation Panel Verdict:</strong> ${escapeHtml(ev.feedback)}
+                </div>
+            </div>
+            `;
+        }).join('');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+</script>
+{% endblock %}
