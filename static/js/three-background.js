@@ -40,10 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Material
     const material = new THREE.PointsMaterial({
-        color: 0x6366f1, // Indigo/Purple tint
-        size: 4,
+        color: 0xffffff, // Stark white points
+        size: 3,
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.9,
         blending: THREE.AdditiveBlending
     });
 
@@ -52,9 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Lines (Connections)
     const lineMaterial = new THREE.LineBasicMaterial({
-        color: 0xa855f7, // Purple
+        color: 0x888888, // Crisp monochrome gray
         transparent: true,
-        opacity: 0.15
+        opacity: 0.2
     });
 
     // Mouse Interaction

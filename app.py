@@ -2,9 +2,24 @@ from flask import Flask, render_template, request, jsonify, send_file, send_from
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import google.generativeai as genai
 import os
+import shutil
 from dotenv import load_dotenv
 
 load_dotenv()
+
+os.makedirs("static/img", exist_ok=True)
+for src_name, dst_name in [
+    ("Robot face-pana.png", "static/img/robot-face-pana.png"),
+    ("Login-bro.png", "static/img/login-bro.png"),
+    ("Sign up-bro.png", "static/img/signup-bro.png"),
+    ("Forgot password-amico.png", "static/img/forgot-password-amico.png"),
+    ("Enter OTP-bro.png", "static/img/enter-otp-bro.png")
+]:
+    if os.path.exists(src_name):
+        try:
+            shutil.copy(src_name, dst_name)
+        except Exception:
+            pass
 
 import re
 import json
@@ -1770,6 +1785,12 @@ def dashboard():
         return render_template("dashboard.html")
 
     return render_template("dashboard.html")
+
+@app.route("/profile")
+@login_required
+def profile():
+    """Display user's profile, personal details, ratings, and account actions."""
+    return render_template("profile.html")
 
 @app.route("/api/analyze-resume", methods=["POST"])
 @login_required

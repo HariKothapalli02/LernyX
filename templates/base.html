@@ -83,15 +83,30 @@
     <div class="app-wrapper">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-dark sticky-top glass-nav">
-            <div class="container">
-                <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2"
-                    href="{{ url_for('home') }}">
-                    <div class="brand-icon">
-                        <i class="bi bi-robot fs-4"></i>
+            <div class="container-fluid px-3 px-md-4">
+                <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="{{ url_for('home') }}">
+                    <div class="brand-emblem-box">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </div>
-                    <span class="text-white">Lerny</span>X
+                    <div class="d-flex align-items-center">
+                        <span class="brand-title">Lerny</span>
+                        <span class="brand-x-badge">X</span>
+                    </div>
+                    <span class="brand-ai-tag">AI</span>
                 </a>
-                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+
+                <!-- Mobile Right Status Badge -->
+                <div class="d-flex d-lg-none align-items-center ms-auto">
+                    <span class="badge bg-black text-white border border-secondary mono-font px-2 py-1" style="font-size: 0.65rem; letter-spacing: 0.08em; border-radius: 0px !important;">
+                        <i class="bi bi-circle-fill me-1" style="font-size: 0.45rem; color: #ffffff;"></i>SYSTEM LIVE
+                    </span>
+                </div>
+
+                <button class="navbar-toggler border-1 border-white shadow-none d-none" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
                     aria-label="Toggle navigation">
                     <div class="toggler-icon">
@@ -101,43 +116,45 @@
                     </div>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto align-items-center gap-lg-2">
+                    <ul class="navbar-nav ms-auto align-items-center gap-lg-3">
                         <li class="nav-item d-none" id="pwa-install-item">
-                            <button id="pwa-install-btn" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm me-2 my-1">
+                            <button id="pwa-install-btn" class="btn btn-sm btn-light fw-bold px-3 py-1.5 rounded-2 me-2 my-1 d-flex align-items-center gap-1 text-black">
                                 <i class="bi bi-download me-1"></i>Install App
                             </button>
                         </li>
                         {% if current_user.is_authenticated %}
+                        {% if request.endpoint != 'home' %}
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('home') }}">
-                                <i class="bi bi-house-door"></i> Home
+                            <a class="nav-link d-flex align-items-center gap-2 fw-medium text-white" href="{{ url_for('home') }}">
+                                <i class="bi bi-house-door fs-6"></i> Home
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-2 fw-medium text-white" href="{{ url_for('dashboard') }}">
+                                <i class="bi bi-speedometer2 fs-6"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item ms-lg-2 me-lg-1">
+                            <a href="{{ url_for('profile') }}" class="user-profile-nav d-flex align-items-center gap-2 px-3 py-1.5 rounded-2 border border-secondary bg-black text-decoration-none">
+                                <i class="bi bi-person-fill text-white"></i>
+                                <span class="small fw-bold text-white text-uppercase" style="letter-spacing: 0.03em;">{{ current_user.username }}</span>
+                                <i class="bi bi-person-circle text-secondary small ms-1"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('dashboard') }}">
-                                <i class="bi bi-speedometer2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item ms-lg-3 me-lg-2">
-                            <div
-                                class="user-profile-nav d-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white bg-opacity-10 border border-white border-opacity-10">
-                                <i class="bi bi-person-circle text-primary"></i>
-                                <span class="small fw-medium text-white">{{ current_user.username }}</span>
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-sm btn-glass-outline rounded-pill px-3" href="{{ url_for('logout') }}">
+                            <a class="btn btn-sm btn-outline-light px-3 py-1.5 rounded-2 d-flex align-items-center gap-1" href="{{ url_for('logout') }}">
                                 <i class="bi bi-box-arrow-right me-1"></i> Logout
                             </a>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('login') }}">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            <a class="nav-link d-flex align-items-center gap-2 fw-medium text-white" href="{{ url_for('login') }}">
+                                <i class="bi bi-box-arrow-in-right fs-6"></i> Login
                             </a>
                         </li>
                         <li class="nav-item ms-lg-2">
-                            <a class="btn btn-sm btn-primary rounded-pill px-4 shadow-sm"
+                            <a class="btn btn-sm btn-light fw-bold px-4 py-1.5 rounded-2 text-black"
                                 href="{{ url_for('signup') }}">
                                 Sign Up
                             </a>
@@ -150,6 +167,7 @@
 
         <!-- Main Content -->
         <main class="flex-grow-1 position-relative" style="z-index: 1;">
+            {% if request.endpoint not in ['login', 'signup', 'forgot_password', 'verify_reset_otp', 'verify_signup', 'reset_password'] %}
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             <div class="container mt-3">
@@ -162,16 +180,37 @@
             </div>
             {% endif %}
             {% endwith %}
+            {% endif %}
 
             {% block content %}{% endblock %}
         </main>
 
         <!-- Footer -->
-        <footer class="text-center py-4 text-secondary position-relative" style="z-index: 1;">
+        {% if request.endpoint not in ['chat_main', 'profile'] %}
+        <footer class="text-center py-4 text-secondary position-relative mb-5 mb-lg-0" style="z-index: 1;">
             <div class="container">
                 <small>&copy; {{ now.year if now else 2025 }} LernyX. All rights reserved.</small>
             </div>
         </footer>
+        {% endif %}
+
+        <!-- Floating Glassmorphism Mobile Bottom Navigation Bar -->
+        {% if current_user.is_authenticated and request.endpoint not in ['login', 'signup', 'forgot_password', 'verify_reset_otp', 'verify_signup', 'reset_password'] %}
+        <div class="mobile-glass-bottom-bar d-lg-none">
+            <a href="{{ url_for('home') }}" class="mobile-nav-item {% if request.endpoint == 'home' %}active{% endif %}" title="Home">
+                <i class="bi bi-house-door-fill fs-5"></i>
+            </a>
+            <a href="{{ url_for('chat_main') }}" class="mobile-nav-item {% if request.endpoint in ['index', 'chat', 'chat_main'] %}active{% endif %}" title="Chat">
+                <i class="bi bi-chat-square-text-fill fs-5"></i>
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="mobile-nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}" title="Dashboard">
+                <i class="bi bi-speedometer2 fs-5"></i>
+            </a>
+            <a href="{{ url_for('profile') }}" class="mobile-nav-item {% if request.endpoint == 'profile' %}active{% endif %}" title="Profile">
+                <i class="bi bi-person-circle fs-5"></i>
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Bootstrap JS -->

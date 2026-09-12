@@ -1,359 +1,432 @@
 {% extends "base.html" %}
 
-{% block title %}LernyX - Learning Platform{% endblock %}
+{% block title %}Your Learning Hub - LernyX{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="text-center mb-5 fade-in-up">
-        <h1 class="display-4 fw-bold text-white mb-3 tracking-tight">Your Learning Hub</h1>
-        <p class="lead text-secondary">Access your AI tools, quizzes, and progress all in one place.</p>
-    </div>
+<div class="container py-4 home-page-container">
+    <!-- Top Hero Banner Card -->
+    <div class="card p-4 p-md-5 mb-4 bg-black border border-secondary text-white overflow-hidden position-relative hero-banner-card shadow-lg">
+        <div class="row align-items-center">
+            <!-- Left Hero Content -->
+            <div class="col-lg-7 col-md-8">
+                <div class="text-secondary small fw-bold tracking-widest uppercase mb-2 mono-font">LEARN × PRACTICE × GROW</div>
+                <h1 class="display-4 fw-bold text-white mb-2 tracking-tight">Your Learning <span class="fw-extrabold text-white">Hub</span></h1>
+                <p class="lead text-secondary mb-4" style="max-width: 540px; font-size: 1.05rem;">
+                    Access your AI tools, quizzes, and progress all in one place.
+                </p>
 
-    <div class="row g-4">
-        <!-- Chatbot -->
-        <div class="col-md-6 col-lg-4 fade-in-on-scroll">
-            <div class="glass-card h-100 d-flex flex-column">
-                <div class="mb-3 text-center">
-                    <i class="bi bi-chat-dots display-4 text-primary"></i>
-                </div>
-                <h5 class="card-title fw-bold text-white mb-3 text-center">AI Chatbot</h5>
-                <p class="text-secondary flex-grow-1 text-center">Ask coding questions, get explanations, and debug code
-                    with LernyX AI.</p>
-                <a href="{{ url_for('chat_main') }}" class="btn btn-glass w-100 mt-3">Open Chat</a>
-            </div>
-        </div>
-
-        <!-- Video Quiz -->
-        <div class="col-md-6 col-lg-4 fade-in-on-scroll delay-100">
-            <div class="glass-card h-100 d-flex flex-column">
-                <div class="mb-3 text-center">
-                    <i class="bi bi-youtube display-4 text-danger"></i>
-                </div>
-                <h5 class="card-title fw-bold text-white mb-3 text-center">Video Quiz</h5>
-                <p class="text-secondary flex-grow-1 text-center">Generate practice quizzes and notes from any
-                    educational YouTube video.</p>
-                <a href="{{ url_for('videoquiz') }}" class="btn btn-glass w-100 mt-3">Start Quiz</a>
-            </div>
-        </div>
-
-        <!-- Quiz Builder -->
-        <div class="col-md-6 col-lg-4 fade-in-on-scroll delay-200">
-            <div class="glass-card h-100 d-flex flex-column">
-                <div class="mb-3 text-center">
-                    <i class="bi bi-pencil-square display-4 text-success"></i>
-                </div>
-                <h5 class="card-title fw-bold text-white mb-3 text-center">Quiz Builder</h5>
-                <p class="text-secondary flex-grow-1 text-center">Create custom exams and share unique codes with
-                    students.</p>
-                <a href="{{ url_for('custom_quiz_builder') }}" class="btn btn-glass w-100 mt-3">Build Quiz</a>
-            </div>
-        </div>
-
-        <!-- Custom Exam -->
-        <div class="col-md-6 col-lg-4 fade-in-on-scroll delay-300">
-            <div class="glass-card h-100 d-flex flex-column">
-                <div class="mb-3 text-center">
-                    <i class="bi bi-journal-check display-4 text-warning"></i>
-                </div>
-                <h5 class="card-title fw-bold text-white mb-3 text-center">Take Exam</h5>
-                <p class="text-secondary flex-grow-1 text-center">Enter an exam code to take a custom assessment created
-                    by others.</p>
-                <a href="{{ url_for('custom_quiz_exam') }}" class="btn btn-glass w-100 mt-3">Enter Code</a>
-            </div>
-        </div>
-
-        <!-- Aptitude Quiz -->
-        <div class="col-md-6 col-lg-4 fade-in-on-scroll delay-400">
-            <div class="glass-card h-100 d-flex flex-column">
-                <div class="mb-3 text-center">
-                    <i class="bi bi-puzzle display-4 text-info"></i>
-                </div>
-                <h5 class="card-title fw-bold text-white mb-3 text-center">Aptitude Quiz</h5>
-                <p class="text-secondary flex-grow-1 text-center">Practice with 10,000+ aptitude questions across
-                    various difficulty levels.</p>
-                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-glass w-100 mt-3"><i
-                        class="bi bi-play-circle me-2"></i>Start Aptitude</a>
-            </div>
-        </div>
-
-        <!-- DSA Practice -->
-        <div class="col-md-6 col-lg-4 fade-in-on-scroll delay-500">
-            <div class="glass-card h-100 d-flex flex-column">
-                <div class="mb-3 text-center">
-                    <i class="bi bi-code-slash display-4 text-light"></i>
-                </div>
-                <h5 class="card-title fw-bold text-white mb-3 text-center">DSA Practice</h5>
-                <p class="text-secondary flex-grow-1 text-center">Write and execute Java code for Data Structures and
-                    Algorithms.</p>
-                <div class="mb-2 text-center">
-                    <span class="badge badge-glass">Score: {{ current_user.dsa_score }}</span>
-                </div>
-                <a href="{{ url_for('compiler') }}" class="btn btn-glass w-100 mt-3">Start Coding</a>
-            </div>
-        </div>
-
-        <!-- Full Horizontal Bar: AI Voice Mock Interview -->
-        <div class="col-12 mt-4 fade-in-on-scroll delay-550">
-            <div class="glass-card p-4 text-white" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.15)); border: 1px solid rgba(16, 185, 129, 0.3) !important;">
-                <div class="row align-items-center">
-                    <div class="col-lg-8 mb-3 mb-lg-0">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="p-3 rounded-circle" style="background: rgba(16, 185, 129, 0.2);">
-                                <i class="bi bi-mic-fill display-5 text-success"></i>
-                            </div>
-                            <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <h4 class="fw-bold mb-0 text-white">AI Voice Mock Interview</h4>
-                                    <span class="badge bg-success text-dark fw-bold px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-soundwave me-1"></i>Web Speech API</span>
-                                </div>
-                                <p class="text-secondary mb-0">Conduct a 1-on-1 voice-enabled AI Mock Interview based on your uploaded resume with real-time audio recognition and instant score evaluation.</p>
-                            </div>
+                <!-- Hero Metric Badges Box -->
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <div class="hero-metric-box">
+                        <i class="bi bi-book fs-5 text-white"></i>
+                        <div>
+                            <strong class="d-block text-white leading-none">6+</strong>
+                            <small class="text-secondary" style="font-size: 0.75rem;">Learning Tools</small>
                         </div>
                     </div>
-                    <div class="col-lg-4 text-lg-end">
-                        <a href="{{ url_for('mock_interview') }}" class="btn btn-success btn-lg fw-bold px-4 shadow" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
-                            <i class="bi bi-mic-fill me-2"></i>Take Mock Interview
-                        </a>
+                    <div class="hero-metric-box">
+                        <i class="bi bi-people fs-5 text-white"></i>
+                        <div>
+                            <strong class="d-block text-white leading-none">10K+</strong>
+                            <small class="text-secondary" style="font-size: 0.75rem;">Practice Questions</small>
+                        </div>
+                    </div>
+                    <div class="hero-metric-box">
+                        <i class="bi bi-bar-chart-line fs-5 text-white"></i>
+                        <div>
+                            <strong class="d-block text-white leading-none">Smarter</strong>
+                            <small class="text-secondary" style="font-size: 0.75rem;">Learning with AI</small>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Full Horizontal Bar: AI Virtual Placement Officer & Relocation Job Finder -->
-        <div class="col-12 mt-4 fade-in-on-scroll delay-600">
-            <div class="glass-card p-4 text-white" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15)); border: 1px solid rgba(139, 92, 246, 0.3) !important;">
-                <div class="row align-items-center">
-                    <div class="col-lg-8 mb-3 mb-lg-0">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="p-3 rounded-circle" style="background: rgba(99, 102, 241, 0.2);">
-                                <i class="bi bi-briefcase-fill display-5 text-primary"></i>
-                            </div>
-                            <div>
-                                <h4 class="fw-bold mb-1 text-white">AI Virtual Placement Officer & Relocation Job Finder</h4>
-                                <p class="text-secondary mb-0">Conduct an interactive assessment based on your resume & relocation preferences to unlock 21 matched LinkedIn jobs.</p>
-                            </div>
-                        </div>
+            <!-- Right Hero Graphic & Quote -->
+            <div class="col-lg-5 col-md-4 text-end d-none d-md-block">
+                <div class="d-flex align-items-center justify-content-end gap-4">
+                    <!-- Robot Mascot Asset Image -->
+                    <div class="hero-robot-graphic">
+                        <img src="{{ url_for('static', filename='img/robot-face-pana.png') }}" alt="LernyX AI Robot Mascot" class="hero-robot-img">
                     </div>
-                    <div class="col-lg-4 text-lg-end">
-                        <a href="{{ url_for('virtual_placement') }}" class="btn btn-primary btn-lg fw-bold px-4 shadow" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
-                            <i class="bi bi-rocket-takeoff me-2"></i>Start Virtual Assessment
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Virtual Assessment & Job Matcher Modal -->
-<div class="modal fade" id="virtualAssessmentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content text-white" style="background: #111827; border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title fw-bold text-white"><i class="bi bi-person-workspace text-primary me-2"></i>Virtual AI Career Officer & LinkedIn Job Matcher</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form id="assessment-form" onsubmit="runVirtualAssessment(event)" class="mb-4" enctype="multipart/form-data">
-                    <div id="saved-resume-alert" class="alert alert-info py-2 px-3 mb-3 d-none border-info">
-                        <i class="bi bi-file-earmark-check-fill text-info me-2"></i>Saved Resume active: <strong id="saved-resume-name">My Resume</strong> (or upload a new resume below).
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label fw-bold text-white"><i class="bi bi-file-earmark-arrow-up text-primary me-2"></i>Upload Your Resume <span class="text-danger">*</span></label>
-                            <input type="file" id="assessment_resume_file" class="form-control bg-dark text-white border-secondary" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg">
-                            <small class="text-muted">Supports PDF, DOCX, TXT, or Image. Uploading will index your resume into Pinecone & MongoDB.</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-medium text-white">Target Job Role / Title</label>
-                            <input type="text" id="target_role_input" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Full Stack Developer, Java Engineer" value="Software Engineer" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-medium text-white">Willingness to Relocate?</label>
-                            <select id="relocate_select" class="form-select bg-dark text-white border-secondary">
-                                <option value="Yes" selected>Yes - Willing to Relocate</option>
-                                <option value="No">No - Remote Only / Local</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-medium text-white">Preferred Job Locations / Cities</label>
-                            <input type="text" id="locations_input" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Bangalore, London, New York, Remote" value="Bangalore, India">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-medium text-white">Quick Virtual Notes / Key Skills</label>
-                            <input type="text" id="answers_input" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Proficient in Java, Spring Boot, React, Problem Solving">
-                        </div>
-                    </div>
-                    <button type="submit" id="assessment-btn" class="btn btn-primary mt-3 w-100 fw-bold py-2" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
-                        <i class="bi bi-cpu me-2"></i>Run Virtual Placement Assessment
-                    </button>
-                </form>
-
-                <div id="assessment-loading" class="d-none text-center py-5">
-                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-                    <h5 class="text-white mt-3 fw-bold">Evaluating Profile & Scraping Live LinkedIn Job Posts...</h5>
-                    <p class="text-muted small">Live Jobs Engine fetching up to 21 jobs (24h MongoDB Cache active).</p>
-                </div>
-
-                <div id="assessment-results" class="d-none">
-                    <div id="status-banner" class="alert p-3 mb-4"></div>
                     
-                    <div id="jobs-section">
-                        <h5 class="fw-bold text-white mb-3"><i class="bi bi-linkedin text-primary me-2"></i>21 Recommended LinkedIn Job Postings</h5>
-                        <div id="jobs-container" class="row g-3"></div>
+                    <div class="hero-quote-box d-none d-lg-block">
+                        <p class="fs-5 fst-italic text-white mb-1">“ Better skills<br>brighter future. ”</p>
+                        <small class="text-secondary mono-font" style="font-size: 0.8rem;">— LernyX AI</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- 6 Main Tool Cards Grid (2 rows x 3 columns) -->
+    <div class="row g-3 mb-4">
+        <!-- 1. AI Chatbot -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="tool-card-icon-box">
+                            <i class="bi bi-chat-square-quote fs-3 text-white"></i>
+                        </div>
+                        <a href="{{ url_for('chat_main') }}" class="tool-card-corner-arrow" title="Open AI Chatbot">
+                            <i class="bi bi-arrow-right fs-6"></i>
+                        </a>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">AI CHATBOT</h5>
+                    <p class="text-secondary small mb-4">Ask coding questions, get explanations, and debug code with LernyX AI.</p>
+                </div>
+                <a href="{{ url_for('chat_main') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-chat-dots-fill fs-6"></i>
+                        <span class="fw-bold">OPEN CHAT</span>
+                    </span>
+                    <i class="bi bi-arrow-right fs-6"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. Video Quiz -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="tool-card-icon-box">
+                            <i class="bi bi-play-btn-fill fs-3 text-white"></i>
+                        </div>
+                        <a href="{{ url_for('videoquiz') }}" class="tool-card-corner-arrow" title="Start Video Quiz">
+                            <i class="bi bi-arrow-right fs-6"></i>
+                        </a>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">VIDEO QUIZ</h5>
+                    <p class="text-secondary small mb-4">Generate practice quizzes and notes from any educational YouTube video.</p>
+                </div>
+                <a href="{{ url_for('videoquiz') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-play-fill fs-5"></i>
+                        <span class="fw-bold">START QUIZ</span>
+                    </span>
+                    <i class="bi bi-arrow-right fs-6"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. Quiz Builder -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="tool-card-icon-box">
+                            <i class="bi bi-pencil-square fs-3 text-white"></i>
+                        </div>
+                        <a href="{{ url_for('custom_quiz_builder') }}" class="tool-card-corner-arrow" title="Build Custom Quiz">
+                            <i class="bi bi-arrow-right fs-6"></i>
+                        </a>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">QUIZ BUILDER</h5>
+                    <p class="text-secondary small mb-4">Create custom exams and share unique codes with students.</p>
+                </div>
+                <a href="{{ url_for('custom_quiz_builder') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-plus-lg fs-6"></i>
+                        <span class="fw-bold">BUILD QUIZ</span>
+                    </span>
+                    <i class="bi bi-arrow-right fs-6"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. Take Exam -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="tool-card-icon-box">
+                            <i class="bi bi-journal-check fs-3 text-white"></i>
+                        </div>
+                        <a href="{{ url_for('custom_quiz_exam') }}" class="tool-card-corner-arrow" title="Enter Exam Code">
+                            <i class="bi bi-arrow-right fs-6"></i>
+                        </a>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">TAKE EXAM</h5>
+                    <p class="text-secondary small mb-4">Enter an exam code to take a custom assessment created by others.</p>
+                </div>
+                <a href="{{ url_for('custom_quiz_exam') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-check-fill fs-6"></i>
+                        <span class="fw-bold">ENTER CODE</span>
+                    </span>
+                    <i class="bi bi-arrow-right fs-6"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 5. Aptitude Quiz -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="tool-card-icon-box">
+                            <i class="bi bi-puzzle-fill fs-3 text-white"></i>
+                        </div>
+                        <a href="{{ url_for('aptitude_quiz') }}" class="tool-card-corner-arrow" title="Start Aptitude Practice">
+                            <i class="bi bi-arrow-right fs-6"></i>
+                        </a>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">APTITUDE QUIZ</h5>
+                    <p class="text-secondary small mb-4">Practice with 10,000+ aptitude questions across various difficulty levels.</p>
+                </div>
+                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-bullseye fs-6"></i>
+                        <span class="fw-bold">START PRACTICE</span>
+                    </span>
+                    <i class="bi bi-arrow-right fs-6"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 6. DSA Practice -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="tool-card-icon-box">
+                            <i class="bi bi-code-slash fs-3 text-white"></i>
+                        </div>
+                        <a href="{{ url_for('compiler') }}" class="tool-card-corner-arrow" title="Start Coding Practice">
+                            <i class="bi bi-arrow-right fs-6"></i>
+                        </a>
+                    </div>
+                    <h5 class="fw-bold text-white mb-2">DSA PRACTICE</h5>
+                    <p class="text-secondary small mb-4">Write and execute Java code for Data Structures and Algorithms.</p>
+                </div>
+                <a href="{{ url_for('compiler') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-code fs-5"></i>
+                        <span class="fw-bold">START CODING</span>
+                    </span>
+                    <i class="bi bi-arrow-right fs-6"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Career & Interview Suite Section Header -->
+    <div class="d-flex align-items-center justify-content-between mb-3 mt-4">
+        <div class="d-flex align-items-center gap-2">
+            <span class="mono-font text-secondary small">[ SUITE ]</span>
+            <h5 class="fw-bold text-white mb-0 tracking-tight text-uppercase">AI Career & Interview Suite</h5>
+        </div>
+        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.72rem;">2 ADVANCED ENGINES</span>
+    </div>
+
+    <!-- 2 Column Career & Interview Suite Cards -->
+    <div class="row g-3">
+        <!-- 1. AI Voice Mock Interview Card -->
+        <div class="col-lg-6">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+                <div>
+                    <!-- Header Badges -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="tool-card-icon-box">
+                            <i class="bi bi-mic-fill fs-3 text-white"></i>
+                        </div>
+                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.7rem;">
+                            <i class="bi bi-soundwave me-1"></i>Web Speech Engine
+                        </span>
+                    </div>
+
+                    <h4 class="fw-bold text-white mb-2">AI Voice Mock Interview</h4>
+                    <p class="text-secondary small mb-3" style="line-height: 1.5;">
+                        Conduct a 1-on-1 voice-enabled AI Mock Interview based on your uploaded resume with real-time audio recognition and instant score evaluation.
+                    </p>
+
+                    <!-- Feature Tags -->
+                    <div class="d-flex flex-wrap gap-1.5 mb-4">
+                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
+                            <i class="bi bi-mic me-1 text-white"></i>Real-time Audio
+                        </span>
+                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
+                            <i class="bi bi-file-earmark-person me-1 text-white"></i>Resume Analysis
+                        </span>
+                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
+                            <i class="bi bi-graph-up-arrow me-1 text-white"></i>Instant Scoring
+                        </span>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('mock_interview') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-mic-fill fs-6"></i>
+                        <span class="fw-bold">TAKE MOCK INTERVIEW</span>
+                    </span>
+                    <i class="bi bi-arrow-right fs-6"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. AI Virtual Placement Officer Card -->
+        <div class="col-lg-6">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+                <div>
+                    <!-- Header Badges -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="tool-card-icon-box">
+                            <i class="bi bi-briefcase-fill fs-3 text-white"></i>
+                        </div>
+                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.7rem;">
+                            <i class="bi bi-building me-1"></i>Career Engine
+                        </span>
+                    </div>
+
+                    <h4 class="fw-bold text-white mb-2">AI Virtual Placement Officer</h4>
+                    <p class="text-secondary small mb-3" style="line-height: 1.5;">
+                        Conduct an interactive assessment based on your resume & relocation preferences to unlock matched LinkedIn job listings.
+                    </p>
+
+                    <!-- Feature Tags -->
+                    <div class="d-flex flex-wrap gap-1.5 mb-4">
+                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
+                            <i class="bi bi-geo-alt me-1 text-white"></i>Relocation Match
+                        </span>
+                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
+                            <i class="bi bi-linkedin me-1 text-white"></i>LinkedIn Jobs
+                        </span>
+                        <span class="badge bg-black text-secondary border border-secondary fw-normal" style="font-size: 0.7rem;">
+                            <i class="bi bi-rocket-takeoff me-1 text-white"></i>Career Map
+                        </span>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('virtual_placement') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-rocket-takeoff fs-6"></i>
+                        <span class="fw-bold">START VIRTUAL ASSESSMENT</span>
+                    </span>
+                    <i class="bi bi-arrow-right fs-6"></i>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', checkSavedResume);
-
-    async function checkSavedResume() {
-        try {
-            const resp = await fetch('/api/latest-resume-review');
-            const data = await resp.json();
-            if (resp.ok && data.review && data.review.filename) {
-                const alertDiv = document.getElementById('saved-resume-alert');
-                const nameSpan = document.getElementById('saved-resume-name');
-                if (alertDiv && nameSpan) {
-                    nameSpan.textContent = data.review.filename;
-                    alertDiv.classList.remove('d-none');
-                }
-                window.hasSavedResume = true;
-            } else {
-                window.hasSavedResume = false;
-            }
-        } catch (err) {
-            console.error('Error checking saved resume:', err);
-        }
+<!-- Custom Page CSS -->
+<style>
+    .home-page-container {
+        max-width: 1240px;
     }
 
-    async function runVirtualAssessment(event) {
-        event.preventDefault();
-        const fileInput = document.getElementById('assessment_resume_file');
-        const role = document.getElementById('target_role_input').value.trim();
-        const relocate = document.getElementById('relocate_select').value;
-        const locations = document.getElementById('locations_input').value.trim();
-        const answers = document.getElementById('answers_input').value.trim();
-
-        const btn = document.getElementById('assessment-btn');
-        const loading = document.getElementById('assessment-loading');
-        const results = document.getElementById('assessment-results');
-        const banner = document.getElementById('status-banner');
-        const jobsContainer = document.getElementById('jobs-container');
-
-        // Check if user uploaded a file OR has a saved resume
-        const hasFile = fileInput.files && fileInput.files.length > 0;
-        if (!hasFile && !window.hasSavedResume) {
-            alert('Please select and upload your resume file (PDF, DOCX, TXT, Image) first to run the Virtual Assessment!');
-            return;
-        }
-
-        const formData = new FormData();
-        if (hasFile) {
-            formData.append('file', fileInput.files[0]);
-        }
-        formData.append('target_role', role);
-        formData.append('relocate', relocate);
-        formData.append('preferred_locations', locations);
-        formData.append('answers', answers);
-
-        btn.disabled = true;
-        loading.classList.remove('d-none');
-        results.classList.add('d-none');
-
-        try {
-            const resp = await fetch('/api/career/virtual-assessment', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await resp.json();
-
-            if (!resp.ok || data.error) {
-                alert('Assessment error: ' + (data.error || 'Failed to complete assessment'));
-                return;
-            }
-
-            results.classList.remove('d-none');
-            
-            if (!data.threshold_passed) {
-                banner.className = 'alert alert-warning border-warning text-white p-3 p-md-4 rounded-3 shadow text-break overflow-hidden';
-                banner.innerHTML = `
-                    <div class="d-flex flex-column flex-sm-row align-items-start gap-3">
-                        <i class="bi bi-exclamation-triangle-fill fs-2 text-warning flex-shrink-0 mb-2 mb-sm-0"></i>
-                        <div class="w-100 min-w-0">
-                            <h5 class="fw-bold text-warning mb-1 text-break" style="font-size: clamp(1rem, 3vw, 1.3rem);">${escapeHtml(data.message)}</h5>
-                            <p class="mb-2 text-break">${escapeHtml(data.feedback)}</p>
-                            <div class="badge bg-dark fs-6 text-warning border border-warning p-2 text-wrap text-start mw-100">${escapeHtml(data.recommendation)}</div>
-                        </div>
-                    </div>
-                `;
-                jobsContainer.innerHTML = '';
-                document.getElementById('jobs-section').classList.add('d-none');
-            } else {
-                banner.className = 'alert alert-success border-success text-white p-3 p-md-4 rounded-3 shadow text-break overflow-hidden';
-                banner.innerHTML = `
-                    <div class="d-flex flex-column flex-sm-row align-items-start gap-3">
-                        <i class="bi bi-check-circle-fill fs-2 text-success flex-shrink-0 mb-2 mb-sm-0"></i>
-                        <div class="w-100 min-w-0">
-                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                                <span class="badge bg-warning text-dark px-2 px-sm-3 py-2 fs-6 shadow-sm text-wrap text-start mw-100"><i class="bi bi-person-badge-fill me-1"></i>Detected Level: ${escapeHtml(data.experience_label || 'Fresher / Entry Level')}</span>
-                                <span class="badge bg-primary px-2 px-sm-3 py-2 fs-6 shadow-sm text-wrap text-start"><i class="bi bi-graph-up-arrow me-1"></i>Score: ${data.score}%</span>
-                            </div>
-                            <h5 class="fw-bold text-success mb-1 text-break" style="font-size: clamp(1rem, 3vw, 1.3rem);">${escapeHtml(data.message)}</h5>
-                            <p class="mb-0 text-white-50 text-break">${escapeHtml(data.feedback)}</p>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('jobs-section').classList.remove('d-none');
-                const jobs = data.jobs || [];
-                if (jobs.length === 0) {
-                    jobsContainer.innerHTML = '<div class="col-12 text-center text-muted py-4">No matching job posts found for this location. Try adjusting location filters.</div>';
-                } else {
-                    jobsContainer.innerHTML = jobs.map((job, idx) => `
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="card h-100 p-3 shadow" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); word-break: break-word; overflow: hidden;">
-                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
-                                    <span class="badge bg-primary">Job #${idx + 1}</span>
-                                    <span class="badge bg-dark text-info border border-info">${escapeHtml(job.location || 'Remote')}</span>
-                                </div>
-                                <h6 class="fw-bold text-white mb-1 text-break" style="font-size: 0.95rem; line-height: 1.3;">${escapeHtml(job.title)}</h6>
-                                <div class="text-secondary small mb-2 text-break"><i class="bi bi-building me-1"></i>${escapeHtml(job.company)}</div>
-                                <p class="text-muted small flex-grow-1 text-break" style="font-size: 0.82rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${escapeHtml(job.description)}</p>
-                                <a href="${escapeHtml(job.link)}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mt-2 fw-bold py-2">
-                                    <i class="bi bi-linkedin me-1"></i>Apply on LinkedIn <i class="bi bi-box-arrow-up-right ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            }
-        } catch (err) {
-            alert('Error: ' + err.message);
-        } finally {
-            btn.disabled = false;
-            loading.classList.add('d-none');
-        }
+    /* Hero Banner Card */
+    .hero-banner-card {
+        background: linear-gradient(135deg, #0d0d0d 0%, #000000 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 0px !important;
     }
 
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str || '';
-        return div.innerHTML;
+    .hero-metric-box {
+        background: #000000;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 0px !important;
+        padding: 0.6rem 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
+    .leading-none {
+        line-height: 1.1;
+    }
 
-    document.querySelectorAll('.fade-in-on-scroll').forEach(el => observer.observe(el));
-</script>
+    .hero-robot-img {
+        max-width: 160px;
+        height: auto;
+        filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+        object-fit: contain;
+    }
+
+    /* Grid Cards */
+    .tool-grid-card {
+        background: #000000 !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 0px !important;
+        transition: all 0.2s ease;
+    }
+
+    .tool-grid-card:hover {
+        border-color: #ffffff !important;
+        background: #0a0a0a !important;
+        transform: translateY(-4px);
+        box-shadow: 4px 4px 0px rgba(255, 255, 255, 0.2);
+    }
+
+    .tool-card-icon-box {
+        width: 52px;
+        height: 52px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 0px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000000;
+        flex-shrink: 0;
+    }
+
+    .tool-card-corner-arrow {
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 0px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        background: #000000;
+    }
+
+    .tool-card-corner-arrow:hover {
+        background: #ffffff;
+        color: #000000;
+        border-color: #ffffff;
+    }
+
+    .tool-card-corner-arrow:hover i {
+        color: #000000 !important;
+    }
+
+    .tool-card-bottom-btn {
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 0px !important;
+        background: #000000 !important;
+        color: #ffffff !important;
+        transition: all 0.2s ease;
+    }
+
+    .tool-card-bottom-btn:hover {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border-color: #ffffff !important;
+    }
+
+    @media (max-width: 767.98px) {
+        .hero-banner-card {
+            padding: 1.5rem 1.25rem !important;
+        }
+
+        .hero-banner-card h1 {
+            font-size: 2.1rem !important;
+        }
+
+        .hero-metric-box {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            flex: 1 1 calc(50% - 10px);
+        }
+
+        .tool-grid-card {
+            padding: 1.25rem !important;
+        }
+    }
+</style>
 {% endblock %}

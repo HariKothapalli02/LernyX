@@ -1,67 +1,165 @@
-<!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Email - LernyX</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+{% block title %}Verify Email - LernyX{% endblock %}
 
-<body class="d-flex align-items-center min-vh-100 py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow-lg border-0">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <h2 class="fw-bold text-white">Verify Email</h2>
-                            <p class="text-muted">Enter the OTP sent to your email</p>
-                        </div>
+{% block content %}
+<style>
+    /* Hide Navbar, Footer, and Three.js background */
+    .navbar,
+    footer,
+    #canvas-container {
+        display: none !important;
+    }
 
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                        {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        {% endfor %}
-                        {% endif %}
-                        {% endwith %}
+    body {
+        min-height: 100vh;
+        overflow-y: auto !important;
+        background: var(--bg-deep);
+    }
 
-                        <form method="POST" action="{{ url_for('verify_signup') }}">
-                            <div class="mb-4">
-                                <label for="otp" class="form-label text-muted small fw-bold">One-Time Password
-                                    (OTP)</label>
-                                <input type="text"
-                                    class="form-control bg-dark text-white border-secondary text-center fs-4" id="otp"
-                                    name="otp" required autofocus maxlength="6" pattern="\d{6}"
-                                    title="Please enter the 6-digit OTP">
-                            </div>
+    .split-screen {
+        min-height: 100vh;
+        width: 100vw;
+        overflow-y: auto;
+    }
 
-                            <div class="d-grid mb-4">
-                                <button type="submit" class="btn btn-primary btn-lg">Verify & Create Account</button>
-                            </div>
-                        </form>
+    .left-pane {
+        background: #000000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem;
+        position: relative;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        min-height: 100vh;
+    }
 
-                        <div class="text-center text-muted small">
-                            <p class="mb-0">Didn't receive code? <a href="{{ url_for('signup') }}"
-                                    class="text-primary text-decoration-none">Try Again</a></p>
-                        </div>
+    .auth-illustration-img {
+        max-width: 80%;
+        max-height: 75vh;
+        object-fit: contain;
+        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.15));
+    }
+
+    .right-pane {
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2.5rem 1.5rem;
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .otp-input {
+        background: #000000;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 0px !important;
+        color: #ffffff;
+        padding: 0.8rem 1rem;
+        font-size: 1.8rem;
+        letter-spacing: 0.4em;
+        text-align: center;
+        font-family: var(--font-mono);
+        transition: all 0.2s ease;
+    }
+
+    .otp-input:focus {
+        background: #080808;
+        border-color: #ffffff;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+    }
+
+    .btn-action {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid #ffffff !important;
+        border-radius: 0px !important;
+        padding: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.2s ease;
+        margin-top: 1rem;
+    }
+
+    .btn-action:hover {
+        background: #000000 !important;
+        color: #ffffff !important;
+        box-shadow: 3px 3px 0px #ffffff;
+    }
+
+    @media (max-width: 992px) {
+        .left-pane {
+            display: none !important;
+        }
+
+        .right-pane {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container-fluid p-0 split-screen">
+    <div class="row g-0 h-100">
+        <!-- Left Side: Illustration -->
+        <div class="col-lg-7 left-pane d-none d-lg-flex">
+            <img src="{{ url_for('static', filename='img/enter-otp-bro.png') }}" alt="Verify Signup OTP Illustration" class="auth-illustration-img">
+        </div>
+
+        <!-- Right Side: Form -->
+        <div class="col-lg-5 col-md-12 right-pane">
+            <div class="login-container fade-in-up">
+                <!-- Mobile-Only Illustration Image Above Title & Text Fields -->
+                <div class="mobile-auth-illustration d-lg-none text-center mb-3">
+                    <img src="{{ url_for('static', filename='img/enter-otp-bro.png') }}" alt="Verify Signup OTP Illustration" class="img-fluid" style="max-height: 160px; object-fit: contain; filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.18));">
+                </div>
+
+                <h1 class="fw-bold text-white mb-2 display-5">Verify Email</h1>
+                <p class="text-secondary small mb-4">Enter the 6-digit confirmation code sent to your email to complete registration.</p>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show text-start mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('verify_signup') }}">
+                    <div class="mb-4 text-start">
+                        <label for="otp" class="form-label text-secondary small fw-bold text-uppercase mono-font">6-Digit OTP</label>
+                        <input type="text" class="form-control otp-input" id="otp" name="otp" required autofocus maxlength="6" pattern="\d{6}" placeholder="------">
                     </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-action">
+                        VERIFY & CREATE ACCOUNT
+                    </button>
+                </form>
+
+                <div class="mt-4">
+                    <p class="text-secondary small">
+                        Didn't receive the code?
+                        <a href="{{ url_for('signup') }}" class="text-white text-decoration-none fw-bold border-bottom border-white pb-1">Try Again</a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
+</div>
+{% endblock %}

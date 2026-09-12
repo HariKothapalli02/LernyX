@@ -1,509 +1,671 @@
 {% extends "base.html" %}
 
-{% block title %}Chatbot - LernyX{% endblock %}
+{% block title %}AI Chatbot - LernyX{% endblock %}
 
 {% block content %}
-<div class="container-fluid h-100 p-0 app-wrapper">
-    <div class="row h-100 g-0">
-        <!-- Chat Area -->
-        <div class="col-lg-9 col-md-8 d-flex flex-column h-100 chat-main-col">
-            <div class="glass-card flex-grow-1 d-flex flex-column p-0 overflow-hidden border-0 rounded-0">
-                <!-- Header -->
-                <div
-                    class="p-3 border-bottom border-light border-opacity-10 d-flex justify-content-between align-items-center bg-black bg-opacity-25 chat-header">
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="btn btn-link text-white p-0 d-md-none me-2" type="button"
-                            data-bs-toggle="offcanvas" data-bs-target="#historySidebar" aria-controls="historySidebar">
-                            <i class="bi bi-layout-sidebar-inset fs-4"></i>
+<div class="container-fluid p-0 m-0 chat-page-wrapper">
+    <div class="row g-0 h-100 m-0">
+        <!-- Main Chat Area (Left Column) -->
+        <div class="col-lg-9 col-md-8 d-flex flex-column h-100 border-end border-secondary">
+            <div class="card h-100 bg-black border-0 d-flex flex-column overflow-hidden">
+                <!-- Chat Card Header -->
+                <div class="px-3 py-3 border-bottom border-secondary d-flex justify-content-between align-items-center bg-black chat-header-bar">
+                    <div class="d-flex align-items-center gap-2 gap-md-3">
+                        <button class="btn btn-sm btn-outline-light d-md-none px-2 py-1" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#historySidebar" aria-controls="historySidebar" title="Chat History">
+                            <i class="bi bi-layout-sidebar-inset fs-6"></i>
                         </button>
-                        <i class="bi bi-robot text-primary fs-4"></i>
-                        <div>
-                            <h5 class="mb-0 text-white fw-bold">AI Chatbot</h5>
-                            <small class="text-secondary d-none d-sm-block">Powered by LernyX AI</small>
+                        <div class="chat-header-robot-icon d-none d-sm-flex">
+                            <i class="bi bi-robot fs-6 text-white"></i>
+                        </div>
+                        <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-white fw-bold tracking-tight lh-1" style="font-size: 0.95rem;">AI CHATBOT</h6>
+                            <small class="text-secondary mt-1 lh-1 d-none d-sm-block" style="font-size: 0.72rem;">Powered by LernyX AI</small>
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge badge-glass d-none d-sm-inline-block">AI Online</span>
-                        <button class="btn btn-sm btn-glass-outline d-md-none" onclick="startNewChat()">
+                        <span class="online-pill-badge d-none d-sm-inline-flex">
+                            <span class="online-dot"></span> AI ONLINE
+                        </span>
+                        <button class="btn btn-sm btn-outline-light fw-bold px-2 py-1 ms-1 d-md-none" onclick="startNewChat()" title="New Chat">
                             <i class="bi bi-plus-lg"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Chat Messages -->
-                <div class="card-body p-0 position-relative flex-grow-1 overflow-hidden">
-                    <div id="chat" class="chat-box p-3 p-md-4"
-                        style="height: 100%; overflow-y: auto; scroll-behavior: smooth;">
-                        <!-- Welcome Message -->
-                        <div class="text-center mt-5 fade-in-up welcome-screen">
-                            <div class="mb-3">
-                                <i class="bi bi-stars text-warning display-4"></i>
+                <!-- Chat Messages / Welcome Empty State -->
+                <div class="card-body p-0 flex-grow-1 overflow-hidden position-relative bg-black">
+                    <div id="chat" class="chat-scroll-box">
+                        <!-- Welcome Screen -->
+                        <div class="text-center welcome-screen-box fade-in-up">
+                            <!-- Mascot Emblem Box -->
+                            <div class="mascot-circle-wrapper mb-3">
+                                <div class="mascot-emblem-box">
+                                    <i class="bi bi-robot fs-4 text-white"></i>
+                                </div>
                             </div>
-                            <h3 class="text-white fw-bold">How can I help you today?</h3>
-                            <p class="text-secondary px-3">Ask me about code, debugging, or complex concepts.</p>
+
+                            <h4 class="text-white fw-bold mb-1 welcome-title">How can I help you <span class="fw-normal text-secondary">today?</span></h4>
+                            <p class="text-secondary mx-auto mb-3 welcome-desc">
+                                Ask me anything about software engineering, code debugging, system architecture, or DSA concepts.
+                            </p>
+
+                            <!-- Quick Prompts Pills Grid (2x2) -->
+                            <div class="quick-prompts-grid row g-2 justify-content-center">
+                                <div class="col-sm-6">
+                                    <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Explain the concept of ')">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-lightbulb text-white fs-6"></i>
+                                            <span>Explain a concept</span>
+                                        </span>
+                                        <i class="bi bi-arrow-right text-secondary small"></i>
+                                    </button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Can you help me debug this code?\n\n```\n\n```')">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-code-slash text-white fs-6"></i>
+                                            <span>Debug my code</span>
+                                        </span>
+                                        <i class="bi bi-arrow-right text-secondary small"></i>
+                                    </button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Give me system design ideas for ')">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-layers text-white fs-6"></i>
+                                            <span>System design ideas</span>
+                                        </span>
+                                        <i class="bi bi-arrow-right text-secondary small"></i>
+                                    </button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Help me solve a DSA problem related to ')">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-bullseye text-white fs-6"></i>
+                                            <span>Solve DSA problem</span>
+                                        </span>
+                                        <i class="bi bi-arrow-right text-secondary small"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Input Area -->
-                <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-25 chat-input-area">
-                    <!-- File Preview -->
-                    <div id="file-preview"
-                        class="d-none mb-2 p-2 rounded border border-secondary bg-dark bg-opacity-50 position-relative"
-                        style="width: fit-content;">
-                        <span id="file-name" class="text-light small me-3"></span>
-                        <button type="button"
-                            class="btn-close btn-close-white small position-absolute top-0 start-100 translate-middle"
-                            aria-label="Close" onclick="clearFile()"></button>
+                <!-- Input Footer -->
+                <div class="p-2.5 border-top border-secondary bg-black chat-input-footer">
+                    <!-- File Attachment Preview -->
+                    <div id="file-preview" class="d-none mb-2 p-1.5 border border-secondary bg-dark rounded position-relative align-items-center gap-2" style="width: fit-content;">
+                        <i class="bi bi-file-earmark-text text-white small"></i>
+                        <span id="file-name" class="text-white small mono-font" style="font-size: 0.78rem;"></span>
+                        <button type="button" class="btn-close btn-close-white ms-2 small" aria-label="Close" onclick="clearFile()"></button>
                     </div>
 
-                    <div class="input-group">
-                        <input type="file" id="file-input" class="d-none" accept=".pdf,.jpg,.jpeg,.png,.webp"
-                            onchange="handleFileSelect(this)">
-                        <button class="btn btn-glass-outline border-end-0" type="button"
-                            onclick="document.getElementById('file-input').click()" title="Attach file">
-                            <i class="bi bi-paperclip"></i>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="file" id="file-input" class="d-none" accept=".pdf,.jpg,.jpeg,.png,.webp" onchange="handleFileSelect(this)">
+                        <button class="btn btn-outline-secondary attachment-square-btn" type="button" onclick="document.getElementById('file-input').click()" title="Attach File">
+                            <i class="bi bi-paperclip fs-6 text-white"></i>
                         </button>
-                        <input type="text" id="message" class="form-control border-start-0 border-end-0"
-                            placeholder="Type your question..." autocomplete="off" style="height: 50px;">
-                        <button class="btn btn-primary px-3 px-md-4" type="button" onclick="send()">
-                            <span class="d-none d-md-inline">Send</span> <i class="bi bi-send-fill ms-md-1"></i>
-                        </button>
+                        
+                        <div class="input-group input-pill-container flex-grow-1">
+                            <input type="text" id="message" class="form-control chat-input-field" placeholder="Type your question here..." autocomplete="off">
+                            <button class="btn btn-light send-pill-btn" type="button" onclick="send()">
+                                <span>SEND</span> <i class="bi bi-send-fill ms-1 small"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="form-text text-secondary small mt-2 d-flex justify-content-between">
-                        <span class="d-none d-sm-inline">Supported: PDF, Images (JPG, PNG, WebP)</span>
-                        <span class="d-none d-md-inline">Press Enter to send</span>
+
+                    <div class="d-none d-sm-flex justify-content-between align-items-center text-secondary small mt-1.5 px-1" style="font-size: 0.72rem;">
+                        <span><i class="bi bi-info-circle me-1"></i>Supported: PDF, Images (JPG, PNG, WebP)</span>
+                        <span><i class="bi bi-keyboard me-1"></i>Press Enter to send</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- History Sidebar (Desktop) -->
-        <div class="col-lg-3 col-md-4 d-none d-md-flex flex-column h-100 border-start border-light border-opacity-10">
-            <div class="glass-card h-100 d-flex flex-column p-0 overflow-hidden border-0 rounded-0">
-                <div class="p-3 border-bottom border-light border-opacity-10 bg-black bg-opacity-25">
-                    <h5 class="mb-0 text-white fw-bold"><i class="bi bi-clock-history me-2"></i>History</h5>
+        <!-- History Sidebar (Right Column - Desktop) -->
+        <div class="col-lg-3 col-md-4 d-none d-md-flex flex-column h-100">
+            <div class="card h-100 bg-black border-0 d-flex flex-column overflow-hidden">
+                <div class="px-3 py-3 border-bottom border-secondary d-flex align-items-center gap-2 bg-black chat-header-bar">
+                    <i class="bi bi-clock fs-6 text-white me-1"></i>
+                    <h6 class="mb-0 text-white fw-bold lh-1">Chat History</h6>
                 </div>
-                <div class="p-3 flex-grow-1 overflow-auto" id="history-list">
-                    <!-- History items will be populated here -->
+                
+                <div class="card-body p-2 flex-grow-1 overflow-auto" id="history-list">
+                    <!-- Populated dynamically via JS -->
                 </div>
-                <div class="p-3 border-top border-light border-opacity-10 bg-black bg-opacity-25">
-                    <button class="btn btn-glass-outline w-100 btn-sm" onclick="startNewChat()">
-                        <i class="bi bi-plus-lg me-2"></i>New Chat
+
+                <div class="p-2.5 border-top border-secondary bg-black">
+                    <button class="btn btn-outline-light w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2" style="font-size: 0.82rem;" onclick="startNewChat()">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>NEW CHAT</span>
                     </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- History Sidebar (Mobile Offcanvas) -->
-        <div class="offcanvas offcanvas-start bg-dark text-white border-end border-light border-opacity-10"
-            tabindex="-1" id="historySidebar" aria-labelledby="historySidebarLabel"
-            style="width: 280px; background: rgba(15, 23, 42, 0.95) !important; backdrop-filter: blur(20px);">
-            <div class="offcanvas-header border-bottom border-light border-opacity-10">
-                <h5 class="offcanvas-title fw-bold" id="historySidebarLabel"><i
-                        class="bi bi-clock-history me-2"></i>History</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
-                    aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body p-3" id="history-list-mobile">
-                <!-- Mobile history items will be populated here -->
-            </div>
-            <div class="p-3 border-top border-light border-opacity-10">
-                <button class="btn btn-primary w-100" onclick="startNewChat()" data-bs-dismiss="offcanvas">
-                    <i class="bi bi-plus-lg me-2"></i>New Chat
-                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Chat Styles Override for this page -->
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start bg-black text-white border-end border-secondary" tabindex="-1" id="historySidebar" aria-labelledby="historySidebarLabel" style="width: 300px;">
+    <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title fw-bold d-flex align-items-center gap-2" id="historySidebarLabel">
+            <i class="bi bi-clock text-white"></i> Chat History
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-3" id="history-list-mobile">
+        <!-- Populated dynamically via JS -->
+    </div>
+    <div class="p-3 border-top border-secondary bg-black">
+        <button class="btn btn-outline-light w-100 py-2.5 fw-bold rounded-3 d-flex align-items-center justify-content-center gap-2" onclick="startNewChat()" data-bs-dismiss="offcanvas">
+            <i class="bi bi-plus-lg"></i>
+            <span>NEW CHAT</span>
+        </button>
+    </div>
+</div>
+
+<!-- Page Specific CSS Styles -->
 <style>
-    .app-wrapper {
-        background: transparent;
+    /* Full Viewport Height Layout */
+    .app-wrapper, main {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
     }
 
-    .chat-header {
-        height: 75px;
-        backdrop-filter: blur(20px) saturate(180%);
-        background: rgba(0, 0, 0, 0.4) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    .chat-page-wrapper {
+        height: calc(100vh - var(--navbar-height));
+        overflow: hidden;
+        width: 100%;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
-    .chat-box {
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.25) 100%);
-        padding: 2rem !important;
+    .chat-page-wrapper .card {
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        background-color: #000000 !important;
     }
 
-    /* Custom Scrollbar */
-    .chat-box::-webkit-scrollbar {
-        width: 8px;
+    /* Header Bar */
+    .chat-header-bar {
+        min-height: 56px;
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+        flex-shrink: 0;
+        z-index: 10;
+        position: relative;
     }
 
-    .chat-box::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.02);
-        border-radius: 10px;
+    /* Robot Icon in Header */
+    .chat-header-robot-icon {
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 0px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000000;
+        flex-shrink: 0;
     }
 
-    .chat-box::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
-        border-radius: 10px;
+    /* Online Pill Badge */
+    .online-pill-badge {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #ffffff;
+        background: #000000;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        letter-spacing: 0.05em;
     }
 
-    .chat-box::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(180deg, #4f46e5, #9333ea);
+    .online-dot {
+        width: 6px;
+        height: 6px;
+        background: #ffffff;
+        border-radius: 50%;
+        display: inline-block;
     }
 
-    /* Message Container with Avatar */
+    /* Mascot Emblem Box */
+    .mascot-circle-wrapper {
+        display: flex;
+        justify-content: center;
+    }
+
+    .mascot-emblem-box {
+        width: 44px;
+        height: 44px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 0px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000000;
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Scrollable Box */
+    .chat-scroll-box {
+        height: 100%;
+        overflow-y: auto;
+        padding: 1.5rem 1.5rem;
+        scroll-behavior: smooth;
+    }
+
+    .welcome-screen-box {
+        margin: auto 0;
+        padding: 0.75rem 0;
+    }
+
+    .welcome-title {
+        font-size: 1.25rem;
+        letter-spacing: -0.02em;
+    }
+
+    .welcome-desc {
+        font-size: 0.82rem;
+        line-height: 1.45;
+        max-width: 460px;
+    }
+
+    /* Quick Prompts Pills */
+    .quick-prompts-grid {
+        max-width: 460px;
+        margin: 0 auto;
+    }
+
+    .quick-prompt-pill {
+        background: #000000;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 0px !important;
+        color: #ffffff;
+        padding: 0.45rem 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    .quick-prompt-pill:hover {
+        border-color: #ffffff;
+        background: #141414;
+        transform: translateY(-2px);
+    }
+
+    /* Input Footer & Controls */
+    .attachment-square-btn {
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 0px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000000 !important;
+        flex-shrink: 0;
+    }
+
+    .attachment-square-btn:hover {
+        border-color: #ffffff !important;
+        background: #141414 !important;
+    }
+
+    .input-pill-container {
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 0px !important;
+        background: #000000 !important;
+        overflow: hidden;
+        height: 40px;
+        transition: all 0.2s ease;
+    }
+
+    .input-pill-container:focus-within {
+        border-color: #ffffff !important;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+    }
+
+    .chat-input-field {
+        background: transparent !important;
+        border: none !important;
+        color: #ffffff !important;
+        padding: 0.5rem 0.85rem !important;
+        font-size: 0.88rem;
+    }
+
+    .chat-input-field:focus {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    .chat-input-field::placeholder {
+        color: #737373 !important;
+    }
+
+    .send-pill-btn {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: none !important;
+        border-radius: 0px !important;
+        margin: 3px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.03em;
+        padding: 0 1rem !important;
+        transition: all 0.2s ease;
+    }
+
+    .send-pill-btn:hover {
+        background: #e5e5e5 !important;
+        color: #000000 !important;
+    }
+
+    /* Ultra-compact Minimalist History Items */
+    .history-card-item {
+        background: transparent !important;
+        border: none !important;
+        border-left: 2px solid transparent !important;
+        color: #d1d5db !important;
+        cursor: pointer;
+        padding: 0.35rem 0.6rem;
+        margin-bottom: 0.15rem;
+        font-size: 0.81rem;
+        font-weight: 400;
+        transition: all 0.15s ease;
+        border-radius: 0px !important;
+    }
+
+    .history-card-item:hover {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-left-color: rgba(255, 255, 255, 0.4) !important;
+        transform: none !important;
+    }
+
+    .history-card-item.active {
+        background: rgba(255, 255, 255, 0.14) !important;
+        color: #ffffff !important;
+        border-left: 2px solid #ffffff !important;
+        font-weight: 600 !important;
+    }
+
+    /* Message Bubbles System */
     .message-container {
         display: flex;
-        gap: 0.875rem;
-        margin-bottom: 1.5rem;
-        animation: messageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+        animation: messageFadeIn 0.25s ease-out;
     }
 
     .message-container.user {
         flex-direction: row-reverse;
     }
 
-    /* Avatar Styling */
     .message-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
+        width: 30px;
+        height: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        font-size: 1.25rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        font-size: 0.85rem;
+        border-radius: 0px !important;
     }
 
     .message-avatar.bot {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        border: 2px solid rgba(99, 102, 241, 0.3);
+        background: #000000;
+        border: 1px solid #ffffff;
+        color: #ffffff;
     }
 
     .message-avatar.user {
-        background: linear-gradient(135deg, #10b981, #06b6d4);
-        border: 2px solid rgba(16, 185, 129, 0.3);
+        background: #ffffff;
+        border: 1px solid #ffffff;
+        color: #000000;
     }
 
-    /* Message Bubble */
     .chat-message {
-        max-width: 75%;
-        padding: 1.125rem 1.5rem;
-        border-radius: 1.25rem;
-        position: relative;
-        line-height: 1.7;
+        line-height: 1.6;
         word-wrap: break-word;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        font-size: 0.92rem;
     }
 
     .chat-message.user {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        color: white;
-        border-bottom-right-radius: 0.375rem;
-        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid #ffffff !important;
+        font-weight: 600;
+        max-width: 78%;
+        padding: 0.6rem 1rem;
+        border-radius: 0px !important;
     }
 
     .chat-message.bot {
-        background: rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        color: var(--text-primary);
-        border-bottom-left-radius: 0.375rem;
+        background: transparent !important;
+        color: #e5e5e5 !important;
+        border: none !important;
+        padding: 0.1rem 0;
+        max-width: 100%;
+        flex-grow: 1;
     }
 
-    /* Code blocks in bot messages */
+    /* Bot Markdown Formatting */
+    .chat-message.bot h1,
+    .chat-message.bot h2,
+    .chat-message.bot h3,
+    .chat-message.bot h4,
+    .chat-message.bot h5,
+    .chat-message.bot h6 {
+        color: #ffffff;
+        font-weight: 700;
+        margin-top: 0.85rem;
+        margin-bottom: 0.4rem;
+        letter-spacing: -0.01em;
+    }
+
+    .chat-message.bot h1:first-child,
+    .chat-message.bot h2:first-child,
+    .chat-message.bot h3:first-child,
+    .chat-message.bot h4:first-child {
+        margin-top: 0;
+    }
+
+    .chat-message.bot strong,
+    .chat-message.bot b {
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .chat-message.bot ul,
+    .chat-message.bot ol {
+        padding-left: 1.2rem;
+        margin-top: 0.35rem;
+        margin-bottom: 0.75rem;
+        color: #d1d5db;
+    }
+
+    .chat-message.bot li {
+        margin-bottom: 0.3rem;
+    }
+
+    .chat-message.bot li::marker {
+        color: #ffffff;
+    }
+
+    .chat-message.bot p {
+        margin-bottom: 0.65rem;
+    }
+
     .chat-message.bot pre {
-        background: rgba(0, 0, 0, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 0.75rem;
-        padding: 1rem;
-        margin: 0.75rem 0;
+        background: #000000;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 0.85rem 1rem;
+        margin: 0.65rem 0;
         overflow-x: auto;
+        border-radius: 0px !important;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
     }
 
     .chat-message.bot code {
-        background: rgba(99, 102, 241, 0.15);
-        padding: 0.2rem 0.5rem;
-        border-radius: 0.375rem;
-        font-family: 'Courier New', monospace;
-        font-size: 0.9em;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.15rem 0.35rem;
+        border-radius: 0px !important;
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .chat-message.bot pre code {
         background: transparent;
         padding: 0;
+        border: none;
     }
 
     .chat-message p:last-child {
         margin-bottom: 0;
     }
 
-    .chat-message a {
-        color: #60a5fa;
-        text-decoration: underline;
-    }
-
-    .chat-message a:hover {
-        color: #93c5fd;
-    }
-
     /* Typing Indicator */
     .typing-indicator {
         display: flex;
-        gap: 0.375rem;
-        padding: 1rem 1.5rem;
+        gap: 0.4rem;
+        align-items: center;
+        padding: 0.85rem 1.25rem;
     }
 
     .typing-dot {
         width: 8px;
         height: 8px;
+        background: #ffffff;
         border-radius: 50%;
-        background: rgba(99, 102, 241, 0.7);
         animation: typingBounce 1.4s infinite;
     }
 
-    .typing-dot:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .typing-dot:nth-child(3) {
-        animation-delay: 0.4s;
-    }
-
-    /* Input Area */
-    .chat-input-area {
-        backdrop-filter: blur(20px) saturate(180%);
-        background: rgba(0, 0, 0, 0.4) !important;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-        padding: 1.5rem !important;
-    }
-
-    .chat-input-area .input-group {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 1.5rem;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .chat-input-area .input-group:focus-within {
-        border-color: var(--accent-primary);
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 4px 16px rgba(0, 0, 0, 0.2);
-        background: rgba(255, 255, 255, 0.08);
-    }
-
-    .chat-input-area .form-control {
-        background: transparent !important;
-        border: none !important;
-        color: white !important;
-        padding: 1rem 1.25rem;
-        font-size: 0.95rem;
-        height: auto !important;
-    }
-
-    .chat-input-area .form-control:focus {
-        box-shadow: none !important;
-    }
-
-    .chat-input-area .form-control::placeholder {
-        color: rgba(255, 255, 255, 0.4);
-    }
-
-    .chat-input-area .btn {
-        border: none !important;
-        background: transparent;
-        transition: all 0.3s ease;
-        padding: 1rem 1.25rem;
-    }
-
-    .chat-input-area .btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-        transform: scale(1.05);
-    }
-
-    .chat-input-area .btn-primary {
-        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
-        padding: 1rem 2rem !important;
-        font-weight: 600;
-        letter-spacing: 0.025em;
-    }
-
-    .chat-input-area .btn-primary:hover {
-        background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
-    }
-
-    /* File Preview */
-    #file-preview {
-        background: rgba(99, 102, 241, 0.1) !important;
-        border: 1px solid rgba(99, 102, 241, 0.3) !important;
-        border-radius: 0.75rem;
-        padding: 0.75rem 1rem !important;
-        backdrop-filter: blur(10px);
-    }
-
-    /* Welcome Screen */
-    .welcome-screen {
-        padding: 3rem 1rem;
-    }
-
-    .welcome-screen i {
-        animation: float 3s ease-in-out infinite;
-    }
-
-    /* History Sidebar */
-    .history-item {
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        border: 1px solid transparent;
-        border-radius: 0.875rem;
-        cursor: pointer;
-    }
-
-    .history-item:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.15);
-        transform: translateX(4px);
-    }
-
-    .history-item.active {
-        background: rgba(99, 102, 241, 0.2);
-        border-color: rgba(99, 102, 241, 0.4);
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
-    }
-
-    /* Status Badge */
-    .badge-glass {
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .chat-main-col {
-            padding: 0 !important;
-        }
-
-        .chat-header {
-            height: 65px;
-            padding: 1rem !important;
-        }
-
-        .chat-box {
-            padding: 1.25rem !important;
-        }
-
-        .message-container {
-            gap: 0.625rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .message-avatar {
-            width: 32px;
-            height: 32px;
-            font-size: 1rem;
-        }
-
-        .chat-message {
-            max-width: 85%;
-            padding: 0.875rem 1.125rem;
-            font-size: 0.925rem;
-        }
-
-        .chat-input-area {
-            padding: 1rem !important;
-        }
-
-        .chat-input-area .form-control {
-            padding: 0.875rem 1rem;
-            font-size: 0.9rem;
-        }
-
-        .chat-input-area .btn-primary {
-            padding: 0.875rem 1.5rem !important;
-        }
-
-        .welcome-screen {
-            padding: 2rem 1rem;
-        }
-
-        .welcome-screen h3 {
-            font-size: 1.5rem;
-        }
-
-        .welcome-screen p {
-            font-size: 0.9rem;
-        }
-    }
-
-    /* Animations */
-    @keyframes messageSlideIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
     @keyframes typingBounce {
-
-        0%,
-        60%,
-        100% {
-            transform: translateY(0);
-        }
-
-        30% {
-            transform: translateY(-10px);
-        }
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-8px); }
     }
 
-    @keyframes float {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-10px);
-        }
+    @keyframes messageFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes pulse {
-
-        0%,
-        100% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: 0.6;
-        }
+    /* Custom Scrollbars */
+    .chat-scroll-box::-webkit-scrollbar,
+    #history-list::-webkit-scrollbar {
+        width: 6px;
     }
 
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
+    .chat-scroll-box::-webkit-scrollbar-track,
+    #history-list::-webkit-scrollbar-track {
+        background: #000000;
+    }
+
+    .chat-scroll-box::-webkit-scrollbar-thumb,
+    #history-list::-webkit-scrollbar-thumb {
+        background: #333333;
+        border: 1px solid #000000;
+        border-radius: 4px;
+    }
+
+    .chat-scroll-box::-webkit-scrollbar-thumb:hover,
+    #history-list::-webkit-scrollbar-thumb:hover {
+        background: #ffffff;
+    }
+
+    @media (max-width: 767.98px) {
+        .chat-page-wrapper {
+            height: calc(100vh - var(--navbar-height) - 75px) !important;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .chat-header-bar {
+            min-height: 50px;
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        .chat-scroll-box {
+            padding: 0.75rem !important;
+        }
+
+        .welcome-screen-box {
+            padding: 0.5rem 0;
+        }
+
+        .welcome-title {
+            font-size: 1.15rem;
+        }
+
+        .welcome-desc {
+            font-size: 0.78rem;
+            padding: 0 0.5rem;
+        }
+
+        .mascot-emblem-box {
+            width: 36px !important;
+            height: 36px !important;
+        }
+
+        .quick-prompt-pill {
+            font-size: 0.76rem !important;
+            padding: 0.45rem 0.75rem !important;
+            background: #0d0d0d !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            border-radius: 4px !important;
+        }
+
+        .chat-message.user {
+            max-width: 88% !important;
+            padding: 0.55rem 0.85rem !important;
+            font-size: 0.88rem !important;
+        }
+
+        .chat-message.bot {
+            font-size: 0.88rem !important;
+        }
+
+        .chat-input-footer {
+            padding: 0.4rem 0.6rem !important;
+        }
+
+        .attachment-square-btn {
+            width: 38px !important;
+            height: 38px !important;
+        }
+
+        .input-pill-container {
+            height: 38px !important;
+        }
+
+        .send-pill-btn {
+            padding: 0 0.75rem !important;
+            font-size: 0.75rem !important;
         }
     }
 </style>
 
+<!-- MathJax & Markdown Libraries -->
 <script>
     window.MathJax = {
         tex: {
@@ -516,13 +678,15 @@
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- Interactive Logic -->
 <script>
     let currentChatId = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         loadHistory();
 
-        // 1. Check for chat ID in URL query string or path
+        // Check for chat ID in URL query string or path
         const urlParams = new URLSearchParams(window.location.search);
         let chatId = urlParams.get('c') || urlParams.get('id');
         if (!chatId) {
@@ -541,16 +705,68 @@
         });
     });
 
+    function setQuickPrompt(promptText) {
+        const msgInput = document.getElementById('message');
+        if (msgInput) {
+            msgInput.value = promptText;
+            msgInput.focus();
+        }
+    }
+
     function startNewChat() {
         currentChatId = null;
         if (window.history.pushState) {
             window.history.pushState({}, '', '/chat');
         }
         document.getElementById('chat').innerHTML = `
-            <div class="text-center mt-5 fade-in-up welcome-screen">
-                <div class="mb-3"><i class="bi bi-stars text-warning display-4"></i></div>
-                <h3 class="text-white fw-bold">How can I help you today?</h3>
-                <p class="text-secondary px-3">Ask me about code, debugging, or complex concepts.</p>
+            <div class="text-center welcome-screen-box fade-in-up">
+                <div class="mascot-circle-wrapper mb-3">
+                    <div class="mascot-emblem-box">
+                        <i class="bi bi-robot fs-4 text-white"></i>
+                    </div>
+                </div>
+                <h4 class="text-white fw-bold mb-1 welcome-title">How can I help you <span class="fw-normal text-secondary">today?</span></h4>
+                <p class="text-secondary mx-auto mb-3 welcome-desc">
+                    Ask me anything about software engineering, code debugging, system architecture, or DSA concepts.
+                </p>
+                <div class="quick-prompts-grid row g-2 justify-content-center">
+                    <div class="col-sm-6">
+                        <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Explain the concept of ')">
+                            <span class="d-flex align-items-center gap-2">
+                                <i class="bi bi-lightbulb text-white fs-6"></i>
+                                <span>Explain a concept</span>
+                            </span>
+                            <i class="bi bi-arrow-right text-secondary small"></i>
+                        </button>
+                    </div>
+                    <div class="col-sm-6">
+                        <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Can you help me debug this code?\\n\\n\`\`\`\\n\\n\`\`\`')">
+                            <span class="d-flex align-items-center gap-2">
+                                <i class="bi bi-code-slash text-white fs-6"></i>
+                                <span>Debug my code</span>
+                            </span>
+                            <i class="bi bi-arrow-right text-secondary small"></i>
+                        </button>
+                    </div>
+                    <div class="col-sm-6">
+                        <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Give me system design ideas for ')">
+                            <span class="d-flex align-items-center gap-2">
+                                <i class="bi bi-layers text-white fs-6"></i>
+                                <span>System design ideas</span>
+                            </span>
+                            <i class="bi bi-arrow-right text-secondary small"></i>
+                        </button>
+                    </div>
+                    <div class="col-sm-6">
+                        <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Help me solve a DSA problem related to ')">
+                            <span class="d-flex align-items-center gap-2">
+                                <i class="bi bi-bullseye text-white fs-6"></i>
+                                <span>Solve DSA problem</span>
+                            </span>
+                            <i class="bi bi-arrow-right text-secondary small"></i>
+                        </button>
+                    </div>
+                </div>
             </div>`;
         loadHistory();
     }
@@ -568,29 +784,24 @@
                 if (!container) return;
                 container.innerHTML = '';
                 if (chats.length === 0) {
-                    container.innerHTML = '<p class="text-center text-secondary small mt-3">No recent chats</p>';
+                    container.innerHTML = '<p class="text-center text-secondary small mt-4 mono-font">No recent chats</p>';
                     return;
                 }
 
                 chats.forEach(chat => {
                     const div = document.createElement('div');
                     const isActive = chat._id === currentChatId;
-                    div.className = `p-3 mb-2 rounded history-item cursor-pointer ${isActive ? 'active' : ''}`;
-                    div.innerHTML = `
-                        <div class="d-flex align-items-center gap-3">
-                            <i class="bi bi-chat-left-text text-primary"></i>
-                            <div class="flex-grow-1 overflow-hidden">
-                                <div class="text-truncate small text-white fw-medium">${chat.title || 'Untitled Chat'}</div>
-                                <div class="text-secondary" style="font-size: 0.7rem;">${new Date(chat.timestamp).toLocaleDateString()}</div>
-                            </div>
-                        </div>
-                    `;
+                    const titleText = chat.title || 'Untitled Chat';
+                    div.className = `history-card-item ${isActive ? 'active' : ''}`;
+                    div.title = titleText;
+                    div.innerHTML = `<div class="text-truncate">${escapeHtml(titleText)}</div>`;
                     div.onclick = () => {
                         loadChat(chat._id);
-                        // Close offcanvas on mobile
                         const offcanvasEl = document.getElementById('historySidebar');
-                        const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl) || new bootstrap.Offcanvas(offcanvasEl);
-                        if (offcanvas) offcanvas.hide();
+                        if (offcanvasEl) {
+                            const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
+                            if (offcanvas) offcanvas.hide();
+                        }
                     };
                     container.appendChild(div);
                 });
@@ -606,7 +817,6 @@
     async function loadChat(chatId) {
         currentChatId = chatId;
         
-        // Sync URL with active chat ID so refresh preserves chat state
         if (window.history.pushState) {
             const targetUrl = window.location.pathname.startsWith('/chat/') 
                 ? '/chat/' + chatId 
@@ -615,7 +825,7 @@
         }
 
         const chatBox = document.getElementById('chat');
-        chatBox.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div></div>';
+        chatBox.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-light" role="status"></div></div>';
 
         try {
             const response = await fetch(`/api/get_chat/${chatId}`);
@@ -636,22 +846,23 @@
             selectedFile = input.files[0];
             document.getElementById('file-name').textContent = selectedFile.name;
             document.getElementById('file-preview').classList.remove('d-none');
+            document.getElementById('file-preview').classList.add('d-flex');
         }
     }
 
     function clearFile() {
         selectedFile = null;
         document.getElementById('file-input').value = '';
+        document.getElementById('file-preview').classList.remove('d-flex');
         document.getElementById('file-preview').classList.add('d-none');
     }
 
     async function send() {
         const messageInput = document.getElementById('message');
-        const sendBtn = document.querySelector('.chat-input-area .btn-primary');
+        const sendBtn = document.querySelector('.send-pill-btn');
         const message = messageInput.value.trim();
         if (!message && !selectedFile) return;
 
-        // Disable input & button while processing
         if (sendBtn) sendBtn.disabled = true;
         messageInput.disabled = true;
 
@@ -663,7 +874,7 @@
         const loadingId = 'loading-' + Date.now();
         const loadingContainer = document.createElement('div');
         loadingContainer.id = loadingId;
-        loadingContainer.className = 'message-container';
+        loadingContainer.className = 'message-container bot';
         loadingContainer.innerHTML = `
             <div class="message-avatar bot"><i class="bi bi-robot"></i></div>
             <div class="chat-message bot typing-indicator">
@@ -680,7 +891,6 @@
         if (selectedFile) formData.append('file', selectedFile);
         if (currentChatId) formData.append('chat_id', currentChatId);
 
-        // 60-second fetch timeout controller
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000);
 
@@ -730,7 +940,7 @@
         const chatBox = document.getElementById('chat');
 
         // Remove welcome screen if present
-        const welcomeScreen = chatBox.querySelector('.welcome-screen');
+        const welcomeScreen = chatBox.querySelector('.welcome-screen-box');
         if (welcomeScreen) {
             welcomeScreen.remove();
         }
@@ -759,6 +969,12 @@
         if (window.MathJax && sender === 'bot') {
             MathJax.typesetPromise([messageDiv]).catch((err) => console.log(err));
         }
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
     }
 </script>
 {% endblock %}

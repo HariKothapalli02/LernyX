@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - LernyX{% endblock %}
+
+{% block content %}
+<div class="container py-4 profile-page-container" style="max-width: 960px;">
+    <!-- Profile Header Card -->
+    <div class="card p-4 p-md-5 mb-4 bg-black border border-secondary text-white shadow-lg">
+        <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-4">
+            <div class="profile-avatar-box">
+                <i class="bi bi-person-fill display-4 text-white"></i>
+            </div>
+            <div class="flex-grow-1 text-center text-md-start">
+                <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
+                    <h2 class="fw-bold text-white mb-0 tracking-tight">{{ current_user.username }}</h2>
+                    <span class="badge bg-black text-white border border-secondary mono-font">VERIFIED ACCOUNT</span>
+                </div>
+                <p class="text-secondary small mb-3 mono-font"><i class="bi bi-envelope me-1"></i>{{ current_user.email }}</p>
+                
+                <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
+                    <span class="badge bg-black text-secondary border border-secondary fw-normal">
+                        <i class="bi bi-calendar-check me-1 text-white"></i>Active Member
+                    </span>
+                    <span class="badge bg-black text-secondary border border-secondary fw-normal">
+                        <i class="bi bi-shield-lock me-1 text-white"></i>{{ 'Custom API Key' if current_user.api_key else 'LernyX AI Engine' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics & AI Ratings (Resume Score, Mock Interview Score, Aptitude Score) -->
+    <div class="row g-3 mb-4">
+        <!-- 1. AI Resume Score Card -->
+        <div class="col-md-4">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between shadow">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="profile-stat-icon">
+                            <i class="bi bi-file-earmark-person fs-4 text-white"></i>
+                        </div>
+                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.68rem;">RESUME SCORE</span>
+                    </div>
+                    <h6 class="text-secondary uppercase tracking-widest small mb-1 mono-font">AI Resume Rating</h6>
+                    <h3 class="fw-bold text-white mb-2" id="profile-resume-score">--</h3>
+                    <p class="text-secondary small mb-0" id="profile-resume-role" style="line-height: 1.45;">Target Role: Loading...</p>
+                </div>
+                <a href="{{ url_for('dashboard') }}#resume-tab" class="btn btn-outline-light btn-sm w-100 mt-3 d-flex align-items-center justify-content-between">
+                    <span>VIEW RESUME REPORT</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. AI Mock Interview Score Card -->
+        <div class="col-md-4">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between shadow">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="profile-stat-icon">
+                            <i class="bi bi-mic-fill fs-4 text-white"></i>
+                        </div>
+                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.68rem;">MOCK INTERVIEW</span>
+                    </div>
+                    <h6 class="text-secondary uppercase tracking-widest small mb-1 mono-font">Latest Interview Score</h6>
+                    <h3 class="fw-bold text-white mb-2" id="profile-mock-score">--</h3>
+                    <p class="text-secondary small mb-0" id="profile-mock-verdict" style="line-height: 1.45;">Verdict: Loading...</p>
+                </div>
+                <a href="{{ url_for('mock_interview') }}" class="btn btn-outline-light btn-sm w-100 mt-3 d-flex align-items-center justify-content-between">
+                    <span>TAKE MOCK TEST</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. Practice & Aptitude Stats Card -->
+        <div class="col-md-4">
+            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between shadow">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="profile-stat-icon">
+                            <i class="bi bi-trophy-fill fs-4 text-white"></i>
+                        </div>
+                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.68rem;">PRACTICE STATS</span>
+                    </div>
+                    <h6 class="text-secondary uppercase tracking-widest small mb-1 mono-font">Questions Answered</h6>
+                    <h3 class="fw-bold text-white mb-2" id="profile-questions-count">--</h3>
+                    <p class="text-secondary small mb-0" id="profile-accuracy-rate" style="line-height: 1.45;">Overall Accuracy: Loading...</p>
+                </div>
+                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-outline-light btn-sm w-100 mt-3 d-flex align-items-center justify-content-between">
+                    <span>PRACTICE QUIZ</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personal & Account Details Card -->
+    <div class="card bg-black border border-secondary p-4 p-md-5 mb-4 shadow">
+        <h5 class="fw-bold text-white mb-4 tracking-tight"><i class="bi bi-person-lines-fill me-2"></i>Personal & Account Information</h5>
+        
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="p-3 border border-secondary bg-dark rounded-0">
+                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">USERNAME</small>
+                    <strong class="text-white fs-6">{{ current_user.username }}</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 border border-secondary bg-dark rounded-0">
+                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">EMAIL ADDRESS</small>
+                    <strong class="text-white fs-6">{{ current_user.email }}</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 border border-secondary bg-dark rounded-0">
+                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">AI ENGINE KEY STATUS</small>
+                    <strong class="text-white fs-6">{{ 'Configured (Custom Key)' if current_user.api_key else 'Default (LernyX System Engine)' }}</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 border border-secondary bg-dark rounded-0">
+                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">APPLICATION STATUS</small>
+                    <strong class="text-white fs-6">LernyX Web & PWA App Ready</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Controls (Install App & Logout) -->
+        <div class="d-flex flex-column flex-sm-row gap-3 pt-3 border-top border-secondary">
+            <button id="profile-install-pwa-btn" class="btn btn-light fw-bold py-2.5 flex-grow-1 d-flex align-items-center justify-content-center gap-2 text-black">
+                <i class="bi bi-download fs-6"></i>
+                <span>INSTALL APP</span>
+            </button>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger fw-bold py-2.5 flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-box-arrow-right fs-6"></i>
+                <span>LOGOUT ACCOUNT</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-avatar-box {
+        width: 80px;
+        height: 80px;
+        background: #000000;
+        border: 1px solid #ffffff;
+        border-radius: 0px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+    }
+
+    .profile-stat-icon {
+        width: 44px;
+        height: 44px;
+        background: #000000;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 0px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProfileStats();
+        setupPwaInstallBtn();
+    });
+
+    async function loadProfileStats() {
+        // 1. Load Resume Review Score
+        try {
+            const resp = await fetch('/api/latest-resume-review');
+            const data = await resp.json();
+            if (resp.ok && data.review) {
+                document.getElementById('profile-resume-score').textContent = 'Completed';
+                document.getElementById('profile-resume-role').textContent = `Target Role: ${data.review.target_role || 'Software Engineer'}`;
+            } else {
+                document.getElementById('profile-resume-score').textContent = 'Not Uploaded';
+                document.getElementById('profile-resume-role').textContent = 'Upload resume in Dashboard for feedback';
+            }
+        } catch (e) {
+            document.getElementById('profile-resume-score').textContent = 'N/A';
+        }
+
+        // 2. Load Latest Mock Interview Score
+        try {
+            const resp = await fetch('/api/user-mock-interviews?limit=1');
+            const data = await resp.json();
+            if (resp.ok && data.interviews && data.interviews.length > 0) {
+                const latest = data.interviews[0];
+                document.getElementById('profile-mock-score').textContent = `${latest.overall_percentage}%`;
+                document.getElementById('profile-mock-verdict').textContent = `Verdict: ${latest.verdict_badge || 'Completed'} (${latest.target_role})`;
+            } else {
+                document.getElementById('profile-mock-score').textContent = 'No Tests';
+                document.getElementById('profile-mock-verdict').textContent = 'Take your first 1-on-1 AI voice mock test';
+            }
+        } catch (e) {
+            document.getElementById('profile-mock-score').textContent = 'N/A';
+        }
+
+        // 3. Load Practice Stats
+        try {
+            const resp = await fetch('/api/aptitude/stats?t=' + new Date().getTime());
+            const data = await resp.json();
+            if (resp.ok && !data.error) {
+                document.getElementById('profile-questions-count').textContent = data.total_questions_answered || 0;
+                document.getElementById('profile-accuracy-rate').textContent = `Accuracy: ${data.overall_average || 0}% (${data.total_correct || 0} Correct)`;
+            } else {
+                document.getElementById('profile-questions-count').textContent = '0';
+                document.getElementById('profile-accuracy-rate').textContent = 'Start practicing aptitude & DSA questions';
+            }
+        } catch (e) {
+            document.getElementById('profile-questions-count').textContent = '0';
+        }
+    }
+
+    function setupPwaInstallBtn() {
+        const btn = document.getElementById('profile-install-pwa-btn');
+        if (!btn) return;
+
+        btn.addEventListener('click', () => {
+            if (window.deferredPwaPrompt) {
+                window.deferredPwaPrompt.prompt();
+                window.deferredPwaPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('[PWA] User accepted install from profile');
+                    }
+                    window.deferredPwaPrompt = null;
+                });
+            } else {
+                alert('PWA App is ready or already installed on your device!');
+            }
+        });
+    }
+</script>
+{% endblock %}

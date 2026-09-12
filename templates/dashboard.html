@@ -5,86 +5,159 @@
 {% block content %}
 <div class="container py-4">
     <style>
-        /* Settings Section Styles */
         .form-text {
             font-size: 0.85rem;
             color: #9ca3af;
             margin-top: 5px;
         }
+
+        .dashboard-nav-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+            padding-bottom: 4px;
+            margin-bottom: 1.25rem;
+        }
+
+        .dashboard-nav-container .nav-tabs {
+            display: inline-flex;
+            flex-wrap: nowrap;
+            min-width: 100%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+            margin-bottom: 0;
+        }
+
+        .nav-tabs .nav-link {
+            background: #000000 !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-bottom: none !important;
+            color: #a3a3a3 !important;
+            border-radius: 0px !important;
+            margin-right: 4px;
+            transition: all 0.2s ease;
+            font-size: 0.78rem;
+            padding: 0.6rem 0.9rem;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+        .nav-tabs .nav-link:hover {
+            color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
+        }
+        .nav-tabs .nav-link.active {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border-color: #ffffff !important;
+        }
+        .dashboard-nav-container::-webkit-scrollbar {
+            height: 3px;
+        }
+        .dashboard-nav-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        @media (max-width: 767.98px) {
+            .dashboard-nav-container .nav-link {
+                padding: 0.5rem 0.7rem !important;
+                font-size: 0.72rem !important;
+            }
+            .card-header {
+                padding: 0.75rem 1rem !important;
+            }
+            .card-body {
+                padding: 1rem !important;
+            }
+            #resume-results {
+                padding: 1rem !important;
+            }
+            .resume-action-btn-group {
+                width: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 0.5rem !important;
+                margin-top: 0.5rem !important;
+            }
+            .resume-action-btn-group .btn {
+                width: 100% !important;
+                margin-right: 0 !important;
+                justify-content: center !important;
+                display: flex !important;
+            }
+        }
     </style>
 
-    <!-- Status Bar -->
-    <div class="card border-0 shadow-lg mb-4"
-        style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1) !important;">
-        <div class="card-body text-white p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h4 mb-0">📊 Aptitude Practice Progress</h2>
-                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-primary fw-bold"
-                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
-                    Start Practice
-                </a>
+    <!-- Status Bar / Metrics Card -->
+    <div class="card bg-black border border-secondary shadow-lg mb-4 p-3 p-md-4" style="border-radius: 0px !important;">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-black text-white border border-secondary mono-font px-2 py-1" style="font-size: 0.7rem;">ANALYTICS</span>
+                <h2 class="h5 mb-0 fw-bold text-white tracking-tight">Aptitude & Practice Metrics</h2>
             </div>
-            <div id="status-content">
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Loading statistics...</p>
+            <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-light text-black fw-bold px-3 py-1.5 btn-sm" style="border-radius: 0px !important;">
+                <i class="bi bi-play-circle-fill me-1"></i>START PRACTICE
+            </a>
+        </div>
+        <div id="status-content">
+            <div class="text-center py-4">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
+                <p class="mt-2 text-secondary mono-font small">Loading analytics data...</p>
             </div>
         </div>
     </div>
 
     <!-- Navigation Tabs -->
-    <ul class="nav nav-tabs nav-fill mb-4" id="dashboardTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-semibold" id="quizzes-tab-btn" data-bs-toggle="tab"
-                data-bs-target="#quizzes-tab" type="button" role="tab" aria-controls="quizzes-tab" aria-selected="true"
-                onclick="loadTab('quizzes')">
-                🎥 Past Quizzes
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="custom-tab-btn" data-bs-toggle="tab" data-bs-target="#custom-tab"
-                type="button" role="tab" aria-controls="custom-tab" aria-selected="false" onclick="loadTab('custom')">
-                🧩 My Custom Quizzes
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="mock-interviews-tab-btn" data-bs-toggle="tab"
-                data-bs-target="#mock-interviews-tab" type="button" role="tab" aria-controls="mock-interviews-tab"
-                aria-selected="false" onclick="loadTab('mock-interviews')">
-                🎙️ Mock Interviews
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="resume-tab-btn" data-bs-toggle="tab" data-bs-target="#resume-tab"
-                type="button" role="tab" aria-controls="resume-tab" aria-selected="false">
-                📄 Resume Review
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="settings-tab-btn" data-bs-toggle="tab"
-                data-bs-target="#settings-tab" type="button" role="tab" aria-controls="settings-tab"
-                aria-selected="false">
-                ⚙️ Settings
-            </button>
-        </li>
-    </ul>
+    <div class="dashboard-nav-container mb-4 overflow-x-auto">
+        <ul class="nav nav-tabs border-secondary flex-nowrap text-nowrap" id="dashboardTabs" role="tablist" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold text-uppercase mono-font py-2 px-3" id="quizzes-tab-btn" data-bs-toggle="tab"
+                    data-bs-target="#quizzes-tab" type="button" role="tab" aria-controls="quizzes-tab" aria-selected="true"
+                    onclick="loadTab('quizzes')">
+                    <i class="bi bi-play-btn me-1.5"></i>Past Quizzes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-uppercase mono-font py-2 px-3" id="custom-tab-btn" data-bs-toggle="tab" data-bs-target="#custom-tab"
+                    type="button" role="tab" aria-controls="custom-tab" aria-selected="false" onclick="loadTab('custom')">
+                    <i class="bi bi-puzzle me-1.5"></i>My Custom Quizzes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-uppercase mono-font py-2 px-3" id="mock-interviews-tab-btn" data-bs-toggle="tab"
+                    data-bs-target="#mock-interviews-tab" type="button" role="tab" aria-controls="mock-interviews-tab"
+                    aria-selected="false" onclick="loadTab('mock-interviews')">
+                    <i class="bi bi-mic me-1.5"></i>Mock Interviews
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-uppercase mono-font py-2 px-3" id="resume-tab-btn" data-bs-toggle="tab" data-bs-target="#resume-tab"
+                    type="button" role="tab" aria-controls="resume-tab" aria-selected="false">
+                    <i class="bi bi-file-earmark-person me-1.5"></i>Resume Review
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-uppercase mono-font py-2 px-3" id="settings-tab-btn" data-bs-toggle="tab"
+                    data-bs-target="#settings-tab" type="button" role="tab" aria-controls="settings-tab"
+                    aria-selected="false">
+                    <i class="bi bi-gear me-1.5"></i>Settings
+                </button>
+            </li>
+        </ul>
+    </div>
 
     <!-- Tab Content -->
     <div class="tab-content" id="dashboardTabsContent">
         <!-- Quizzes Tab -->
         <div class="tab-pane fade show active" id="quizzes-tab" role="tabpanel" aria-labelledby="quizzes-tab-btn">
-            <div class="card"
-                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div class="card-header"
-                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                    <h3 class="h5 mb-0 text-white">Generated Quizzes</h3>
+            <div class="card bg-black border border-secondary shadow" style="border-radius: 0px !important;">
+                <div class="card-header bg-black border-bottom border-secondary py-3 px-4">
+                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-play-btn me-2"></i>Generated Video Quizzes</h3>
                 </div>
-                <div class="card-body" id="quizzes-container">
-                    <div class="text-center py-5 text-muted">
-                        <div class="spinner-border text-primary" role="status"></div>
+                <div class="card-body p-4" id="quizzes-container">
+                    <div class="text-center py-5 text-secondary mono-font">
+                        <div class="spinner-border text-light" role="status"></div>
                         <p class="mt-2">Loading your quizzes...</p>
                     </div>
                 </div>
@@ -93,15 +166,13 @@
 
         <!-- Custom Quizzes Tab -->
         <div class="tab-pane fade" id="custom-tab" role="tabpanel" aria-labelledby="custom-tab-btn">
-            <div class="card"
-                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div class="card-header"
-                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                    <h3 class="h5 mb-0 text-white">My Custom Quiz Codes</h3>
+            <div class="card bg-black border border-secondary shadow" style="border-radius: 0px !important;">
+                <div class="card-header bg-black border-bottom border-secondary py-3 px-4">
+                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-puzzle me-2"></i>My Custom Quiz Codes</h3>
                 </div>
-                <div class="card-body" id="custom-quizzes-container">
-                    <div class="text-center py-5 text-muted">
-                        <div class="spinner-border text-primary" role="status"></div>
+                <div class="card-body p-4" id="custom-quizzes-container">
+                    <div class="text-center py-5 text-secondary mono-font">
+                        <div class="spinner-border text-light" role="status"></div>
                         <p class="mt-2">Loading your custom quizzes...</p>
                     </div>
                 </div>
@@ -110,19 +181,16 @@
 
         <!-- Mock Interviews Tab -->
         <div class="tab-pane fade" id="mock-interviews-tab" role="tabpanel" aria-labelledby="mock-interviews-tab-btn">
-            <div class="card"
-                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2"
-                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                    <h3 class="h5 mb-0 text-white"><i class="bi bi-mic-fill text-success me-2"></i>Past AI Voice Mock Interviews</h3>
-                    <a href="{{ url_for('mock_interview') }}" class="btn btn-sm btn-success fw-bold px-3 shadow"
-                        style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
-                        <i class="bi bi-play-circle-fill me-1"></i>Start New Interview
+            <div class="card bg-black border border-secondary shadow" style="border-radius: 0px !important;">
+                <div class="card-header bg-black border-bottom border-secondary py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-mic-fill me-2"></i>Past AI Voice Mock Interviews</h3>
+                    <a href="{{ url_for('mock_interview') }}" class="btn btn-sm btn-light text-black fw-bold px-3" style="border-radius: 0px !important;">
+                        <i class="bi bi-play-circle-fill me-1"></i>START NEW INTERVIEW
                     </a>
                 </div>
-                <div class="card-body" id="mock-interviews-container">
-                    <div class="text-center py-5 text-muted">
-                        <div class="spinner-border text-success" role="status"></div>
+                <div class="card-body p-4" id="mock-interviews-container">
+                    <div class="text-center py-5 text-secondary mono-font">
+                        <div class="spinner-border text-light" role="status"></div>
                         <p class="mt-2">Loading your mock interviews...</p>
                     </div>
                 </div>
@@ -131,47 +199,41 @@
 
         <!-- Resume Review Tab -->
         <div class="tab-pane fade" id="resume-tab" role="tabpanel" aria-labelledby="resume-tab-btn">
-            <div class="card"
-                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div class="card-header d-flex justify-content-between align-items-center"
-                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                    <h3 class="h5 mb-0 text-white"><i class="bi bi-file-earmark-person text-primary me-2"></i>AI Resume Reviewer & Feedback Report</h3>
-                    <span class="badge bg-primary">AI Engine</span>
+            <div class="card bg-black border border-secondary shadow" style="border-radius: 0px !important;">
+                <div class="card-header bg-black border-bottom border-secondary py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-file-earmark-person me-2"></i>AI Resume Reviewer & Feedback Report</h3>
+                    <span class="badge bg-black text-white border border-secondary mono-font">AI ENGINE</span>
                 </div>
                 <div class="card-body p-4">
                     <form id="resume-form" onsubmit="analyzeResume(event)" class="mb-4">
                         <div class="row g-3">
                             <div class="col-md-7">
-                                <label class="form-label text-white fw-medium">Upload Resume (PDF, DOCX, TXT, Image)</label>
-                                <input type="file" id="resume_file" class="form-control" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" required
-                                    style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;">
+                                <label class="form-label text-white fw-medium small mono-font">Upload Resume (PDF, DOCX, TXT, Image)</label>
+                                <input type="file" id="resume_file" class="form-control bg-black text-white border-secondary" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" required style="border-radius: 0px !important;">
                             </div>
                             <div class="col-md-5">
-                                <label class="form-label text-white fw-medium">Target Job Role / Domain</label>
-                                <input type="text" id="target_role" class="form-control" placeholder="e.g. Full Stack Developer, Data Analyst"
-                                    value="Software Engineer"
-                                    style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;">
+                                <label class="form-label text-white fw-medium small mono-font">Target Job Role / Domain</label>
+                                <input type="text" id="target_role" class="form-control bg-black text-white border-secondary" placeholder="e.g. Full Stack Developer, Data Analyst"
+                                    value="Software Engineer" style="border-radius: 0px !important;">
                             </div>
                         </div>
-                        <button type="submit" id="resume-submit-btn" class="btn btn-primary mt-3 px-4 fw-bold"
-                            style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;">
-                            <i class="bi bi-magic me-2"></i>Analyze Resume & Get Recommendations
+                        <button type="submit" id="resume-submit-btn" class="btn btn-light text-black mt-3 px-4 fw-bold py-2" style="border-radius: 0px !important;">
+                            <i class="bi bi-magic me-2"></i>ANALYZE RESUME & GET RECOMMENDATIONS
                         </button>
                     </form>
 
                     <div id="resume-loading" class="d-none text-center py-5">
-                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                        <div class="spinner-border text-light" role="status" style="width: 2.5rem; height: 2.5rem;"></div>
                         <h5 class="text-white mt-3 fw-bold">Analyzing Your Resume with AI...</h5>
-                        <p class="text-muted small">Checking ATS optimization, impact metrics, formatting, and key recommendations.</p>
+                        <p class="text-secondary small mono-font">Checking ATS optimization, impact metrics, formatting, and key recommendations.</p>
                     </div>
 
-                    <div id="resume-results" class="d-none mt-4 p-4 rounded"
-                        style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary flex-wrap gap-2">
-                            <h4 class="text-white mb-0 fw-bold"><i class="bi bi-clipboard-data text-success me-2"></i>Complete Resume Analysis Report</h4>
-                            <div>
-                                <button class="btn btn-sm btn-outline-light me-2" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print Report</button>
-                                <button id="download-docx-btn" class="btn btn-sm btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#resumeTemplateModal" onclick="openResumeTemplateModal()"><i class="bi bi-file-earmark-word-fill me-1"></i>Download Revised Resume (.docx)</button>
+                    <div id="resume-results" class="d-none mt-4 p-3 p-md-4 bg-black border border-secondary" style="border-radius: 0px !important;">
+                        <div class="d-flex justify-content-between align-items-start align-items-md-center mb-3 pb-3 border-bottom border-secondary flex-column flex-md-row gap-2">
+                            <h4 class="text-white mb-0 fw-bold fs-6 fs-md-5 tracking-tight"><i class="bi bi-clipboard-data me-2 text-white"></i>Complete Resume Analysis Report</h4>
+                            <div class="resume-action-btn-group d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto mt-2 mt-md-0">
+                                <button class="btn btn-sm btn-outline-light me-sm-2" onclick="window.print()" style="border-radius: 0px !important;"><i class="bi bi-printer me-1"></i>Print Report</button>
+                                <button id="download-docx-btn" class="btn btn-sm btn-light text-black fw-bold" data-bs-toggle="modal" data-bs-target="#resumeTemplateModal" onclick="openResumeTemplateModal()" style="border-radius: 0px !important;"><i class="bi bi-file-earmark-word-fill me-1"></i>Download Revised Resume (.docx)</button>
                             </div>
                         </div>
                         <div id="resume-report-content" class="text-white markdown-body"></div>
@@ -183,51 +245,47 @@
         <!-- Settings Tab -->
         <div class="tab-pane fade" id="settings-tab" role="tabpanel" aria-labelledby="settings-tab-btn">
             <!-- API Key Settings -->
-            <div class="card mb-4"
-                style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div class="card-header"
-                    style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                    <h3 class="h5 mb-0 text-white">API Configuration</h3>
+            <div class="card bg-black border border-secondary shadow mb-4" style="border-radius: 0px !important;">
+                <div class="card-header bg-black border-bottom border-secondary py-3 px-4">
+                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-key me-2"></i>API Key Configuration</h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form action="{{ url_for('update_api_key') }}" method="POST">
                         <div class="mb-3">
-                            <label for="api_key" class="form-label text-white">AI API Key</label>
-                            <input type="password" id="api_key" name="api_key" class="form-control"
-                                placeholder="Enter your AI API Key"
+                            <label for="api_key" class="form-label text-white small mono-font">AI API Key</label>
+                            <input type="password" id="api_key" name="api_key" class="form-control bg-black text-white border-secondary"
+                                placeholder="Enter your custom AI API Key"
                                 value="{{ current_user.api_key if current_user.api_key else '' }}"
-                                style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;">
-                            <p class="form-text">
-                                Add your own API key to ensure uninterrupted service.
-                                Your key is stored securely and used only for your requests.
+                                style="border-radius: 0px !important;">
+                            <p class="form-text text-secondary small">
+                                Add your own API key to ensure uninterrupted high-speed service.
+                                Your key is encrypted securely and used exclusively for your requests.
                             </p>
                         </div>
-                        <button type="submit" class="btn btn-primary">
-                            Save API Key
+                        <button type="submit" class="btn btn-light text-black fw-bold px-4 py-2" style="border-radius: 0px !important;">
+                            SAVE API KEY
                         </button>
                     </form>
                 </div>
             </div>
 
-            <div class="card border-danger"
-                style="background: rgba(220, 38, 38, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(220, 38, 38, 0.3) !important;">
-                <div class="card-body">
-                    <h3 class="h5 text-danger mb-3">⚠️ Danger Zone</h3>
-                    <p class="text-secondary mb-3">
+            <div class="card bg-black border border-danger shadow" style="border-radius: 0px !important;">
+                <div class="card-body p-4">
+                    <h3 class="h6 text-danger mb-3 fw-bold mono-font">⚠️ DANGER ZONE - ACCOUNT DELETION</h3>
+                    <p class="text-secondary small mb-3">
                         Deleting your account will permanently remove all your data including:
                     </p>
-                    <ul class="text-secondary mb-3">
-                        <li>Your account information</li>
-                        <li>All chat conversations</li>
-                        <li>All quiz history and scores</li>
-                        <li>All custom quizzes you created</li>
-                        <li>All custom quiz attempts</li>
+                    <ul class="text-secondary small mb-3">
+                        <li>Your personal account information</li>
+                        <li>All chat history and saved conversations</li>
+                        <li>All quiz scores, aptitude stats, and DSA progress</li>
+                        <li>All custom quizzes and test attempt logs</li>
                     </ul>
-                    <p class="text-danger fw-bold mb-3">
-                        This action cannot be undone!
+                    <p class="text-danger fw-bold small mb-3">
+                        This action is irreversible and cannot be undone!
                     </p>
-                    <button class="btn btn-danger" onclick="deleteAccount()">
-                        Delete My Account
+                    <button class="btn btn-outline-danger fw-bold px-4 py-2" onclick="deleteAccount()" style="border-radius: 0px !important;">
+                        DELETE MY ACCOUNT
                     </button>
                 </div>
             </div>
@@ -454,60 +512,87 @@
             const data = await resp.json();
 
             if (data.error) {
-                document.getElementById('status-content').innerHTML = '<p class="text-white-50">Unable to load statistics.</p>';
+                document.getElementById('status-content').innerHTML = '<p class="text-secondary mono-font small">Unable to load statistics.</p>';
                 return;
             }
 
+            const easyAvg = data.easy ? (data.easy.average || 0) : 0;
+            const easyCorrect = data.easy ? (data.easy.correct || 0) : 0;
+            const easyTotal = data.easy ? (data.easy.total || 0) : 0;
+
+            const medAvg = data.medium ? (data.medium.average || 0) : 0;
+            const medCorrect = data.medium ? (data.medium.correct || 0) : 0;
+            const medTotal = data.medium ? (data.medium.total || 0) : 0;
+
             const statusHtml = `
-                <div class="row g-4 mb-4 text-center">
-                    <div class="col-md-4">
-                        <div class="bg-white bg-opacity-10 rounded p-3 h-100">
-                            <div class="small opacity-75">Questions Practiced</div>
-                            <div class="display-6 fw-bold">${data.total_questions_answered || 0}</div>
+                <!-- Top Primary Metrics (2x2 on Mobile, 4x1 on Desktop) -->
+                <div class="row g-2 g-md-3 mb-3">
+                    <div class="col-6 col-lg-3">
+                        <div class="p-3 bg-black border border-secondary text-center h-100 shadow-sm" style="border-radius: 0px !important;">
+                            <div class="text-secondary small mono-font uppercase mb-1" style="font-size: 0.68rem; letter-spacing: 0.05em;">PRACTICED</div>
+                            <div class="fw-bold fs-3 text-white mono-font mb-1">${data.total_questions_answered || 0}</div>
+                            <small class="text-secondary d-block" style="font-size: 0.68rem;">Questions</small>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="bg-white bg-opacity-10 rounded p-3 h-100">
-                            <div class="small opacity-75">Overall Accuracy</div>
-                            <div class="display-6 fw-bold">${data.overall_average || 0}%</div>
+                    <div class="col-6 col-lg-3">
+                        <div class="p-3 bg-black border border-secondary text-center h-100 shadow-sm" style="border-radius: 0px !important;">
+                            <div class="text-secondary small mono-font uppercase mb-1" style="font-size: 0.68rem; letter-spacing: 0.05em;">ACCURACY</div>
+                            <div class="fw-bold fs-3 text-white mono-font mb-1">${data.overall_average || 0}%</div>
+                            <small class="text-secondary d-block" style="font-size: 0.68rem;">Overall Rate</small>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="bg-white bg-opacity-10 rounded p-3 h-100">
-                            <div class="small opacity-75">Total Correct</div>
-                            <div class="display-6 fw-bold">${data.total_correct || 0}</div>
+                    <div class="col-6 col-lg-3">
+                        <div class="p-3 bg-black border border-secondary text-center h-100 shadow-sm" style="border-radius: 0px !important;">
+                            <div class="text-secondary small mono-font uppercase mb-1" style="font-size: 0.68rem; letter-spacing: 0.05em;">TOTAL CORRECT</div>
+                            <div class="fw-bold fs-3 text-white mono-font mb-1">${data.total_correct || 0}</div>
+                            <small class="text-secondary d-block" style="font-size: 0.68rem;">Correct Answers</small>
                         </div>
                     </div>
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="p-3 rounded border-start border-4 border-success bg-white bg-opacity-10">
-                            <div class="small opacity-75">Easy Accuracy</div>
-                            <div class="h4 mb-1">${data.easy.average || 0}%</div>
-                            <div class="small opacity-50">${data.easy.correct}/${data.easy.total} correct</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 rounded border-start border-4 border-warning bg-white bg-opacity-10">
-                            <div class="small opacity-75">Medium Accuracy</div>
-                            <div class="h4 mb-1">${data.medium.average || 0}%</div>
-                            <div class="small opacity-50">${data.medium.correct}/${data.medium.total} correct</div>
+                    <div class="col-6 col-lg-3">
+                        <div class="p-3 bg-black border border-secondary text-center h-100 shadow-sm" style="border-radius: 0px !important;">
+                            <div class="text-secondary small mono-font uppercase mb-1" style="font-size: 0.68rem; letter-spacing: 0.05em;">DSA SCORE</div>
+                            <div class="fw-bold fs-3 text-white mono-font mb-1">${data.dsa_score || 0}</div>
+                            <small class="text-secondary d-block" style="font-size: 0.68rem;">${data.dsa_solved_count || 0} Solved</small>
                         </div>
                     </div>
                 </div>
-                <div class="row g-3 mt-2">
-                    <div class="col-md-6">
-                        <div class="p-3 rounded border-start border-4 border-primary bg-white bg-opacity-10">
-                            <div class="small opacity-75">DSA Score</div>
-                            <div class="h4 mb-1">${data.dsa_score || 0}</div>
-                            <div class="small opacity-50">Points</div>
+
+                <!-- Detailed Breakdown (3 Cards Grid) -->
+                <div class="row g-2 g-md-3">
+                    <div class="col-6 col-md-4">
+                        <div class="p-3 bg-black border border-secondary h-100 shadow-sm" style="border-radius: 0px !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-secondary small mono-font uppercase" style="font-size: 0.68rem;">EASY LEVEL</span>
+                                <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.6rem;">${easyCorrect}/${easyTotal}</span>
+                            </div>
+                            <div class="fw-bold fs-4 text-white mono-font mb-1">${easyAvg}%</div>
+                            <div class="progress" style="height: 3px; background: rgba(255,255,255,0.15); border-radius: 0px;">
+                                <div class="progress-bar bg-white" style="width: ${easyAvg}%;"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="p-3 rounded border-start border-4 border-info bg-white bg-opacity-10">
-                            <div class="small opacity-75">DSA Solved</div>
-                            <div class="h4 mb-1">${data.dsa_solved_count || 0}</div>
-                            <div class="small opacity-50">Questions</div>
+                    <div class="col-6 col-md-4">
+                        <div class="p-3 bg-black border border-secondary h-100 shadow-sm" style="border-radius: 0px !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-secondary small mono-font uppercase" style="font-size: 0.68rem;">MEDIUM LEVEL</span>
+                                <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.6rem;">${medCorrect}/${medTotal}</span>
+                            </div>
+                            <div class="fw-bold fs-4 text-white mono-font mb-1">${medAvg}%</div>
+                            <div class="progress" style="height: 3px; background: rgba(255,255,255,0.15); border-radius: 0px;">
+                                <div class="progress-bar bg-white" style="width: ${medAvg}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 bg-black border border-secondary h-100 shadow-sm" style="border-radius: 0px !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-secondary small mono-font uppercase" style="font-size: 0.68rem;">DSA SOLVED</span>
+                                <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.6rem;">CODING</span>
+                            </div>
+                            <div class="fw-bold fs-4 text-white mono-font mb-1">${data.dsa_solved_count || 0} Solved</div>
+                            <div class="progress" style="height: 3px; background: rgba(255,255,255,0.15); border-radius: 0px;">
+                                <div class="progress-bar bg-white" style="width: ${Math.min(100, ((data.dsa_solved_count || 0) * 10))}%;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -515,7 +600,7 @@
             document.getElementById('status-content').innerHTML = statusHtml;
         } catch (error) {
             console.error('Error loading status:', error);
-            document.getElementById('status-content').innerHTML = '<p class="text-white-50">Error loading statistics.</p>';
+            document.getElementById('status-content').innerHTML = '<p class="text-secondary mono-font small">Error loading statistics.</p>';
         }
     }
 
@@ -1031,9 +1116,9 @@
         </div>
       </div>
       <div class="modal-footer border-secondary">
-        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" id="confirm-download-btn" class="btn btn-success fw-bold px-4" onclick="downloadSelectedTemplateResume()">
-          <i class="bi bi-download me-2"></i>Download Resume (Classic Navy)
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">CANCEL</button>
+        <button type="button" id="confirm-download-btn" class="btn btn-primary fw-bold px-4" onclick="downloadSelectedTemplateResume()">
+          <i class="bi bi-download me-2"></i>DOWNLOAD RESUME (CLASSIC NAVY)
         </button>
       </div>
     </div>
@@ -1043,64 +1128,64 @@
 <!-- Modal: Detailed Mock Interview Report -->
 <div class="modal fade" id="mockInterviewDetailModal" tabindex="-1" aria-labelledby="mockInterviewDetailModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content" style="background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 18px; color: #fff;">
-      <div class="modal-header border-secondary">
+    <div class="modal-content border border-white text-white">
+      <div class="modal-header border-bottom border-white border-opacity-25">
         <h5 class="modal-title fw-bold text-white" id="mockInterviewDetailModalLabel">
-          <i class="bi bi-trophy-fill text-success me-2"></i><span id="modal-target-role">Software Engineer</span> Mock Interview Report
+          <i class="bi bi-trophy-fill text-white me-2"></i><span id="modal-target-role">Software Engineer</span> Mock Interview Report
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-4">
         <!-- Header Result -->
         <div class="text-center mb-4">
-          <span class="badge bg-success px-3 py-2 rounded-pill fs-6 mb-2" id="modal-verdict-badge">
+          <span class="badge bg-dark border border-white px-3 py-2 fs-6 mb-2" id="modal-verdict-badge">
             Executive Verdict
           </span>
           <h1 class="display-3 fw-bold text-white mb-1"><span id="modal-score-percent">0</span>%</h1>
-          <p class="text-secondary fs-6">Overall Performance Score</p>
+          <p class="text-secondary fs-6 mono-font">OVERALL PERFORMANCE SCORE</p>
         </div>
 
         <!-- Executive Summary -->
-        <div class="alert p-3 p-md-4 rounded-3 mb-4 text-white" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);">
-          <h6 class="fw-bold text-success mb-2"><i class="bi bi-clipboard-data-fill me-2"></i>Executive Performance Verdict</h6>
+        <div class="alert p-3 p-md-4 mb-4 text-white border border-white bg-black">
+          <h6 class="fw-bold text-white mb-2"><i class="bi bi-clipboard-data-fill me-2"></i>Executive Performance Verdict</h6>
           <p class="mb-0 text-white-50 small" id="modal-executive-summary"></p>
         </div>
 
         <!-- Top Strengths & Improvements -->
         <div class="row g-3 mb-4">
           <div class="col-md-6">
-            <div class="p-3 rounded-3 h-100" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
-              <h6 class="fw-bold text-success mb-2"><i class="bi bi-check-circle-fill me-2"></i>Top Demonstrated Strengths</h6>
+            <div class="p-3 border border-white bg-black h-100">
+              <h6 class="fw-bold text-white mb-2"><i class="bi bi-check-circle-fill me-2"></i>Top Demonstrated Strengths</h6>
               <ul id="modal-strengths-list" class="text-white-50 ps-3 mb-0 small"></ul>
             </div>
           </div>
           <div class="col-md-6">
-            <div class="p-3 rounded-3 h-100" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3);">
-              <h6 class="fw-bold text-warning mb-2"><i class="bi bi-tools me-2"></i>Key Areas to Refine</h6>
+            <div class="p-3 border border-white bg-black h-100">
+              <h6 class="fw-bold text-white mb-2"><i class="bi bi-tools me-2"></i>Key Areas to Refine</h6>
               <ul id="modal-improvements-list" class="text-white-50 ps-3 mb-0 small"></ul>
             </div>
           </div>
         </div>
 
         <!-- Recommendation Alert -->
-        <div class="alert alert-info p-3 mb-4 rounded-3 border-info" style="background: rgba(13, 202, 240, 0.15);">
+        <div class="alert alert-dark p-3 mb-4 border border-white bg-black">
           <div class="d-flex align-items-center gap-3">
-            <i class="bi bi-rocket-takeoff-fill fs-3 text-info flex-shrink-0"></i>
+            <i class="bi bi-rocket-takeoff-fill fs-3 text-white flex-shrink-0"></i>
             <div>
-              <strong class="text-info d-block small">Career Recommendation:</strong>
+              <strong class="text-white d-block small mono-font">CAREER RECOMMENDATION:</strong>
               <span class="text-white-50 small" id="modal-recommendation"></span>
             </div>
           </div>
         </div>
 
         <!-- Detailed Question Breakdown -->
-        <h5 class="fw-bold text-white mb-3"><i class="bi bi-list-check text-success me-2"></i>Question-by-Question Multi-Agent Assessment</h5>
+        <h5 class="fw-bold text-white mb-3"><i class="bi bi-list-check text-white me-2"></i>Question-by-Question Multi-Agent Assessment</h5>
         <div id="modal-questions-breakdown"></div>
       </div>
-      <div class="modal-footer border-secondary">
-        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Close</button>
-        <a href="/mock-interview" class="btn btn-success fw-bold" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
-          <i class="bi bi-arrow-counterclockwise me-1"></i>Retake Mock Interview
+      <div class="modal-footer border-top border-white border-opacity-25">
+        <button type="button" class="btn btn-outline-light fw-bold" data-bs-dismiss="modal">CLOSE</button>
+        <a href="/mock-interview" class="btn btn-primary fw-bold">
+          <i class="bi bi-arrow-counterclockwise me-1"></i>RETAKE MOCK INTERVIEW
         </a>
       </div>
     </div>
