@@ -11,56 +11,74 @@
             margin-top: 5px;
         }
 
-        .dashboard-nav-container {
+        .dashboard-nav-grid {
             width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            white-space: nowrap;
-            padding-bottom: 4px;
             margin-bottom: 1.25rem;
         }
 
-        .dashboard-nav-container .nav-tabs {
-            display: inline-flex;
-            flex-wrap: nowrap;
-            min-width: 100%;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-            margin-bottom: 0;
+        .dashboard-nav-grid .nav-tabs {
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr) !important;
+            gap: 8px !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border-bottom: none !important;
+            list-style: none !important;
         }
 
-        .nav-tabs .nav-link {
+        .dashboard-nav-grid .nav-tabs .nav-item {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            flex: none !important;
+        }
+
+        .dashboard-nav-grid .nav-tabs .nav-link {
             background: #000000 !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            border-bottom: none !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
             color: #a3a3a3 !important;
             border-radius: 0px !important;
-            margin-right: 4px;
             transition: all 0.2s ease;
-            font-size: 0.78rem;
-            padding: 0.6rem 0.9rem;
-            letter-spacing: 0.03em;
-            white-space: nowrap;
+            font-size: 0.74rem;
+            letter-spacing: 0.02em;
+            white-space: normal !important;
+            text-align: center !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0.65rem 0.4rem !important;
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 48px !important;
         }
-        .nav-tabs .nav-link:hover {
+        .dashboard-nav-grid .nav-tabs .nav-link:hover {
             color: #ffffff !important;
-            border-color: rgba(255, 255, 255, 0.5) !important;
+            border-color: rgba(255, 255, 255, 0.6) !important;
         }
-        .nav-tabs .nav-link.active {
+        .dashboard-nav-grid .nav-tabs .nav-link.active {
             background: #ffffff !important;
             color: #000000 !important;
             border-color: #ffffff !important;
-        }
-        .dashboard-nav-container::-webkit-scrollbar {
-            height: 3px;
-        }
-        .dashboard-nav-container::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.4);
+            font-weight: 800 !important;
         }
 
-        @media (max-width: 767.98px) {
-            .dashboard-nav-container .nav-link {
-                padding: 0.5rem 0.7rem !important;
-                font-size: 0.72rem !important;
+        @media (max-width: 991.98px) {
+            .dashboard-nav-grid .nav-tabs {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 6px !important;
+            }
+            .dashboard-nav-grid .nav-tabs .nav-item:nth-child(5) {
+                grid-column: span 2 !important;
+            }
+            .dashboard-nav-grid .nav-tabs .nav-link {
+                padding: 0.6rem 0.2rem !important;
+                font-size: 0.68rem !important;
+                letter-spacing: 0em !important;
+                line-height: 1.15 !important;
+                min-height: 44px !important;
             }
             .card-header {
                 padding: 0.75rem 1rem !important;
@@ -108,40 +126,40 @@
         </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="dashboard-nav-container mb-4 overflow-x-auto">
-        <ul class="nav nav-tabs border-secondary flex-nowrap text-nowrap" id="dashboardTabs" role="tablist" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;">
+    <!-- Navigation Tabs Grid (2, 2, 1 on Mobile / 5-Column on Desktop) -->
+    <div class="dashboard-nav-grid mb-4">
+        <ul class="nav nav-tabs border-0 m-0" id="dashboardTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active fw-bold text-uppercase mono-font py-2 px-3" id="quizzes-tab-btn" data-bs-toggle="tab"
+                <button class="nav-link active fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="quizzes-tab-btn" data-bs-toggle="tab"
                     data-bs-target="#quizzes-tab" type="button" role="tab" aria-controls="quizzes-tab" aria-selected="true"
                     onclick="loadTab('quizzes')">
-                    <i class="bi bi-play-btn me-1.5"></i>Past Quizzes
+                    <i class="bi bi-play-btn me-1"></i>Past Quizzes
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold text-uppercase mono-font py-2 px-3" id="custom-tab-btn" data-bs-toggle="tab" data-bs-target="#custom-tab"
+                <button class="nav-link fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="custom-tab-btn" data-bs-toggle="tab" data-bs-target="#custom-tab"
                     type="button" role="tab" aria-controls="custom-tab" aria-selected="false" onclick="loadTab('custom')">
-                    <i class="bi bi-puzzle me-1.5"></i>My Custom Quizzes
+                    <i class="bi bi-puzzle me-1"></i>Custom Quizzes
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold text-uppercase mono-font py-2 px-3" id="mock-interviews-tab-btn" data-bs-toggle="tab"
+                <button class="nav-link fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="mock-interviews-tab-btn" data-bs-toggle="tab"
                     data-bs-target="#mock-interviews-tab" type="button" role="tab" aria-controls="mock-interviews-tab"
                     aria-selected="false" onclick="loadTab('mock-interviews')">
-                    <i class="bi bi-mic me-1.5"></i>Mock Interviews
+                    <i class="bi bi-mic me-1"></i>Mock Interviews
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold text-uppercase mono-font py-2 px-3" id="resume-tab-btn" data-bs-toggle="tab" data-bs-target="#resume-tab"
+                <button class="nav-link fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="resume-tab-btn" data-bs-toggle="tab" data-bs-target="#resume-tab"
                     type="button" role="tab" aria-controls="resume-tab" aria-selected="false">
-                    <i class="bi bi-file-earmark-person me-1.5"></i>Resume Review
+                    <i class="bi bi-file-earmark-person me-1"></i>Resume Review
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold text-uppercase mono-font py-2 px-3" id="settings-tab-btn" data-bs-toggle="tab"
+                <button class="nav-link fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="settings-tab-btn" data-bs-toggle="tab"
                     data-bs-target="#settings-tab" type="button" role="tab" aria-controls="settings-tab"
                     aria-selected="false">
-                    <i class="bi bi-gear me-1.5"></i>Settings
+                    <i class="bi bi-gear me-1"></i>Settings
                 </button>
             </li>
         </ul>
