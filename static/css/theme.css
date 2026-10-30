@@ -394,11 +394,38 @@ body {
 }
 
 /* Modals & Alerts */
+.modal {
+    z-index: 100050 !important;
+}
+.modal-backdrop {
+    z-index: 100040 !important;
+}
+.modal-dialog {
+    z-index: 100051 !important;
+    pointer-events: auto !important;
+}
 .modal-content {
     background: #080808 !important;
     border: 1px solid #ffffff !important;
     color: #ffffff !important;
     box-shadow: 0 10px 40px rgba(255, 255, 255, 0.1);
+    position: relative !important;
+    z-index: 100052 !important;
+    pointer-events: auto !important;
+}
+
+.modal-header, .modal-body, .modal-footer {
+    position: relative !important;
+    z-index: 100053 !important;
+    pointer-events: auto !important;
+}
+
+.modal-footer button, .modal-header button, .modal-body button,
+.modal-footer a, .modal-header a, .modal-body a {
+    position: relative !important;
+    z-index: 100054 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
 }
 
 .modal-header {

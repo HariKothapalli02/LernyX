@@ -287,6 +287,35 @@
                 </div>
             </div>
 
+            <!-- GitHub Auto-Sync Settings -->
+            <div class="card bg-black border border-secondary shadow mb-4" style="border-radius: 0px !important;">
+                <div class="card-header bg-black border-bottom border-secondary py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-github me-2"></i>GitHub Auto-Sync (DSA Solutions)</h3>
+                    {% if current_user.github_token %}
+                        <span class="badge bg-success text-black fw-bold mono-font">CONNECTED</span>
+                    {% else %}
+                        <span class="badge bg-secondary text-white mono-font">NOT CONNECTED</span>
+                    {% endif %}
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ url_for('update_github_token') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="dash_github_token" class="form-label text-white small mono-font">GitHub Personal Access Token (PAT)</label>
+                            <input type="password" id="dash_github_token" name="github_token" class="form-control bg-black text-white border-secondary"
+                                placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                value="{{ current_user.github_token if current_user.github_token else '' }}"
+                                style="border-radius: 0px !important;">
+                            <p class="form-text text-secondary small">
+                                Automatically push solved DSA problems, problem statements, and AI Big-O complexity notes directly to your <code class="text-white">LernyX-DSA-Solutions</code> repo! Token requires <code class="text-info">repo</code> scope.
+                            </p>
+                        </div>
+                        <button type="submit" class="btn btn-light text-black fw-bold px-4 py-2" style="border-radius: 0px !important;">
+                            SAVE GITHUB TOKEN
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             <div class="card bg-black border border-danger shadow" style="border-radius: 0px !important;">
                 <div class="card-body p-4">
                     <h3 class="h6 text-danger mb-3 fw-bold mono-font">⚠️ DANGER ZONE - ACCOUNT DELETION</h3>
@@ -735,7 +764,7 @@
                         </div>
                         <h4 class="text-white fw-bold">No Mock Interviews Taken Yet</h4>
                         <p class="text-muted mx-auto mb-4" style="max-width: 450px;">
-                            Practice 1-on-1 technical voice interviews powered by Gemini 2.5 Flash & get detailed scoring reports stored right here.
+                            Practice 1-on-1 technical voice interviews powered by LernyX Intelligence & get detailed scoring reports stored right here.
                         </p>
                         <a href="/mock-interview" class="btn btn-success btn-lg fw-bold px-4 shadow" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
                             <i class="bi bi-play-circle-fill me-2"></i>Take Your First Mock Interview

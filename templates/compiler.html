@@ -1,177 +1,489 @@
 {% extends "base.html" %}
 
-{% block title %}DSA Practice - LernyX{% endblock %}
+{% block title %}DSA Problem Vault & 3-Pane Compiler - LernyX{% endblock %}
 
 {% block head %}
+<!-- Marked.js for AI Markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
+    .mono-font {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    }
+
     #editor {
         width: 100%;
-        height: 70vh;
-        /* Responsive height */
-        min-height: 400px;
-        border: 1px solid #444;
+        height: 100%;
+        min-height: 280px;
+        border: none;
     }
 
     .output-console {
-        background-color: #1e1e1e;
+        background-color: #0d0d0d;
         color: #d4d4d4;
         font-family: 'Consolas', 'Monaco', monospace;
         padding: 10px;
-        height: 200px;
+        height: 100%;
         overflow-y: auto;
-        border-radius: 4px;
+        border: 1px solid #262626;
+        font-size: 0.88rem;
     }
 
-    /* Mobile optimizations */
-    @media (max-width: 768px) {
-        #editor {
-            height: 50vh;
-            /* Smaller on mobile */
-            min-height: 300px;
-        }
-
-        .card-body.overflow-auto {
-            max-height: 300px !important;
-            /* Limit sidebar height on mobile */
-        }
-    }
-
-    .question-item {
+    .problem-row {
         cursor: pointer;
-        transition: background-color 0.2s;
+        transition: background-color 0.15s ease-in-out;
     }
 
-    .question-item:hover {
-        background-color: #2d2d2d;
-        color: #fff;
+    .problem-row:hover {
+        background-color: rgba(255, 255, 255, 0.05);
     }
 
-    .question-item.active {
-        background-color: #0d6efd;
+    /* 3-View Workspace Side-by-Side Cards */
+    .workspace-pane-card {
+        height: calc(100vh - 140px);
+        min-height: 580px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 6px;
+        border: 1px solid #2d2d2d;
+        background-color: #0c0c0c;
+        overflow: hidden;
+    }
+
+    .ai-chat-stream {
+        overflow-y: auto;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ai-bubble {
+        background: #171717;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 10px 12px;
+        color: #e5e5e5;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .ai-bubble pre {
+        background: #000;
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 10px;
+        position: relative;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        overflow-x: auto;
+    }
+
+    .ai-bubble code {
+        color: #38bdf8;
+        font-family: 'Consolas', monospace;
+    }
+
+    .user-bubble {
+        background: #1e3a8a;
         color: #fff;
-        border-left: 3px solid #fff;
+        border-radius: 8px;
+        padding: 8px 12px;
+        align-self: flex-end;
+        max-width: 90%;
+        font-size: 0.88rem;
+    }
+
+    .code-action-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+
+    .quick-chip {
+        font-size: 0.74rem;
+        border-radius: 16px;
+        padding: 3px 8px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Formatted Problem Description Content */
+    .problem-description-content {
+        line-height: 1.7;
+        color: #d1d5db;
+        font-size: 0.93rem;
+    }
+
+    .problem-description-content code {
+        background: #18181b;
+        color: #38bdf8;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.88em;
+        border: 1px solid #3f3f46;
+        font-family: 'Consolas', 'Monaco', monospace;
+    }
+
+    .problem-description-content b,
+    .problem-description-content strong {
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .problem-description-content p {
+        margin-bottom: 0.85rem;
+    }
+
+    .problem-description-content ul,
+    .problem-description-content ol {
+        padding-left: 1.25rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .problem-description-content li {
+        margin-bottom: 0.35rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <!-- Questions Sidebar -->
-        <div class="col-md-3" id="sidebar-col">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-bottom">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="toggleSidebar()"
-                                title="Hide Questions">
-                                <i class="bi bi-list"></i>
-                            </button>
-                            <h5 class="mb-0">Questions</h5>
+<div class="container-fluid py-2 px-md-3">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: PROBLEMS CATALOG (DEFAULT)         -->
+    <!-- ========================================== -->
+    <div id="view-problems-list">
+        <!-- Catalog Header Banner -->
+        <div class="card bg-black border-secondary mb-3 shadow">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h2 class="fw-bold tracking-tight mb-0 text-white">
+                                <i class="bi bi-code-slash text-primary me-2"></i>DSA Problem Vault
+                            </h2>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2">Interactive</span>
                         </div>
-                        <button class="btn btn-sm btn-outline-primary" onclick="generateQuestions()"
-                            title="Generate New">
-                            <i class="bi bi-magic"></i> New
+                        <p class="text-secondary mb-0 small">
+                            Solve algorithmic challenges, master Data Structures, test code in Python/Java/C, and get instant explanations with LernyX Intelligence.
+                        </p>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="text-end d-none d-sm-block">
+                            <div class="small text-secondary">Your DSA Score</div>
+                            <div class="fs-4 fw-bold text-success" id="dsa-score-display">{{ current_user.dsa_score }} pts</div>
+                        </div>
+                        <button class="btn btn-outline-primary fw-bold d-flex align-items-center gap-2" onclick="generateQuestions()">
+                            <i class="bi bi-magic"></i>
+                            <span>Generate New</span>
                         </button>
                     </div>
-                    <input type="text" id="question-search" class="form-control form-control-sm"
-                        placeholder="Search questions..." onkeyup="filterQuestions()">
                 </div>
-                <div class="list-group list-group-flush overflow-auto" style="max-height: 600px;" id="question-list">
-                    <!-- Questions will be loaded here -->
-                    <div class="text-center p-3 text-muted">
-                        <small>Click "New" to generate questions</small>
+
+                <!-- Stats summary bar -->
+                <div class="row g-3 mt-3 pt-3 border-top border-secondary">
+                    <div class="col-6 col-md-3">
+                        <div class="text-secondary small">Total Questions</div>
+                        <div class="fs-5 fw-bold text-white" id="stat-total-questions">-</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-secondary small">Solved by You</div>
+                        <div class="fs-5 fw-bold text-success" id="stat-solved-questions">-</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-secondary small">Completion Rate</div>
+                        <div class="fs-5 fw-bold text-info" id="stat-completion-rate">0%</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-secondary small">Supported Languages</div>
+                        <div class="fs-6 fw-bold text-white">Python &bull; Java &bull; C</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Problem Description Column -->
-        <div class="col-md-4" id="problem-col">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="btn btn-sm btn-outline-secondary" id="show-sidebar-btn" onclick="toggleSidebar()"
-                            style="display: none;" title="Show Questions">
-                            <i class="bi bi-list"></i>
-                        </button>
-                        <h5 class="mb-0" id="problem-title">Select a Question</h5>
+        <!-- Search and Filter Bar -->
+        <div class="card bg-dark border-secondary mb-3 shadow-sm">
+            <div class="card-body py-2 px-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-5">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-black border-secondary text-secondary"><i class="bi bi-search"></i></span>
+                            <input type="text" id="catalog-search" class="form-control bg-black border-secondary text-white"
+                                placeholder="Search by title, topic, or keyword..." autocomplete="off" onkeyup="filterProblemsList()">
+                        </div>
                     </div>
-                    <span class="badge bg-secondary" id="problem-difficulty"></span>
-                </div>
-                <div class="card-body overflow-auto" style="max-height: 600px;" id="problem-description">
-                    <p class="text-muted">Select a question from the sidebar to start coding.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Code Editor Column -->
-        <div class="col-md-5" id="editor-col">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Code Editor</h5>
-                    <div class="d-flex gap-2">
-                        <select id="language-select" class="form-select form-select-sm" style="width: auto;"
-                            onchange="changeLanguage()">
-                            <option value="java" selected>Java</option>
-                            <option value="python">Python</option>
-                            <option value="c">C</option>
+                    <div class="col-6 col-md-3">
+                        <select id="catalog-difficulty-filter" class="form-select form-select-sm bg-black border-secondary text-white" onchange="filterProblemsList()">
+                            <option value="all">All Difficulties</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
                         </select>
-                        <button id="run-btn" class="btn btn-success btn-sm" onclick="runCode()">
-                            <i class="bi bi-play-fill"></i> Run
-                        </button>
-                        <button id="submit-btn" class="btn btn-primary btn-sm" onclick="submitCode()">
-                            <i class="bi bi-check-circle-fill"></i> Submit
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <select id="catalog-status-filter" class="form-select form-select-sm bg-black border-secondary text-white" onchange="filterProblemsList()">
+                            <option value="all">All Status</option>
+                            <option value="solved">Solved</option>
+                            <option value="unsolved">Unsolved</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 text-end">
+                        <button class="btn btn-sm btn-outline-secondary w-100" onclick="resetFilters()" title="Reset Filters">
+                            <i class="bi bi-arrow-repeat"></i>
                         </button>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    <div id="editor"></div>
+            </div>
+        </div>
+
+        <!-- Problems Table -->
+        <div class="card bg-black border-secondary shadow">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0" id="problems-table">
+                    <thead class="table-dark text-secondary border-bottom border-secondary small text-uppercase">
+                        <tr>
+                            <th style="width: 100px;">Status</th>
+                            <th>Problem Title</th>
+                            <th style="width: 180px;">Topic</th>
+                            <th style="width: 130px;">Difficulty</th>
+                            <th style="width: 150px;" class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="problems-table-body">
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-secondary">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                Loading DSA problems...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: 3-VIEW SIDE-BY-SIDE PROBLEM WORKSPACE                              -->
+    <!-- [ Left: Problem Statement | Center: Code Editor | Right: LernyX AI Copilot ] -->
+    <!-- ========================================================================= -->
+    <div id="view-problem-workspace" style="display: none;">
+        <!-- Workspace Top Navigation -->
+        <div class="card bg-black border-secondary mb-2 shadow-sm">
+            <div class="card-body py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 fw-bold" onclick="backToProblemsList()">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Problems</span>
+                    </button>
+                    <span class="text-secondary">|</span>
+                    <h5 class="mb-0 text-white fw-bold" id="workspace-title">Loading Problem...</h5>
+                    <span id="workspace-difficulty" class="badge bg-secondary">Easy</span>
+                    <span id="workspace-topic" class="badge bg-dark border border-secondary text-secondary d-none d-sm-inline">Topic</span>
+                    <span id="workspace-status-badge" class="badge bg-success d-none"><i class="bi bi-check-circle-fill me-1"></i> Solved</span>
                 </div>
-                <div class="card-footer bg-dark">
-                    <h6 class="text-white-50 mb-2">Output:</h6>
-                    <div id="output" class="output-console">
-                        // Output will appear here...
+
+                <div class="d-flex align-items-center gap-2">
+                    <button id="workspace-github-btn" class="btn btn-sm btn-outline-light d-none align-items-center gap-1 fw-bold" onclick="handlePushToGitHub()">
+                        <i class="bi bi-github"></i>
+                        <span>Push to GitHub</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Views Side-by-Side: Problem | Editor | AI Assistant -->
+        <div class="row g-2">
+            <!-- 1. Left View: Problem Description & Test Cases -->
+            <div class="col-xl-4 col-lg-4 col-md-12">
+                <div class="card workspace-pane-card shadow-sm">
+                    <div class="card-header bg-dark border-bottom border-secondary d-flex justify-content-between align-items-center py-2 px-3">
+                        <span class="fw-bold text-white small text-uppercase tracking-wider">
+                            <i class="bi bi-file-text me-1 text-primary"></i> Problem Description
+                        </span>
+                    </div>
+                    <div class="card-body overflow-auto p-3" id="workspace-description-body" style="flex: 1;">
+                        <!-- Injected Problem Description -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Center View: Monaco Code Editor & Console Output -->
+            <div class="col-xl-4 col-lg-4 col-md-12">
+                <div class="card workspace-pane-card shadow-sm">
+                    <!-- Editor Top Control Bar -->
+                    <div class="card-header bg-dark border-bottom border-secondary py-2 px-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <select id="language-select" class="form-select form-select-sm bg-black border-secondary text-white fw-bold" style="width: 105px;" onchange="changeLanguage()">
+                                <option value="java" selected>Java</option>
+                                <option value="python">Python</option>
+                                <option value="c">C</option>
+                            </select>
+                            <button id="reset-btn" class="btn btn-outline-secondary btn-sm" onclick="resetToBoilerplate()" title="Reset to standard template">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button id="run-btn" class="btn btn-sm btn-outline-success fw-bold px-3 d-flex align-items-center gap-1" onclick="runCode()">
+                                <i class="bi bi-play-fill fs-6"></i> Run
+                            </button>
+                            <button id="submit-btn" class="btn btn-sm btn-primary fw-bold px-3 d-flex align-items-center gap-1" onclick="submitCode()">
+                                <i class="bi bi-check-circle-fill"></i> Submit
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Editor Canvas -->
+                    <div class="card-body p-0" style="flex: 1; position: relative; min-height: 250px;">
+                        <div id="editor"></div>
+                    </div>
+
+                    <!-- Output Console Area -->
+                    <div class="card-footer bg-black border-top border-secondary p-2" style="height: 175px; display: flex; flex-direction: column;">
+                        <div class="d-flex justify-content-between align-items-center mb-1 px-1">
+                            <span class="small text-secondary text-uppercase fw-bold mono-font">
+                                <i class="bi bi-terminal me-1"></i> Console Output
+                            </span>
+                            <small class="text-muted" id="run-status-text"></small>
+                        </div>
+                        <div id="output" class="output-console" style="flex: 1;">
+                            // Output will appear here after clicking 'Run' or 'Submit'...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Right View: LernyX AI Assistant & Doubt Solver (Side-by-Side!) -->
+            <div class="col-xl-4 col-lg-4 col-md-12">
+                <div class="card workspace-pane-card shadow-sm">
+                    <!-- AI Header -->
+                    <div class="card-header bg-dark border-bottom border-secondary py-2 px-3 d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary text-white p-1"><i class="bi bi-robot"></i></span>
+                            <span class="fw-bold text-white small text-uppercase tracking-wider">LernyX AI Copilot</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle py-0 px-2" style="font-size: 0.7rem;">Online</span>
+                        </div>
+                        <button class="btn btn-xs btn-outline-secondary py-0 px-2" onclick="clearAiChat()" title="Reset Chat">
+                            <i class="bi bi-trash3"></i> Clear
+                        </button>
+                    </div>
+
+                    <!-- Quick Action Chips -->
+                    <div class="p-2 px-2 bg-black border-bottom border-secondary d-flex gap-1 overflow-auto text-nowrap" style="scrollbar-width: thin;">
+                        <button class="btn btn-xs btn-outline-info quick-chip" onclick="triggerQuickAi('Give me the complete optimal code in ' + document.getElementById('language-select').value + ' with explanation.')">
+                            <i class="bi bi-code-slash"></i> Complete Code
+                        </button>
+                        <button class="btn btn-xs btn-outline-warning quick-chip" onclick="triggerQuickAi('Explain the approach, intuition, and algorithm logic step by step.')">
+                            <i class="bi bi-lightbulb"></i> Intuition
+                        </button>
+                        <button class="btn btn-xs btn-outline-danger quick-chip" onclick="triggerQuickAi('Analyze my current code in the editor, find any bugs or edge cases, and show how to fix them.')">
+                            <i class="bi bi-bug"></i> Fix Bugs
+                        </button>
+                        <button class="btn btn-xs btn-outline-light quick-chip" onclick="triggerQuickAi('What is the optimal Time and Space Complexity for this problem?')">
+                            <i class="bi bi-speedometer2"></i> Complexity
+                        </button>
+                    </div>
+
+                    <!-- Message Stream Area -->
+                    <div class="ai-chat-stream" id="ai-chat-stream" style="flex: 1; overflow-y: auto;">
+                        <div class="ai-bubble">
+                            <strong>Hi! 👋 I am your LernyX AI Assistant.</strong><br>
+                            I have full context of this problem, your current code in the editor, and test cases.<br>
+                            Click <em>"Complete Code"</em> above or ask me any doubt below!
+                        </div>
+                    </div>
+
+                    <!-- AI Input Form -->
+                    <div class="card-footer bg-dark border-top border-secondary p-2">
+                        <form id="ai-chat-form" onsubmit="event.preventDefault(); sendAiMessage();" class="d-flex gap-2">
+                            <textarea id="ai-chat-input" class="form-control bg-black border-secondary text-white small" rows="2"
+                                placeholder="Ask any doubt or question..." style="resize: none; font-size: 0.88rem;"
+                                onkeydown="if(event.key === 'Enter' && !event.shiftKey){ event.preventDefault(); sendAiMessage(); }"></textarea>
+                            <button type="submit" id="ai-send-btn" class="btn btn-primary px-3 fw-bold d-flex align-items-center justify-content-center">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
+
+<!-- ========================================== -->
+<!-- MODALS                                      -->
+<!-- ========================================== -->
 
 <!-- API Key Modal -->
 <div class="modal fade" id="apiKeyModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Enter AI API Key</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content bg-black border border-secondary text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold"><i class="bi bi-magic me-2 text-primary"></i>Generate New Problems</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>To generate new questions, please enter your AI API Key.</p>
-                <input type="text" id="gemini-api-key" class="form-control" placeholder="AIzaSy...">
+                <p class="text-secondary small">LernyX AI will automatically craft new structured DSA problems with hidden and edge-case test suites.</p>
+                <div class="mb-3">
+                    <label class="form-label small text-white">AI API Key (Optional if configured on server)</label>
+                    <input type="password" id="gemini-api-key" class="form-control bg-dark border-secondary text-white" placeholder="AIzaSy...">
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="submitGeneration()">Generate</button>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary fw-bold" onclick="submitGeneration()">Generate Problems</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Test Results Modal -->
-<div class="modal fade" id="resultsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Submission Results</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="resultsModal" tabindex="-1" aria-labelledby="resultsModalLabel" aria-hidden="true" style="z-index: 100050;">
+    <div class="modal-dialog modal-lg modal-dialog-centered" style="z-index: 100051; pointer-events: auto;">
+        <div class="modal-content bg-black border border-secondary text-white shadow-lg" style="position: relative; z-index: 100052; pointer-events: auto;">
+            <div class="modal-header border-secondary d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold" id="resultsModalLabel"><i class="bi bi-cpu me-2 text-primary"></i>Submission Results</h5>
+                <button type="button" class="btn-close btn-close-white" onclick="closeResultsModal()" aria-label="Close" style="cursor: pointer; z-index: 100055; pointer-events: auto;"></button>
             </div>
             <div class="modal-body" id="results-body">
-                <!-- Results will be injected here -->
+                <!-- Results injected here -->
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer border-secondary d-flex justify-content-between align-items-center">
+                <div id="github-sync-action-container"></div>
+                <button type="button" class="btn btn-secondary px-4 fw-bold" onclick="closeResultsModal()" style="cursor: pointer; z-index: 100055; pointer-events: auto;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GitHub Token Modal -->
+<div class="modal fade" id="githubTokenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-black border border-secondary text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold"><i class="bi bi-github me-2"></i>Connect GitHub Auto-Sync</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-secondary small mb-3">
+                    LernyX commits your solution and <strong>LernyX Intelligence complexity notes</strong> directly to your repository <code class="text-white">LernyX-DSA-Solutions</code> to turn your GitHub activity streak green!
+                </p>
+                <div class="mb-3">
+                    <label class="form-label small mono-font text-white">GitHub Personal Access Token (PAT)</label>
+                    <input type="password" id="github-pat-input" class="form-control bg-dark border-secondary text-white" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                    <div class="form-text text-secondary small mt-2">
+                        Requires <code class="text-info">repo</code> scope.
+                    </div>
+                </div>
+                <div id="github-modal-alert" class="d-none alert alert-danger small py-2"></div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-light text-black fw-bold px-3" onclick="saveGitHubTokenAndPush()">Save & Push Now</button>
             </div>
         </div>
     </div>
@@ -186,10 +498,11 @@
 
     let editor;
     let currentQuestion = null;
+    let allQuestions = [];
 
     const boilerplates = {
-        java: 'public class Main {\n    public static void main(String[] args) {\n        // Write your solution here\n        System.out.println("Hello Java!");\n    }\n}',
-        python: 'def main():\n    # Write your solution here\n    print("Hello Python!")\n\nif __name__ == "__main__":\n    main()',
+        java: 'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // Read input if needed, e.g. String s = sc.nextLine();\n        System.out.println("Hello Java!");\n    }\n}',
+        python: 'import sys\n\ndef main():\n    # Read all input from standard input\n    input_data = sys.stdin.read().strip()\n    # Write your solution here\n    print("Hello Python!")\n\nif __name__ == "__main__":\n    main()',
         c: '#include <stdio.h>\n\nint main() {\n    // Write your solution here\n    printf("Hello C!\\n");\n    return 0;\n}'
     };
 
@@ -198,168 +511,304 @@
             value: boilerplates.java,
             language: 'java',
             theme: 'vs-dark',
-            automaticLayout: true
+            automaticLayout: true,
+            fontSize: 14,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false
         });
 
         loadQuestions();
+
+        // Move all modals directly to document.body to escape stacking context traps
+        ['resultsModal', 'githubTokenModal', 'apiKeyModal'].forEach(id => {
+            const m = document.getElementById(id);
+            if (m && m.parentNode !== document.body) {
+                document.body.appendChild(m);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (editor) editor.layout();
+        });
     });
 
-    function changeLanguage() {
-        const lang = document.getElementById('language-select').value;
-        monaco.editor.setModelLanguage(editor.getModel(), lang === 'c' ? 'c' : lang);
-        editor.setValue(boilerplates[lang]);
-    }
-
-    function generateQuestions() {
-        const apiKey = localStorage.getItem('gemini_api_key');
-        if (!apiKey) {
-            new bootstrap.Modal(document.getElementById('apiKeyModal')).show();
-            return;
-        }
-        submitGeneration();
-    }
-
-    function submitGeneration() {
-        const apiKey = document.getElementById('gemini-api-key').value || localStorage.getItem('gemini_api_key');
-        if (!apiKey) {
-            alert("Please enter your AI API Key.");
-            return;
-        }
-
-        localStorage.setItem('gemini_api_key', apiKey);
-
-        const btn = document.querySelector('#apiKeyModal .btn-primary');
-        const originalText = btn.innerText;
-        btn.disabled = true;
-        btn.innerText = "Generating...";
-
-        fetch('/api/generate_questions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ api_key: apiKey })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    alert('Error: ' + data.error);
-                } else {
-                    alert(`Generated ${data.count} new questions!`);
-                    bootstrap.Modal.getInstance(document.getElementById('apiKeyModal')).hide();
-                    loadQuestions();
-                }
-            })
-            .catch(err => alert('Network Error: ' + err))
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerText = originalText;
-            });
-    }
+    // ==========================================
+    // CATALOG & NAVIGATION LOGIC
+    // ==========================================
 
     function loadQuestions() {
-        const list = document.getElementById('question-list');
+        const tbody = document.getElementById('problems-table-body');
 
         fetch('/api/questions')
             .then(res => res.json())
             .then(questions => {
-                if (questions.length === 0) {
-                    list.innerHTML = '<div class="text-center p-3 text-muted"><small>Click "New" to generate questions</small></div>';
-                    return;
-                }
+                allQuestions = questions;
+                renderQuestionsTable(questions);
+                updateStats(questions);
 
-                list.innerHTML = '';
-                questions.forEach((q, index) => {
-                    const item = document.createElement('a');
-                    item.className = 'list-group-item list-group-item-action question-item';
-                    item.innerHTML = `
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">
-                                ${q.title}
-                                ${q.solved ? '<span class="badge bg-success ms-2">Solved</span>' : ''}
-                            </h6>
-                            <small class="text-${q.difficulty === 'Easy' ? 'success' : 'warning'}">${q.difficulty}</small>
-                        </div>
-                        <small class="text-muted">${q.topic}</small>
-                    `;
-                    item.onclick = () => selectQuestion(q, item);
-                    list.appendChild(item);
-
-                    // Select first question by default
-                    if (index === 0 && !currentQuestion) {
-                        selectQuestion(q, item);
+                // Check if URL hash has a specific problem e.g. #problem=<id>
+                const hash = window.location.hash;
+                if (hash && hash.startsWith('#problem=')) {
+                    const targetId = hash.replace('#problem=', '');
+                    const found = questions.find(q => q._id === targetId);
+                    if (found) {
+                        openProblem(found);
                     }
-                });
+                }
             })
-            .catch(err => console.error('Error loading questions:', err));
+            .catch(err => {
+                console.error('Error loading questions:', err);
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Failed to load questions: ${err.message}</td></tr>`;
+            });
     }
 
-    function selectQuestion(q, element) {
-        currentQuestion = q;
-
-        // Update active state
-        document.querySelectorAll('.question-item').forEach(el => el.classList.remove('active'));
-        if (element) element.classList.add('active');
-
-        // Update UI
-        document.getElementById('problem-title').innerText = q.title;
-        document.getElementById('problem-difficulty').innerText = q.difficulty;
-        document.getElementById('problem-difficulty').className = `badge bg-${q.difficulty === 'Easy' ? 'success' : 'warning'}`;
-
-        let descHtml = `<p>${q.description}</p>`;
-
-        // Show example test case (first one usually)
-        if (q.test_cases && q.test_cases.length > 0) {
-            const example = q.test_cases[0];
-            descHtml += `
-                <h6>Example:</h6>
-                <pre class="bg-dark text-light p-2 rounded" style="border: 1px solid #444;">Input: ${example.input}\nOutput: ${example.output}</pre>
+    function renderQuestionsTable(questions) {
+        const tbody = document.getElementById('problems-table-body');
+        if (!questions || questions.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-secondary">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        No DSA problems found. Click "Generate New" to create curated challenges!
+                    </td>
+                </tr>
             `;
+            return;
         }
 
-        document.getElementById('problem-description').innerHTML = descHtml;
+        let html = '';
+        questions.forEach(q => {
+            const isSolved = Boolean(q.solved);
+            const statusHtml = isSolved
+                ? `<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i> Solved</span>`
+                : `<span class="badge bg-dark border border-secondary text-secondary px-2 py-1"><i class="bi bi-circle me-1"></i> Unsolved</span>`;
 
-        // Update Editor with standard boilerplate
-        const lang = document.getElementById('language-select').value;
-        editor.setValue(boilerplates[lang]);
+            const diffColor = q.difficulty === 'Easy' ? 'success' : (q.difficulty === 'Medium' ? 'warning' : 'danger');
 
-        // Handle Solved State
-        const submitBtn = document.getElementById('submit-btn');
+            html += `
+                <tr class="problem-row" onclick="openProblemById('${q._id}')">
+                    <td>${statusHtml}</td>
+                    <td>
+                        <span class="fw-bold text-white fs-6 d-block">${escapeHtml(q.title)}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-dark text-secondary border border-secondary">${escapeHtml(q.topic || 'General')}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-${diffColor}-subtle text-${diffColor} border border-${diffColor}-subtle">${escapeHtml(q.difficulty)}</span>
+                    </td>
+                    <td class="text-end">
+                        <button class="btn btn-sm ${isSolved ? 'btn-outline-success' : 'btn-outline-primary'} fw-bold" onclick="event.stopPropagation(); openProblemById('${q._id}')">
+                            ${isSolved ? 'Review Code' : 'Solve Challenge'} <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function updateStats(questions) {
+        const total = questions.length;
+        const solved = questions.filter(q => q.solved).length;
+        const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
+
+        const totalEl = document.getElementById('stat-total-questions');
+        const solvedEl = document.getElementById('stat-solved-questions');
+        const rateEl = document.getElementById('stat-completion-rate');
+
+        if (totalEl) totalEl.innerText = total;
+        if (solvedEl) solvedEl.innerText = solved;
+        if (rateEl) rateEl.innerText = `${pct}%`;
+    }
+
+    function filterProblemsList() {
+        const searchVal = (document.getElementById('catalog-search').value || '').toLowerCase().trim();
+        const diffVal = document.getElementById('catalog-difficulty-filter').value;
+        const statusVal = document.getElementById('catalog-status-filter').value;
+
+        const filtered = allQuestions.filter(q => {
+            const matchesSearch = !searchVal ||
+                q.title.toLowerCase().includes(searchVal) ||
+                (q.topic && q.topic.toLowerCase().includes(searchVal));
+
+            const matchesDiff = (diffVal === 'all') || (q.difficulty === diffVal);
+            const matchesStatus = (statusVal === 'all') ||
+                (statusVal === 'solved' && q.solved) ||
+                (statusVal === 'unsolved' && !q.solved);
+
+            return matchesSearch && matchesDiff && matchesStatus;
+        });
+
+        renderQuestionsTable(filtered);
+    }
+
+    function resetFilters() {
+        document.getElementById('catalog-search').value = '';
+        document.getElementById('catalog-difficulty-filter').value = 'all';
+        document.getElementById('catalog-status-filter').value = 'all';
+        renderQuestionsTable(allQuestions);
+    }
+
+    // ==========================================
+    // 3-VIEW WORKSPACE LOGIC
+    // ==========================================
+
+    function openProblemById(id) {
+        const q = allQuestions.find(item => item._id === id);
+        if (q) openProblem(q);
+    }
+
+    function openProblem(q) {
+        currentQuestion = q;
+
+        // Switch Views: Hide Catalog, Show 3-View Workspace
+        document.getElementById('view-problems-list').style.display = 'none';
+        document.getElementById('view-problem-workspace').style.display = 'block';
+
+        // Update URL hash
+        window.location.hash = `#problem=${q._id}`;
+
+        // Populate Top Header
+        document.getElementById('workspace-title').innerText = q.title;
+        const diffEl = document.getElementById('workspace-difficulty');
+        diffEl.innerText = q.difficulty;
+        diffEl.className = `badge bg-${q.difficulty === 'Easy' ? 'success' : (q.difficulty === 'Medium' ? 'warning' : 'danger')}`;
+
+        const topicEl = document.getElementById('workspace-topic');
+        topicEl.innerText = q.topic || 'General';
+
+        const statusBadge = document.getElementById('workspace-status-badge');
+        const githubBtn = document.getElementById('workspace-github-btn');
         if (q.solved) {
-            submitBtn.disabled = true;
+            statusBadge.classList.remove('d-none');
+            if (githubBtn) githubBtn.classList.remove('d-none');
+        } else {
+            statusBadge.classList.add('d-none');
+            if (githubBtn) githubBtn.classList.add('d-none');
+        }
+
+        // View 1 (Left): Populate Problem Description & Test Cases
+        const formattedDesc = formatProblemDescription(q.description);
+        let descHtml = `<div class="problem-description-content mb-4">${formattedDesc}</div>`;
+
+        if (q.test_cases && q.test_cases.length > 0) {
+            descHtml += `<h6 class="text-white fw-bold mb-2"><i class="bi bi-card-checklist text-primary me-2"></i>Example Cases:</h6>`;
+            q.test_cases.forEach((tc, idx) => {
+                if (!tc.hidden) {
+                    descHtml += `
+                        <div class="card bg-dark border-secondary mb-2">
+                            <div class="card-header bg-black border-secondary py-1 px-2 d-flex justify-content-between align-items-center">
+                                <span class="small text-secondary fw-bold">Example ${idx + 1}</span>
+                                <button class="btn btn-xs btn-outline-secondary py-0 px-2" onclick="copyToClipboard('${escapeJs(tc.input)}')">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                            <div class="card-body p-2 font-monospace small">
+                                <div><strong class="text-secondary">Input:</strong> <span class="text-white">${escapeHtml(tc.input)}</span></div>
+                                <div><strong class="text-secondary">Output:</strong> <span class="text-success">${escapeHtml(tc.output)}</span></div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        document.getElementById('workspace-description-body').innerHTML = descHtml;
+
+        // View 2 (Center): Restore user's saved solution or standard boilerplate
+        if (q.solved && q.user_code) {
+            const userLang = q.user_language || document.getElementById('language-select').value;
+            document.getElementById('language-select').value = userLang;
+            const monacoLang = userLang === 'c' ? 'c' : (userLang === 'python' ? 'python' : 'java');
+            monaco.editor.setModelLanguage(editor.getModel(), monacoLang);
+            editor.setValue(q.user_code);
+        } else {
+            const lang = document.getElementById('language-select').value;
+            const monacoLang = lang === 'c' ? 'c' : (lang === 'python' ? 'python' : 'java');
+            monaco.editor.setModelLanguage(editor.getModel(), monacoLang);
+            editor.setValue(boilerplates[lang]);
+        }
+
+        // Set Submit button status
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = false;
+        if (q.solved) {
             submitBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Solved';
             submitBtn.classList.remove('btn-primary');
             submitBtn.classList.add('btn-success');
         } else {
-            submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Submit';
             submitBtn.classList.add('btn-primary');
             submitBtn.classList.remove('btn-success');
         }
+
+        // Reset console output
+        document.getElementById('output').innerHTML = '// Ready. Click "Run" or "Submit".';
+        document.getElementById('run-status-text').innerText = '';
+
+        // View 3 (Right): Reset AI stream welcome message for this specific problem
+        clearAiChat();
+
+        // Resize Monaco editor layout after showing container
+        setTimeout(() => {
+            if (editor) editor.layout();
+        }, 120);
     }
 
-    function runCode() {
-        if (!currentQuestion) {
-            alert("Please select a question first.");
-            return;
+    function backToProblemsList() {
+        document.getElementById('view-problem-workspace').style.display = 'none';
+        document.getElementById('view-problems-list').style.display = 'block';
+
+        history.replaceState(null, null, ' ');
+
+        updateStats(allQuestions);
+        renderQuestionsTable(allQuestions);
+    }
+
+    function changeLanguage() {
+        const lang = document.getElementById('language-select').value;
+        const monacoLang = lang === 'c' ? 'c' : (lang === 'python' ? 'python' : 'java');
+        monaco.editor.setModelLanguage(editor.getModel(), monacoLang);
+
+        if (currentQuestion && currentQuestion.solved && currentQuestion.user_language === lang && currentQuestion.user_code) {
+            editor.setValue(currentQuestion.user_code);
+        } else {
+            editor.setValue(boilerplates[lang]);
         }
+    }
+
+    function resetToBoilerplate() {
+        const lang = document.getElementById('language-select').value;
+        if (confirm(`Reset editor to standard starter template for ${lang.toUpperCase()}?`)) {
+            editor.setValue(boilerplates[lang]);
+        }
+    }
+
+    // ==========================================
+    // EXECUTION & SUBMISSION
+    // ==========================================
+
+    function runCode() {
+        if (!currentQuestion) return;
 
         const runBtn = document.getElementById('run-btn');
         const outputDiv = document.getElementById('output');
+        const statusText = document.getElementById('run-status-text');
         const lang = document.getElementById('language-select').value;
         const code = editor.getValue();
 
         runBtn.disabled = true;
-        outputDiv.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Running...';
+        statusText.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Running...';
 
-        // Use the first test case as the example input/expected output for 'Run'
         const example = currentQuestion.test_cases && currentQuestion.test_cases.length > 0 ? currentQuestion.test_cases[0] : { input: '', output: '' };
         const input = example.input;
         const expected = example.output;
 
         fetch('/api/execute_code', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 source_code: code,
                 language: lang,
@@ -367,73 +816,53 @@
                 question_id: currentQuestion._id
             })
         })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 if (data.error) {
-                    outputDiv.innerHTML = `<span class="text-danger">Error: ${data.error}</span>`;
+                    outputDiv.innerHTML = `<span class="text-danger">Error: ${escapeHtml(data.error)}</span>`;
+                    statusText.innerText = 'Execution Failed';
                 } else {
-                    let outputHtml = '';
                     const stdout = data.stdout ? data.stdout.trim() : "";
                     const isAccepted = (!data.status || data.status.description === "Accepted") && !data.stderr;
                     const isCorrect = isAccepted && (stdout === expected.trim());
 
-                    outputHtml += `<div class="mb-2">
-                    <span class="badge bg-${isCorrect ? 'success' : 'danger'}">${isCorrect ? 'Passed Example' : 'Failed Example'}</span>
-                </div>`;
+                    statusText.innerHTML = `<span class="badge bg-${isCorrect ? 'success' : 'danger'}">${isCorrect ? 'Passed Example' : 'Failed Example'}</span>`;
 
-                    outputHtml += `<div><strong>Input:</strong> <pre class="text-muted mb-1">${input}</pre></div>`;
-                    outputHtml += `<div><strong>Expected Output:</strong> <pre class="text-success mb-1">${expected}</pre></div>`;
+                    let outputHtml = '';
+                    outputHtml += `<div><strong>Input:</strong> <pre class="text-secondary mb-1">${escapeHtml(input)}</pre></div>`;
+                    outputHtml += `<div><strong>Expected:</strong> <pre class="text-success mb-1">${escapeHtml(expected)}</pre></div>`;
 
                     if (data.stdout) {
-                        outputHtml += `<div><strong>Your Output:</strong> <pre class="${isCorrect ? 'text-success' : 'text-danger'} mb-1">${data.stdout}</pre></div>`;
+                        outputHtml += `<div><strong>Output:</strong> <pre class="${isCorrect ? 'text-success' : 'text-danger'} mb-1">${escapeHtml(data.stdout)}</pre></div>`;
                     }
-
                     if (data.stderr) {
-                        outputHtml += `<div><strong>Error:</strong> <pre class="text-danger mb-1">${data.stderr}</pre></div>`;
+                        outputHtml += `<div><strong>Stderr:</strong> <pre class="text-danger mb-1">${escapeHtml(data.stderr)}</pre></div>`;
                     }
-
                     if (data.compile_output) {
-                        outputHtml += `<div><strong>Compilation:</strong> <pre class="text-warning mb-1">${data.compile_output}</pre></div>`;
+                        outputHtml += `<div><strong>Compilation:</strong> <pre class="text-warning mb-1">${escapeHtml(data.compile_output)}</pre></div>`;
                     }
 
                     outputDiv.innerHTML = outputHtml;
                 }
             })
-            .catch(error => {
-                outputDiv.innerHTML = `<span class="text-danger">Network Error: ${error.message}</span>`;
+            .catch(err => {
+                outputDiv.innerHTML = `<span class="text-danger">Network Error: ${escapeHtml(err.message)}</span>`;
+                statusText.innerText = 'Network Error';
             })
             .finally(() => {
                 runBtn.disabled = false;
             });
     }
 
-    function filterQuestions() {
-        const input = document.getElementById('question-search');
-        const filter = input.value.toLowerCase();
-        const items = document.getElementsByClassName('question-item');
-
-        for (let i = 0; i < items.length; i++) {
-            const text = items[i].innerText || items[i].textContent;
-            if (text.toLowerCase().indexOf(filter) > -1) {
-                items[i].style.display = "";
-            } else {
-                items[i].style.display = "none";
-            }
-        }
-    }
-
     function submitCode() {
-        if (!currentQuestion) {
-            alert("Please select a question first.");
-            return;
-        }
+        if (!currentQuestion) return;
 
         const submitBtn = document.getElementById('submit-btn');
         const lang = document.getElementById('language-select').value;
         const code = editor.getValue();
 
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Grading...';
 
         fetch('/api/submit_code', {
             method: 'POST',
@@ -447,91 +876,454 @@
             .then(res => res.json())
             .then(data => {
                 if (data.error) {
-                    alert('Error: ' + data.error);
+                    alert('Submission Error: ' + data.error);
                     return;
                 }
 
                 const modalBody = document.getElementById('results-body');
+                const githubActionContainer = document.getElementById('github-sync-action-container');
                 let html = '';
 
                 if (data.all_passed) {
-                    html += `<div class="alert alert-success">
-                    <h4><i class="bi bi-trophy-fill"></i> All Test Cases Passed!</h4>
-                    <p>Points Awarded: <strong>+${data.points_awarded}</strong></p>
-                    <p>Total Score: <strong>${data.new_total_score}</strong></p>
-                </div>`;
+                    // Update state
+                    currentQuestion.solved = true;
+                    currentQuestion.user_code = code;
+                    currentQuestion.user_language = lang;
+
+                    // Update UI elements
+                    document.getElementById('workspace-status-badge').classList.remove('d-none');
+                    document.getElementById('workspace-github-btn').classList.remove('d-none');
+                    const scoreDisp = document.getElementById('dsa-score-display');
+                    if (scoreDisp && data.new_total_score) scoreDisp.innerText = `${data.new_total_score} pts`;
+
+                    submitBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Solved';
+                    submitBtn.classList.remove('btn-primary');
+                    submitBtn.classList.add('btn-success');
+
+                    html += `
+                        <div class="alert alert-success border-success bg-dark text-white p-3 mb-3">
+                            <h4 class="text-success fw-bold mb-1"><i class="bi bi-trophy-fill me-2"></i> All Test Cases Passed!</h4>
+                            <p class="mb-1 text-secondary">Points Awarded: <strong class="text-success">+${data.points_awarded}</strong></p>
+                            <p class="mb-0 text-secondary">Total DSA Score: <strong class="text-white">${data.new_total_score}</strong></p>
+                        </div>
+                    `;
+
+                    if (githubActionContainer) {
+                        githubActionContainer.innerHTML = `
+                            <button id="push-github-btn" class="btn btn-outline-light d-flex align-items-center gap-2 fw-bold" onclick="handlePushToGitHub()">
+                                <i class="bi bi-github fs-5"></i>
+                                <span>PUSH TO GITHUB</span>
+                            </button>
+                        `;
+                    }
                 } else {
-                    html += `<div class="alert alert-danger">
-                    <h4><i class="bi bi-x-circle-fill"></i> Some Test Cases Failed</h4>
-                    <p>Please check your logic and try again.</p>
-                </div>`;
+                    html += `
+                        <div class="alert alert-danger border-danger bg-dark text-white p-3 mb-3">
+                            <h4 class="text-danger fw-bold mb-1"><i class="bi bi-x-circle-fill me-2"></i> Some Test Cases Failed</h4>
+                            <p class="mb-0 text-secondary">Check failed cases below or ask <strong>LernyX AI Copilot</strong> on the right for help!</p>
+                        </div>
+                    `;
+                    if (githubActionContainer) githubActionContainer.innerHTML = '';
                 }
 
-                html += '<ul class="list-group">';
+                html += '<ul class="list-group list-group-flush mb-0">';
                 data.results.forEach(r => {
-                    html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>Test Case ${r.case_index}</strong>
-                        ${r.hidden ? '<span class="badge bg-secondary ms-2">Hidden</span>' : ''}
-                    </div>
-                    <span class="badge bg-${r.passed ? 'success' : 'danger'} rounded-pill">
-                        ${r.passed ? 'Passed' : 'Failed'}
-                    </span>
-                </li>`;
+                    html += `
+                        <li class="list-group-item bg-black text-white border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Test Case ${r.case_index}</strong>
+                                ${r.hidden ? '<span class="badge bg-secondary ms-2">Hidden Case</span>' : ''}
+                            </div>
+                            <span class="badge bg-${r.passed ? 'success' : 'danger'} rounded-pill">
+                                ${r.passed ? 'Passed' : 'Failed'}
+                            </span>
+                        </li>
+                    `;
                     if (!r.passed && !r.hidden) {
-                        html += `<li class="list-group-item bg-light text-danger">
-                        <small>Expected: ${r.expected}<br>Actual: ${r.actual}</small>
-                    </li>`;
+                        html += `
+                            <li class="list-group-item bg-dark text-danger border-secondary py-2 small font-monospace">
+                                <div>Expected: ${escapeHtml(r.expected)}</div>
+                                <div>Actual:   ${escapeHtml(r.actual)}</div>
+                            </li>
+                        `;
                     }
                 });
                 html += '</ul>';
 
                 modalBody.innerHTML = html;
-                new bootstrap.Modal(document.getElementById('resultsModal')).show();
+                const modalEl = document.getElementById('resultsModal');
+                if (modalEl && modalEl.parentNode !== document.body) {
+                    document.body.appendChild(modalEl);
+                }
+                const modalInst = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modalInst.show();
             })
-            .catch(err => alert('Network Error: ' + err))
+            .catch(err => alert('Network Error: ' + err.message))
             .finally(() => {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Submit';
+                if (currentQuestion && currentQuestion.solved) {
+                    submitBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Solved';
+                    submitBtn.classList.remove('btn-primary');
+                    submitBtn.classList.add('btn-success');
+                } else {
+                    submitBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Submit';
+                    submitBtn.classList.add('btn-primary');
+                    submitBtn.classList.remove('btn-success');
+                }
             });
     }
 
-    function toggleSidebar() {
-        const sidebarCol = document.getElementById('sidebar-col');
-        const problemCol = document.getElementById('problem-col');
-        const editorCol = document.getElementById('editor-col');
-        const showBtn = document.getElementById('show-sidebar-btn');
+    function closeResultsModal() {
+        const modalEl = document.getElementById('resultsModal');
+        if (modalEl) {
+            const modalInst = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (modalInst) {
+                modalInst.hide();
+            }
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            modalEl.setAttribute('aria-hidden', 'true');
+        }
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+    }
 
-        if (sidebarCol.style.display === 'none') {
-            // Show Sidebar
-            sidebarCol.style.display = 'block';
+    // ==========================================
+    // LERNYX AI DSA ASSISTANT LOGIC (VIEW 3)
+    // ==========================================
 
-            // Reset widths
-            problemCol.classList.remove('col-md-5');
-            problemCol.classList.add('col-md-4');
+    function clearAiChat() {
+        if (!currentQuestion) return;
+        const stream = document.getElementById('ai-chat-stream');
+        stream.innerHTML = `
+            <div class="ai-bubble">
+                <strong>Hi! 👋 I am your LernyX AI Copilot for "${escapeHtml(currentQuestion.title)}".</strong><br>
+                I have full context of this problem statement, your code in the editor, and test cases.<br>
+                Click <em>"Complete Code"</em> above or ask me any doubt below!
+            </div>
+        `;
+    }
 
-            editorCol.classList.remove('col-md-7');
-            editorCol.classList.add('col-md-5');
+    function triggerQuickAi(promptText) {
+        document.getElementById('ai-chat-input').value = promptText;
+        sendAiMessage();
+    }
 
-            showBtn.style.display = 'none';
+    async function sendAiMessage() {
+        if (!currentQuestion) return;
+
+        const inputEl = document.getElementById('ai-chat-input');
+        const prompt = inputEl.value.trim();
+        if (!prompt) return;
+
+        const stream = document.getElementById('ai-chat-stream');
+        const sendBtn = document.getElementById('ai-send-btn');
+
+        // Append User bubble
+        const userDiv = document.createElement('div');
+        userDiv.className = 'user-bubble';
+        userDiv.innerText = prompt;
+        stream.appendChild(userDiv);
+
+        inputEl.value = '';
+        inputEl.disabled = true;
+        sendBtn.disabled = true;
+
+        // Append Loading bubble
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'ai-bubble text-secondary';
+        loadingDiv.innerHTML = '<span class="spinner-grow spinner-grow-sm me-2 text-primary"></span>LernyX Intelligence is analyzing...';
+        stream.appendChild(loadingDiv);
+        stream.scrollTop = stream.scrollHeight;
+
+        try {
+            const res = await fetch('/api/dsa_ai_assistant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question_id: currentQuestion._id,
+                    prompt: prompt,
+                    source_code: editor.getValue(),
+                    language: document.getElementById('language-select').value,
+                    output_context: document.getElementById('output').innerText
+                })
+            });
+
+            const data = await res.json();
+            loadingDiv.remove();
+
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'ai-bubble';
+
+            if (data.error) {
+                aiDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${escapeHtml(data.error)}</span>`;
+            } else {
+                const parsedMarkdown = marked.parse(data.response || '');
+                aiDiv.innerHTML = parsedMarkdown;
+                enhanceCodeBlocks(aiDiv);
+            }
+
+            stream.appendChild(aiDiv);
+            stream.scrollTop = stream.scrollHeight;
+
+        } catch (e) {
+            loadingDiv.remove();
+            const errDiv = document.createElement('div');
+            errDiv.className = 'ai-bubble text-danger';
+            errDiv.innerText = 'Network error: ' + e.message;
+            stream.appendChild(errDiv);
+        } finally {
+            inputEl.disabled = false;
+            sendBtn.disabled = false;
+            inputEl.focus();
+        }
+    }
+
+    function enhanceCodeBlocks(container) {
+        const preBlocks = container.querySelectorAll('pre');
+        preBlocks.forEach(pre => {
+            const codeEl = pre.querySelector('code');
+            if (!codeEl) return;
+
+            const codeText = codeEl.innerText;
+            const bar = document.createElement('div');
+            bar.className = 'code-action-bar';
+
+            // Insert into Editor button
+            const insertBtn = document.createElement('button');
+            insertBtn.className = 'btn btn-xs btn-primary fw-bold';
+            insertBtn.innerHTML = '<i class="bi bi-box-arrow-in-left me-1"></i> Insert into Editor';
+            insertBtn.onclick = () => insertCodeIntoMonaco(codeText);
+
+            // Copy button
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'btn btn-xs btn-outline-secondary';
+            copyBtn.innerHTML = '<i class="bi bi-clipboard me-1"></i> Copy';
+            copyBtn.onclick = () => {
+                copyToClipboard(codeText);
+                copyBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Copied!';
+                setTimeout(() => { copyBtn.innerHTML = '<i class="bi bi-clipboard me-1"></i> Copy'; }, 2000);
+            };
+
+            bar.appendChild(insertBtn);
+            bar.appendChild(copyBtn);
+            pre.parentNode.insertBefore(bar, pre.nextSibling);
+        });
+    }
+
+    function insertCodeIntoMonaco(code) {
+        if (!editor) return;
+        editor.setValue(code);
+
+        // Flash confirmation
+        const outputDiv = document.getElementById('output');
+        outputDiv.innerHTML = '<span class="text-success fw-bold">// Code from LernyX AI Copilot inserted into Monaco Editor successfully! Click "Run" or "Submit" to test.</span>';
+    }
+
+    // ==========================================
+    // GITHUB PUSH & TOKEN
+    // ==========================================
+
+    async function handlePushToGitHub() {
+        if (!currentQuestion) return;
+
+        const btn = document.getElementById('push-github-btn') || document.getElementById('workspace-github-btn');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Checking GitHub...';
+
+        try {
+            const statusRes = await fetch('/api/github_status');
+            const statusData = await statusRes.json();
+
+            if (!statusData.connected) {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                const tokenModalEl = document.getElementById('githubTokenModal');
+                if (tokenModalEl && tokenModalEl.parentNode !== document.body) {
+                    document.body.appendChild(tokenModalEl);
+                }
+                const tokenModal = bootstrap.Modal.getOrCreateInstance(tokenModalEl);
+                tokenModal.show();
+            } else {
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> LernyX AI Analyzing & Pushing...';
+                await executePushToGitHub(btn, originalContent);
+            }
+        } catch (e) {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            alert('Failed checking GitHub status: ' + e.message);
+        }
+    }
+
+    async function saveGitHubTokenAndPush() {
+        const tokenInput = document.getElementById('github-pat-input');
+        const alertBox = document.getElementById('github-modal-alert');
+        const token = tokenInput.value.trim();
+
+        if (!token) {
+            alertBox.textContent = 'Please enter a valid GitHub Personal Access Token.';
+            alertBox.classList.remove('d-none');
+            return;
+        }
+
+        try {
+            const saveRes = await fetch('/update_github_token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ github_token: token })
+            });
+            const saveData = await saveRes.json();
+
+            if (saveData.error) {
+                alertBox.textContent = 'Error: ' + saveData.error;
+                alertBox.classList.remove('d-none');
+                return;
+            }
+
+            const tokenModalEl = document.getElementById('githubTokenModal');
+            if (tokenModalEl) {
+                const tokenModalInst = bootstrap.Modal.getInstance(tokenModalEl) || bootstrap.Modal.getOrCreateInstance(tokenModalEl);
+                if (tokenModalInst) tokenModalInst.hide();
+            }
+
+            const btn = document.getElementById('push-github-btn') || document.getElementById('workspace-github-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> LernyX AI Analyzing & Pushing...';
+                await executePushToGitHub(btn, '<i class="bi bi-github"></i><span>Push to GitHub</span>');
+            }
+        } catch (e) {
+            alertBox.textContent = 'Failed saving token: ' + e.message;
+            alertBox.classList.remove('d-none');
+        }
+    }
+
+    async function executePushToGitHub(btn, originalContent) {
+        const lang = document.getElementById('language-select').value;
+        const code = editor.getValue();
+
+        try {
+            const pushRes = await fetch('/api/push_to_github', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question_id: currentQuestion._id,
+                    source_code: code,
+                    language: lang
+                })
+            });
+            const pushData = await pushRes.json();
+
+            if (pushData.error) {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                alert('GitHub Push Error: ' + pushData.error);
+                return;
+            }
+
+            btn.className = 'btn btn-sm btn-success d-flex align-items-center gap-1 fw-bold';
+            btn.innerHTML = `<i class="bi bi-check-circle-fill"></i> Synced to GitHub!`;
+
+            const container = document.getElementById('github-sync-action-container');
+            if (container) {
+                const link = document.createElement('a');
+                link.href = pushData.repo_url;
+                link.target = '_blank';
+                link.className = 'btn btn-sm btn-outline-info ms-2 fw-bold mono-font';
+                link.innerHTML = '<i class="bi bi-box-arrow-up-right me-1"></i> View Repo';
+                container.appendChild(link);
+            }
+        } catch (e) {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            alert('Push failed: ' + e.message);
+        }
+    }
+
+    // ==========================================
+    // UTILITIES
+    // ==========================================
+
+    function generateQuestions() {
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) {
+            new bootstrap.Modal(document.getElementById('apiKeyModal')).show();
+            return;
+        }
+        submitGeneration();
+    }
+
+    function submitGeneration() {
+        const apiKey = document.getElementById('gemini-api-key').value || localStorage.getItem('gemini_api_key');
+        if (apiKey) localStorage.setItem('gemini_api_key', apiKey);
+
+        const btn = document.querySelector('#apiKeyModal .btn-primary');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Generating...";
+
+        fetch('/api/generate_questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: apiKey || '' })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    alert(`Generated ${data.count} new questions!`);
+                    const modalEl = document.getElementById('apiKeyModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    loadQuestions();
+                }
+            })
+            .catch(err => alert('Network Error: ' + err))
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            });
+    }
+
+    function copyToClipboard(text) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text);
         } else {
-            // Hide Sidebar
-            sidebarCol.style.display = 'none';
-
-            // Expand other columns
-            problemCol.classList.remove('col-md-4');
-            problemCol.classList.add('col-md-5');
-
-            editorCol.classList.remove('col-md-5');
-            editorCol.classList.add('col-md-7');
-
-            showBtn.style.display = 'block';
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
         }
+    }
 
-        // Refresh editor layout
-        if (editor) {
-            setTimeout(() => editor.layout(), 50);
+    function formatProblemDescription(rawDesc) {
+        if (!rawDesc) return '';
+        if (typeof marked !== 'undefined' && marked.parse) {
+            marked.setOptions({ breaks: true, gfm: true });
+            return marked.parse(rawDesc);
         }
+        return rawDesc;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function escapeJs(str) {
+        if (!str) return '';
+        return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n');
     }
 </script>
 {% endblock %}

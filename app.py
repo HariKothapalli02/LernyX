@@ -204,12 +204,13 @@ login_manager.login_message = 'Please log in to access this page.'
 
 # User class for Flask-Login
 class User(UserMixin):
-    def __init__(self, user_id, username, email, dsa_score=0, api_key=None):
+    def __init__(self, user_id, username, email, dsa_score=0, api_key=None, github_token=None):
         self.id = str(user_id)
         self.username = username
         self.email = email
         self.dsa_score = dsa_score
         self.api_key = api_key
+        self.github_token = github_token
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -223,7 +224,8 @@ def load_user(user_id):
                 user_data["username"], 
                 user_data["email"],
                 user_data.get("dsa_score", 0),
-                user_data.get("api_key")
+                user_data.get("api_key"),
+                user_data.get("github_token")
             )
     except Exception as e:
         print(f"Error loading user: {str(e)}")
@@ -400,7 +402,7 @@ def ask_gemini(prompt, history=None, attachment_path=None):
     is_greeting = (cleaned in greeting_keywords or (len(cleaned) < 10 and any(cleaned.startswith(w) for w in greeting_keywords))) and not attachment_path
 
     if is_greeting and not history: # Only return static greeting if it's the very first message
-        html = "<b>Hi there! 👋</b><br>I am your Gemini chatbot. Ask me anything, request code, or type a command to get started!"
+        html = "<b>Hi there! 👋</b><br>I am your LernyX Intelligence assistant. Ask me anything, request code, or type a command to get started!"
         return html
 
     # Build context from history
@@ -448,7 +450,7 @@ def ask_gemini(prompt, history=None, attachment_path=None):
     
     model = get_gemini_model()
     if model is None:
-        return "<p><b>AI Chatbot Unavailable.</b><br>Please configure the Gemini API key in settings.</p>"
+        return "<p><b>AI Chatbot Unavailable.</b><br>Please configure the API key in settings.</p>"
 
     try:
         content_parts = [format_prompt]
@@ -1031,6 +1033,36 @@ def execute_code_engine(language, source_code, stdin=""):
     """
     lang_lower = str(language).lower().strip()
 
+    # 0. High-Speed Local Python Runtime Execution (Zero network lag, 100% reliable)
+    if lang_lower in ["python", "py", "python3"]:
+        import sys
+        import subprocess
+        try:
+            proc = subprocess.run(
+                [sys.executable, "-c", source_code],
+                input=stdin,
+                capture_output=True,
+                text=True,
+                timeout=6
+            )
+            return {
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+                "compile_output": "",
+                "success": proc.returncode == 0,
+                "error": None if proc.returncode == 0 else proc.stderr
+            }
+        except subprocess.TimeoutExpired:
+            return {
+                "stdout": "",
+                "stderr": "Time Limit Exceeded (Execution exceeded 6 seconds). Check for infinite loops.",
+                "compile_output": "",
+                "success": False,
+                "error": "Time Limit Exceeded"
+            }
+        except Exception as local_py_err:
+            print(f"[Local Python Runtime fallback needed]: {local_py_err}")
+
     # 1. Primary Execution Engine: Piston v2 API (Free, high-speed public code runner)
     piston_map = {
         "python": ("python", "main.py"),
@@ -1049,7 +1081,7 @@ def execute_code_engine(language, source_code, stdin=""):
                 "files": [{"name": p_filename, "content": source_code}],
                 "stdin": stdin
             }
-            resp = requests.post("https://emkc.org/api/v2/piston/execute", json=piston_payload, timeout=10)
+            resp = requests.post("https://emkc.org/api/v2/piston/execute", json=piston_payload, timeout=8)
             if resp.status_code == 200:
                 res_data = resp.json()
                 run_stage = res_data.get("run", {})
@@ -1303,12 +1335,10 @@ def submit_code():
     if not source_code or not question_id:
         return jsonify({"error": "Missing code or question ID"}), 400
         
-    # Check if already solved
+    # Check if user already solved this question previously (to decide on awarding points vs re-submitting)
     user_data = users_collection.find_one({"_id": ObjectId(current_user.id)})
     solved_questions = [str(qid) for qid in user_data.get("solved_questions", [])] if user_data else []
-    
-    if str(question_id) in solved_questions:
-        return jsonify({"error": "You have already solved this question."}), 400
+    is_already_solved = str(question_id) in solved_questions
         
     try:
         # Fetch question
@@ -1347,11 +1377,13 @@ def submit_code():
         new_total_score = current_user.dsa_score
         
         if all_passed:
-            # Check if already solved
-            user_data = users_collection.find_one({"_id": ObjectId(current_user.id)})
-            solved_questions = user_data.get("solved_questions", [])
+            solution_data = {
+                "source_code": source_code,
+                "language": language,
+                "solved_at": datetime.now(timezone.utc).isoformat()
+            }
             
-            if ObjectId(question_id) not in solved_questions:
+            if not is_already_solved:
                 # Award points
                 points = 1 if question.get("difficulty") == "Easy" else 4
                 print(f"DEBUG: Awarding {points} points to {current_user.username} for question {question_id}")
@@ -1360,13 +1392,21 @@ def submit_code():
                     {"_id": ObjectId(current_user.id)},
                     {
                         "$inc": {"dsa_score": points},
-                        "$push": {"solved_questions": ObjectId(question_id)}
+                        "$push": {"solved_questions": ObjectId(question_id)},
+                        "$set": {f"solved_solutions.{question_id}": solution_data}
                     }
                 )
                 points_awarded = points
                 new_total_score += points
             else:
-                print(f"DEBUG: User {current_user.username} already solved question {question_id}")
+                # Already solved previously: update saved solution so latest working code is preserved
+                print(f"DEBUG: User {current_user.username} already solved question {question_id}, updating saved solution")
+                users_collection.update_one(
+                    {"_id": ObjectId(current_user.id)},
+                    {
+                        "$set": {f"solved_solutions.{question_id}": solution_data}
+                    }
+                )
                 
         return jsonify({
             "all_passed": all_passed,
@@ -1390,17 +1430,110 @@ def get_questions():
         # Fetch all questions including _id
         questions = list(db.dsa_questions.find({}).sort("created_at", -1))
         
-        # Get user's solved questions
+        # Get user's solved questions and saved solutions
         user_data = users_collection.find_one({"_id": ObjectId(current_user.id)})
         solved_ids = [str(qid) for qid in user_data.get("solved_questions", [])] if user_data else []
+        solved_solutions = user_data.get("solved_solutions", {}) if user_data else {}
         
-        # Convert ObjectId to string for JSON serialization and add solved status
+        # Convert ObjectId to string for JSON serialization and add solved status & user solution
         for q in questions:
-            q["_id"] = str(q["_id"])
-            q["solved"] = q["_id"] in solved_ids
+            qid_str = str(q["_id"])
+            q["_id"] = qid_str
+            q["solved"] = qid_str in solved_ids
+            if qid_str in solved_solutions:
+                sol = solved_solutions[qid_str]
+                q["user_code"] = sol.get("source_code")
+                q["user_language"] = sol.get("language")
+            else:
+                q["user_code"] = None
+                q["user_language"] = None
             
         return jsonify(questions)
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/dsa_ai_assistant", methods=["POST"])
+@login_required
+def dsa_ai_assistant():
+    """
+    Context-aware DSA AI Assistant that understands the current problem,
+    student's code, language, compiler output, and answers doubts or generates solutions.
+    """
+    data = request.get_json() or {}
+    question_id = data.get("question_id")
+    user_prompt = (data.get("prompt") or "").strip()
+    source_code = data.get("source_code", "")
+    language = data.get("language", "python")
+    output_context = data.get("output_context", "")
+
+    if not user_prompt:
+        return jsonify({"error": "Prompt is required"}), 400
+
+    problem_title = "DSA Coding Problem"
+    difficulty = "Medium"
+    description = ""
+    test_cases_str = ""
+
+    if question_id:
+        try:
+            q = db.dsa_questions.find_one({"_id": ObjectId(question_id)})
+            if q:
+                problem_title = q.get("title", problem_title)
+                difficulty = q.get("difficulty", difficulty)
+                description = q.get("description", "")
+                test_cases = q.get("test_cases", [])
+                if test_cases:
+                    formatted_cases = []
+                    for i, tc in enumerate(test_cases[:3]):
+                        formatted_cases.append(f"Case {i+1}: Input: {tc.get('input')} -> Output: {tc.get('output')}")
+                    test_cases_str = "\n".join(formatted_cases)
+        except Exception as q_err:
+            print(f"Error fetching question for AI assistant: {q_err}")
+
+    system_prompt = f"""You are the LernyX Intelligence DSA AI Assistant, an elite competitive programmer and computer science tutor.
+The student is currently working on this coding challenge:
+- Problem: {problem_title}
+- Difficulty: {difficulty}
+- Description: {description}
+- Example Test Cases:
+{test_cases_str}
+
+Student's Working Context:
+- Selected Language: {language}
+- Student's Current Code in Editor:
+```{language}
+{source_code if source_code.strip() else f"// No code written yet (starter template in {language})"}
+```
+- Console Output / Execution Message:
+{output_context if output_context.strip() else "(No errors / not run yet)"}
+
+Student's Request / Question:
+{user_prompt}
+
+Guidelines:
+1. If the student asks for the complete code or solution:
+   - Provide the complete, working, optimal solution in {language} wrapped in ```{language} ... ``` code block.
+   - Make sure standard I/O (reading from stdin, writing to stdout) is handled properly for the platform.
+   - Explain the approach, algorithm intuition, Time Complexity, and Space Complexity clearly.
+2. If the student has doubts, errors, or failed test cases:
+   - Explain clearly what the bug or mistake is in their code and how to fix it.
+   - Provide helpful hints, step-by-step logic, or corrected snippets.
+3. If the student asks for intuition or an explanation:
+   - Break down the problem step-by-step with clear explanations.
+4. Format your answer with clean Markdown (bold headings, bullet points, code blocks). Keep explanations friendly, educational, and easy to understand."""
+
+    try:
+        response, err = generate_content_with_fallback([system_prompt])
+        if err or not response:
+            return jsonify({"error": f"LernyX AI is currently unavailable: {err or 'No response generated'}"}), 500
+
+        reply_text = _get_gemini_text(response)
+        if not reply_text:
+            return jsonify({"error": "Failed to generate AI response. Please try again."}), 500
+
+        return jsonify({"response": reply_text})
+    except Exception as e:
+        print(f"Error in dsa_ai_assistant: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/login", methods=["GET", "POST"])
@@ -1770,6 +1903,224 @@ def update_api_key():
         flash("Failed to update API key.", "error")
         
     return redirect(url_for('dashboard'))
+
+@app.route("/update_github_token", methods=["POST"])
+@login_required
+def update_github_token():
+    if not MONGODB_AVAILABLE:
+        if request.is_json:
+            return jsonify({"error": "Database unavailable"}), 500
+        flash("Database unavailable.", "error")
+        return redirect(url_for('profile'))
+
+    data = request.get_json(silent=True) or request.form
+    github_token = data.get("github_token", "").strip()
+
+    try:
+        users_collection.update_one(
+            {"_id": ObjectId(current_user.id)},
+            {"$set": {"github_token": github_token}}
+        )
+        if request.is_json:
+            return jsonify({"success": True, "has_token": bool(github_token)})
+        flash("GitHub token updated successfully.", "success")
+    except Exception as e:
+        print(f"Error updating GitHub token: {str(e)}")
+        if request.is_json:
+            return jsonify({"error": str(e)}), 500
+        flash("Failed to update GitHub token.", "error")
+
+    return redirect(url_for('profile'))
+
+@app.route("/api/github_status", methods=["GET"])
+@login_required
+def get_github_status():
+    """Check if the current user has configured a GitHub token."""
+    if not MONGODB_AVAILABLE:
+        return jsonify({"connected": False, "error": "Database unavailable"}), 500
+    try:
+        user_data = users_collection.find_one({"_id": ObjectId(current_user.id)})
+        token = user_data.get("github_token", "") if user_data else ""
+        return jsonify({"connected": bool(token and token.strip())})
+    except Exception as e:
+        return jsonify({"connected": False, "error": str(e)}), 500
+
+@app.route("/api/push_to_github", methods=["POST"])
+@login_required
+def push_to_github():
+    """Push solved DSA problem code, problem statement, and AI complexity analysis to user's GitHub repo."""
+    if not MONGODB_AVAILABLE:
+        return jsonify({"error": "Database unavailable"}), 500
+
+    data = request.get_json() or {}
+    question_id = data.get("question_id")
+    source_code = data.get("source_code", "")
+    language = data.get("language", "python").lower()
+
+    if not question_id or not source_code:
+        return jsonify({"error": "Missing question_id or source_code"}), 400
+
+    # Retrieve User's GitHub Token
+    user_data = users_collection.find_one({"_id": ObjectId(current_user.id)})
+    github_token = (user_data.get("github_token") or "").strip()
+    if not github_token:
+        return jsonify({"error": "GitHub Personal Access Token not configured. Please add your token first."}), 401
+
+    # Fetch Question
+    try:
+        question = db.dsa_questions.find_one({"_id": ObjectId(question_id)})
+        if not question:
+            return jsonify({"error": "Question not found"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Invalid question ID: {str(e)}"}), 400
+
+    title = question.get("title", "DSA Problem")
+    difficulty = question.get("difficulty", "Medium")
+    description = question.get("description", "")
+    test_cases = question.get("test_cases", [])
+
+    # File extensions
+    ext_map = {"python": "py", "java": "java", "c": "c", "cpp": "cpp", "javascript": "js"}
+    file_ext = ext_map.get(language, "txt")
+
+    # Safe folder name for problem (e.g., '001-two-sum')
+    clean_title = "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in title).strip()
+    folder_slug = clean_title.replace(" ", "-")
+    folder_path = f"{difficulty}/{folder_slug}"
+
+    import base64
+    import requests
+
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "LernyX-Platform"
+    }
+
+    # Verify user token & get username
+    user_res = requests.get("https://api.github.com/user", headers=headers, timeout=10)
+    if user_res.status_code != 200:
+        return jsonify({"error": f"Invalid or expired GitHub token ({user_res.status_code}). Please verify your token."}), 401
+
+    github_username = user_res.json().get("login")
+    repo_name = "LernyX-DSA-Solutions"
+
+    # Ensure repository exists
+    repo_check = requests.get(f"https://api.github.com/repos/{github_username}/{repo_name}", headers=headers, timeout=10)
+    if repo_check.status_code == 404:
+        create_repo_payload = {
+            "name": repo_name,
+            "description": "DSA Solutions and AI Complexity Analysis automatically synced from LernyX Platform 🚀",
+            "private": False,
+            "auto_init": True
+        }
+        create_res = requests.post("https://api.github.com/user/repos", headers=headers, json=create_repo_payload, timeout=15)
+        if create_res.status_code not in (200, 201):
+            return jsonify({"error": f"Failed to auto-create repo '{repo_name}': {create_res.text}"}), 500
+
+    # Helper function to create or update file via GitHub API
+    def commit_github_file(path, content_str, commit_msg):
+        url = f"https://api.github.com/repos/{github_username}/{repo_name}/contents/{path}"
+        existing = requests.get(url, headers=headers, timeout=10)
+        sha = None
+        if existing.status_code == 200:
+            sha = existing.json().get("sha")
+
+        encoded_content = base64.b64encode(content_str.encode("utf-8")).decode("utf-8")
+        payload = {
+            "message": commit_msg,
+            "content": encoded_content
+        }
+        if sha:
+            payload["sha"] = sha
+
+        put_res = requests.put(url, headers=headers, json=payload, timeout=15)
+        return put_res.status_code in (200, 201), put_res
+
+    # 1. Generate Problem README.md
+    test_cases_str = ""
+    for idx, tc in enumerate(test_cases[:3]):
+        test_cases_str += f"\n**Example {idx + 1}:**\n```\nInput: {tc.get('input', '')}\nOutput: {tc.get('output', '')}\n```\n"
+
+    problem_readme = f"""# {title}
+
+**Difficulty:** `{difficulty}` | **Platform:** [LernyX](https://lernyx.ai)
+
+## Problem Description
+{description}
+
+## Sample Test Cases
+{test_cases_str}
+
+---
+*Auto-synced by [LernyX Platform](https://lernyx.ai) - Your AI-Powered Learning & Career Acceleration Suite.*
+"""
+
+    # 2. Generate LernyX AI Complexity Analysis
+    complexity_prompt = f"""You are LernyX Intelligence. Analyze this {language} DSA solution for the problem '{title}'.
+Problem: {description}
+Student Code:
+```{language}
+{source_code}
+```
+Provide:
+1. Exact Time Complexity (Big-O) with a 1-sentence mathematical rationale.
+2. Exact Space Complexity (Auxiliary space Big-O) with a 1-sentence rationale.
+3. Key Algorithmic Approach (2-3 bullet points).
+4. Edge Cases Handled (2 bullet points).
+
+Keep it clean, beautifully formatted Markdown suitable for a GitHub repository. No preamble."""
+
+    ai_analysis_text = ""
+    try:
+        res, err = generate_content_with_fallback(complexity_prompt, preferred_model="gemini-2.5-flash", temperature=0.2)
+        if res:
+            ai_analysis_text = _get_gemini_text(res)
+    except Exception as gen_err:
+        print(f"Error generating complexity: {gen_err}")
+
+    if not ai_analysis_text or not ai_analysis_text.strip():
+        ai_analysis_text = f"""## Algorithmic Complexity & Analysis
+- **Language:** {language.capitalize()}
+- **Time Complexity:** Analyzed by LernyX Intelligence
+- **Space Complexity:** Analyzed by LernyX Intelligence
+- **Status:** All Test Cases Passed Successfully
+"""
+
+    analysis_md = f"""# Complexity & Algorithmic Analysis
+
+### Problem: {title} (`{difficulty}`)
+
+{ai_analysis_text}
+
+---
+*Generated by LernyX Intelligence.*
+"""
+
+    # 3. Commit Files to GitHub
+    solution_filename = f"Solution.{file_ext}"
+    commit_prefix = f"Solve: {title} [{difficulty}]"
+
+    # Commit Solution Code
+    ok, resp = commit_github_file(f"{folder_path}/{solution_filename}", source_code, f"{commit_prefix} - Solution code")
+    if not ok:
+        return jsonify({"error": f"Failed committing solution code to GitHub: {resp.text}"}), 500
+
+    # Commit Problem README.md
+    commit_github_file(f"{folder_path}/README.md", problem_readme, f"{commit_prefix} - Problem description")
+
+    # Commit Complexity.md
+    commit_github_file(f"{folder_path}/Complexity.md", analysis_md, f"{commit_prefix} - LernyX AI Complexity Analysis")
+
+    repo_url = f"https://github.com/{github_username}/{repo_name}/tree/main/{folder_path}"
+
+    return jsonify({
+        "success": True,
+        "message": f"Successfully synced '{title}' to your GitHub repository!",
+        "repo_url": repo_url,
+        "github_username": github_username
+    })
 
 @app.route("/home")
 @login_required

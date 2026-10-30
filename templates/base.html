@@ -177,20 +177,31 @@
 
         <!-- Main Content -->
         <main class="flex-grow-1 position-relative" style="z-index: 1;">
-            {% if request.endpoint not in ['login', 'signup', 'forgot_password', 'verify_reset_otp', 'verify_signup', 'reset_password'] %}
+            <!-- Modern Floating Toast Notifications Container -->
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-            <div class="container mt-3">
+            <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 99999;">
                 {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show glass-alert" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                {% set bs_class = 'danger' if category in ['error', 'danger'] else ('success' if category == 'success' else ('warning' if category == 'warning' else 'info')) %}
+                {% set icon_class = 'bi-exclamation-octagon-fill' if category in ['error', 'danger'] else ('bi-check-circle-fill' if category == 'success' else ('bi-exclamation-triangle-fill' if category == 'warning' else 'bi-info-circle-fill')) %}
+                <div class="toast show align-items-center text-white bg-black border border-{{ bs_class }} shadow-lg rounded-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="6000" style="min-width: 300px; max-width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+                    <div class="d-flex align-items-center p-3">
+                        <div class="fs-4 me-3 text-{{ bs_class }} flex-shrink-0">
+                            <i class="bi {{ icon_class }}"></i>
+                        </div>
+                        <div class="toast-body p-0 flex-grow-1" style="font-size: 0.9rem; line-height: 1.4;">
+                            <div class="fw-bold text-uppercase mono-font small text-{{ bs_class }} mb-1">
+                                {{ 'Error' if category in ['error', 'danger'] else ('Success' if category == 'success' else ('Notice' if category == 'warning' else 'Information')) }}
+                            </div>
+                            <div class="text-white">{{ message }}</div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white ms-2 me-0 flex-shrink-0" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
             {% endif %}
             {% endwith %}
-            {% endif %}
 
             {% block content %}{% endblock %}
         </main>
@@ -283,6 +294,15 @@
                     if (installItem) installItem.classList.add('d-none');
                 });
             }
+        });
+
+        // Initialize Bootstrap Toasts with auto-hide
+        document.addEventListener('DOMContentLoaded', function () {
+            const toastElList = document.querySelectorAll('.toast');
+            toastElList.forEach(function (toastEl) {
+                const toast = new bootstrap.Toast(toastEl, { delay: 6000, autohide: true });
+                toast.show();
+            });
         });
     </script>
 

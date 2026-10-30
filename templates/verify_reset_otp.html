@@ -130,16 +130,7 @@
                 <h1 class="fw-bold text-white mb-2 display-5">Enter OTP Code</h1>
                 <p class="text-secondary small mb-4">Please enter the 6-digit verification code sent to your email.</p>
 
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show text-start mb-4" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor %}
-                {% endif %}
-                {% endwith %}
+
 
                 <form method="POST" action="{{ url_for('verify_reset_otp') }}">
                     <div class="mb-4 text-start">

@@ -120,8 +120,14 @@
             </div>
             <div class="col-md-6">
                 <div class="p-3 border border-secondary bg-dark rounded-0">
-                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">APPLICATION STATUS</small>
-                    <strong class="text-white fs-6">LernyX Web & PWA App Ready</strong>
+                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">GITHUB DSA SYNC</small>
+                    <strong class="text-white fs-6">
+                        {% if current_user.github_token %}
+                            <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Connected</span>
+                        {% else %}
+                            <span class="text-secondary">Not Connected</span>
+                        {% endif %}
+                    </strong>
                 </div>
             </div>
         </div>
@@ -137,6 +143,50 @@
                 <span>LOGOUT ACCOUNT</span>
             </a>
         </div>
+    </div>
+
+    <!-- GitHub Auto-Sync Integration Card -->
+    <div class="card bg-black border border-secondary p-4 p-md-5 mb-4 shadow">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h5 class="fw-bold text-white mb-0 tracking-tight">
+                <i class="bi bi-github me-2 text-white"></i>GitHub Auto-Sync for Solved Problems
+            </h5>
+            {% if current_user.github_token %}
+                <span class="badge bg-success text-black fw-bold px-3 py-1.5 mono-font" style="border-radius: 0px !important;">
+                    <i class="bi bi-check-circle-fill me-1"></i>SYNC ACTIVE
+                </span>
+            {% else %}
+                <span class="badge bg-secondary text-white px-3 py-1.5 mono-font" style="border-radius: 0px !important;">
+                    OPTIONAL
+                </span>
+            {% endif %}
+        </div>
+
+        <p class="text-secondary small mb-3" style="max-width: 720px; line-height: 1.5;">
+            Whenever you pass all test cases in the <strong>DSA Compiler</strong>, LernyX will commit your solution, problem statement, and 
+            <strong>LernyX Intelligence complexity analysis (Big-O)</strong> directly to your personal GitHub repository 
+            <code class="text-white">LernyX-DSA-Solutions</code> to build your GitHub streak & portfolio!
+        </p>
+
+        <form action="{{ url_for('update_github_token') }}" method="POST">
+            <div class="mb-3">
+                <label for="github_token" class="form-label text-white small mono-font">
+                    GitHub Personal Access Token (classic or fine-grained with <code class="text-info">repo</code> scope)
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-secondary rounded-0"><i class="bi bi-key-fill"></i></span>
+                    <input type="password" id="github_token" name="github_token" class="form-control bg-black text-white border-secondary rounded-0"
+                        placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        value="{{ current_user.github_token if current_user.github_token else '' }}">
+                    <button type="submit" class="btn btn-light text-black fw-bold px-4 rounded-0">
+                        <i class="bi bi-save me-1"></i>SAVE TOKEN
+                    </button>
+                </div>
+                <div class="form-text text-secondary small mt-2">
+                    <i class="bi bi-info-circle me-1"></i>Need a token? Go to GitHub &rarr; <em>Settings &rarr; Developer Settings &rarr; Personal access tokens &rarr; Tokens (classic)</em> &rarr; Check <strong>repo</strong> scope.
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
