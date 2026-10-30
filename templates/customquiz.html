@@ -3,70 +3,72 @@
 {% block title %}Custom Quiz Builder - LernyX{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="display-5 fw-bold text-white">Custom Quiz Builder</h1>
-        <p class="lead text-muted">Create your own exam-style quizzes manually or let AI draft questions for a topic.
+<div class="container py-4 py-md-5">
+    <div class="text-center mb-4 fade-in-up">
+        <span class="badge badge-purple px-3 py-1.5 mb-2" style="font-size: 0.78rem; letter-spacing: 0.05em;">
+            <i class="bi bi-pencil-square me-1"></i>EXAM & ASSESSMENT STUDIO
+        </span>
+        <h1 class="h2 fw-bold text-slate mb-2 tracking-tight">Custom Quiz Builder</h1>
+        <p class="text-secondary mx-auto mb-0" style="max-width: 620px; font-size: 0.95rem; line-height: 1.5;">
+            Create your own proctored exam quizzes manually or leverage LernyX AI to automatically generate structured challenges.
         </p>
     </div>
 
     <div class="row g-4">
         <!-- Left Column: Editor -->
         <div class="col-lg-5">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-transparent border-bottom">
-                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 18px; border: 1px solid rgba(124, 58, 237, 0.12) !important; background: #ffffff;">
+                <div class="card-header bg-white border-bottom p-3" style="border-color: rgba(124, 58, 237, 0.1) !important; border-top-left-radius: 18px; border-top-right-radius: 18px;">
+                    <ul class="nav nav-pills nav-fill" role="tablist" style="background: rgba(124, 58, 237, 0.06); padding: 4px; border-radius: 12px;">
                         <li class="nav-item">
-                            <button class="nav-link active" id="tab-manual" data-bs-toggle="tab"
-                                data-bs-target="#manual-panel" type="button">Manual Entry</button>
+                            <button class="nav-link active fw-bold py-2" id="tab-manual" data-bs-toggle="tab"
+                                data-bs-target="#manual-panel" type="button" style="border-radius: 10px; font-size: 0.88rem;">
+                                <i class="bi bi-pencil-fill me-1"></i>Manual Entry
+                            </button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" id="tab-ai" data-bs-toggle="tab" data-bs-target="#ai-panel"
-                                type="button">AI-Assisted</button>
+                            <button class="nav-link fw-bold py-2" id="tab-ai" data-bs-toggle="tab" data-bs-target="#ai-panel"
+                                type="button" style="border-radius: 10px; font-size: 0.88rem;">
+                                <i class="bi bi-magic me-1"></i>AI-Assisted
+                            </button>
                         </li>
                     </ul>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <div class="tab-content">
                         <!-- Manual Panel -->
                         <div class="tab-pane fade show active" id="manual-panel">
                             <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold">Quiz Title</label>
-                                <input type="text" class="form-control bg-dark text-white border-secondary"
-                                    id="manual_title" placeholder="e.g., Python Basics Midterm">
+                                <label class="form-label text-slate small fw-bold">Quiz Title</label>
+                                <input type="text" class="form-control" id="manual_title" placeholder="e.g., Python Basics Midterm" style="border-radius: 10px; border-color: #cbd5e1;">
                             </div>
-                            <hr class="border-secondary">
+                            <hr style="border-color: rgba(124, 58, 237, 0.1);">
                             <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold">Question</label>
-                                <textarea class="form-control bg-dark text-white border-secondary" id="q_text" rows="2"
-                                    placeholder="Enter question text..."></textarea>
+                                <label class="form-label text-slate small fw-bold">Question</label>
+                                <textarea class="form-control" id="q_text" rows="2" placeholder="Enter question text..." style="border-radius: 10px; border-color: #cbd5e1;"></textarea>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold">Options</label>
+                                <label class="form-label text-slate small fw-bold">Options</label>
                                 <div class="input-group mb-2">
-                                    <span class="input-group-text bg-dark border-secondary text-muted">A</span>
-                                    <input type="text" class="form-control bg-dark text-white border-secondary"
-                                        id="opt_a" placeholder="Option A">
+                                    <span class="input-group-text fw-bold text-purple" style="background: rgba(124, 58, 237, 0.08); border-color: #cbd5e1;">A</span>
+                                    <input type="text" class="form-control" id="opt_a" placeholder="Option A" style="border-color: #cbd5e1;">
                                 </div>
                                 <div class="input-group mb-2">
-                                    <span class="input-group-text bg-dark border-secondary text-muted">B</span>
-                                    <input type="text" class="form-control bg-dark text-white border-secondary"
-                                        id="opt_b" placeholder="Option B">
+                                    <span class="input-group-text fw-bold text-purple" style="background: rgba(124, 58, 237, 0.08); border-color: #cbd5e1;">B</span>
+                                    <input type="text" class="form-control" id="opt_b" placeholder="Option B" style="border-color: #cbd5e1;">
                                 </div>
                                 <div class="input-group mb-2">
-                                    <span class="input-group-text bg-dark border-secondary text-muted">C</span>
-                                    <input type="text" class="form-control bg-dark text-white border-secondary"
-                                        id="opt_c" placeholder="Option C">
+                                    <span class="input-group-text fw-bold text-purple" style="background: rgba(124, 58, 237, 0.08); border-color: #cbd5e1;">C</span>
+                                    <input type="text" class="form-control" id="opt_c" placeholder="Option C" style="border-color: #cbd5e1;">
                                 </div>
                                 <div class="input-group mb-2">
-                                    <span class="input-group-text bg-dark border-secondary text-muted">D</span>
-                                    <input type="text" class="form-control bg-dark text-white border-secondary"
-                                        id="opt_d" placeholder="Option D">
+                                    <span class="input-group-text fw-bold text-purple" style="background: rgba(124, 58, 237, 0.08); border-color: #cbd5e1;">D</span>
+                                    <input type="text" class="form-control" id="opt_d" placeholder="Option D" style="border-color: #cbd5e1;">
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold">Correct Option</label>
-                                <select class="form-select bg-dark text-white border-secondary" id="correct_opt">
+                                <label class="form-label text-slate small fw-bold">Correct Option</label>
+                                <select class="form-select" id="correct_opt" style="border-radius: 10px; border-color: #cbd5e1;">
                                     <option value="0">Option A</option>
                                     <option value="1">Option B</option>
                                     <option value="2">Option C</option>
@@ -74,65 +76,67 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold">Explanation (Optional)</label>
-                                <textarea class="form-control bg-dark text-white border-secondary" id="q_explanation"
-                                    rows="2" placeholder="Explain the correct answer..."></textarea>
+                                <label class="form-label text-slate small fw-bold">Explanation (Optional)</label>
+                                <textarea class="form-control" id="q_explanation" rows="2" placeholder="Explain why this option is correct..." style="border-radius: 10px; border-color: #cbd5e1;"></textarea>
                             </div>
                             <div class="d-flex gap-2 mb-3">
-                                <button class="btn btn-primary flex-grow-1" onclick="addManualQuestion()">Add
-                                    Question</button>
-                                <button class="btn btn-outline-secondary" onclick="clearQuestionForm()">Clear</button>
+                                <button class="btn btn-outline-primary flex-grow-1 fw-bold" onclick="addManualQuestion()" style="border-radius: 10px;">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Question
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearQuestionForm()" style="border-radius: 10px;">Clear</button>
                             </div>
                             <div id="manual_status"></div>
 
-                            <hr class="border-secondary my-4">
+                            <hr style="border-color: rgba(124, 58, 237, 0.1);" class="my-4">
 
                             <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold">Difficulty</label>
-                                <select class="form-select bg-dark text-white border-secondary" id="manual_difficulty">
+                                <label class="form-label text-slate small fw-bold">Difficulty</label>
+                                <select class="form-select" id="manual_difficulty" style="border-radius: 10px; border-color: #cbd5e1;">
                                     <option value="easy">Easy</option>
                                     <option value="medium" selected>Medium</option>
                                     <option value="hard">Hard</option>
                                 </select>
                             </div>
-                            <button class="btn btn-success w-100" onclick="saveCustomQuiz()">Save & Generate
-                                Code</button>
+                            <button class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm" onclick="saveCustomQuiz()" style="border-radius: 12px;">
+                                <i class="bi bi-check2-circle me-1"></i>Save & Generate Exam Code
+                            </button>
                             <div id="save_status" class="mt-2"></div>
                         </div>
 
                         <!-- AI Panel -->
                         <div class="tab-pane fade" id="ai-panel">
                             <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold">Topic</label>
-                                <input type="text" class="form-control bg-dark text-white border-secondary"
-                                    id="ai_topic" placeholder="e.g., OOP Concepts">
+                                <label class="form-label text-slate small fw-bold">Topic</label>
+                                <input type="text" class="form-control" id="ai_topic" placeholder="e.g., OOP Concepts, Dynamic Programming" style="border-radius: 10px; border-color: #cbd5e1;">
                             </div>
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
-                                    <label class="form-label text-muted small fw-bold">Questions</label>
-                                    <input type="number" class="form-control bg-dark text-white border-secondary"
-                                        id="ai_num_questions" min="3" max="20" value="5">
+                                    <label class="form-label text-slate small fw-bold">Number of Questions</label>
+                                    <input type="number" class="form-control" id="ai_num_questions" min="3" max="20" value="5" style="border-radius: 10px; border-color: #cbd5e1;">
                                 </div>
                                 <div class="col-6">
-                                    <label class="form-label text-muted small fw-bold">Difficulty</label>
-                                    <select class="form-select bg-dark text-white border-secondary" id="ai_difficulty">
+                                    <label class="form-label text-slate small fw-bold">Difficulty</label>
+                                    <select class="form-select" id="ai_difficulty" style="border-radius: 10px; border-color: #cbd5e1;">
                                         <option value="easy">Easy</option>
                                         <option value="medium" selected>Medium</option>
                                         <option value="hard">Hard</option>
                                     </select>
                                 </div>
                             </div>
-                            <button class="btn btn-primary w-100" onclick="generateFromAI()">Generate Questions</button>
+                            <button class="btn btn-outline-primary w-100 py-2.5 fw-bold mb-3" onclick="generateFromAI()" style="border-radius: 10px;">
+                                <i class="bi bi-magic me-1"></i>Generate Questions with AI
+                            </button>
                             <div id="ai_status" class="mt-2"></div>
 
-                            <hr class="border-secondary my-4">
+                            <hr style="border-color: rgba(124, 58, 237, 0.1);" class="my-4">
 
                             <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold">Quiz Title (Optional)</label>
-                                <input type="text" class="form-control bg-dark text-white border-secondary"
-                                    id="ai_quiz_title" placeholder="e.g., Java Practice Quiz">
+                                <label class="form-label text-slate small fw-bold">Quiz Title (Optional)</label>
+                                <input type="text" class="form-control" id="ai_quiz_title" placeholder="e.g., Java Practice Quiz" style="border-radius: 10px; border-color: #cbd5e1;">
                             </div>
-                            <button class="btn btn-success w-100" onclick="saveCustomQuiz('ai')">Save & Generate Code</button>
+                            <button class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm" onclick="saveCustomQuiz('ai')" style="border-radius: 12px;">
+                                <i class="bi bi-check2-circle me-1"></i>Save & Generate Exam Code
+                            </button>
                             <div id="ai_save_status" class="mt-2"></div>
                         </div>
                     </div>
@@ -142,15 +146,20 @@
 
         <!-- Right Column: Preview -->
         <div class="col-lg-7">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-transparent border-bottom">
-                    <h5 class="mb-0 text-white">Question List</h5>
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 18px; border: 1px solid rgba(124, 58, 237, 0.12) !important; background: #ffffff;">
+                <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center" style="border-color: rgba(124, 58, 237, 0.1) !important; border-top-left-radius: 18px; border-top-right-radius: 18px;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-card-checklist text-purple fs-5"></i>
+                        <h5 class="mb-0 text-slate fw-bold" style="font-size: 1.05rem;">Quiz Question Drafts</h5>
+                    </div>
+                    <span class="badge badge-purple px-2.5 py-1" id="question_count_badge">0 Questions</span>
                 </div>
                 <div class="card-body p-0">
                     <div id="questions_container" class="list-group list-group-flush"
                         style="max-height: 800px; overflow-y: auto;">
-                        <div class="p-4 text-center text-muted">
-                            <p>No questions yet. Add them manually or use the AI tab.</p>
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                            <p class="mb-0">No questions added yet. Use manual entry or generate them automatically using the AI tab on the left.</p>
                         </div>
                     </div>
                 </div>
@@ -175,7 +184,7 @@
         const status = document.getElementById('manual_status');
 
         if (!q || !a || !b || !c || !d) {
-            status.innerHTML = '<div class="alert alert-danger mt-2 py-2">Fill all fields.</div>';
+            status.innerHTML = '<div class="alert alert-danger mt-2 py-2">Please fill in the question and all four option fields.</div>';
             return;
         }
 
@@ -186,7 +195,7 @@
             explanation: expl || ""
         });
 
-        status.innerHTML = '<div class="alert alert-success mt-2 py-2">Question added.</div>';
+        status.innerHTML = '<div class="alert alert-success mt-2 py-2">Question added successfully.</div>';
         setTimeout(() => status.innerHTML = '', 2000);
         clearQuestionForm(false);
         renderQuestions();
@@ -205,28 +214,34 @@
 
     function renderQuestions() {
         const container = document.getElementById('questions_container');
+        const badge = document.getElementById('question_count_badge');
+        if (badge) badge.textContent = `${builderQuestions.length} Question${builderQuestions.length === 1 ? '' : 's'}`;
+
         if (!builderQuestions.length) {
-            container.innerHTML = '<div class="p-4 text-center text-muted"><p>No questions yet.</p></div>';
+            container.innerHTML = '<div class="p-5 text-center text-muted"><i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i><p class="mb-0">No questions added yet.</p></div>';
             return;
         }
         container.innerHTML = builderQuestions.map((q, idx) => {
             const opt = q.options || [];
             const correctLabel = ["A", "B", "C", "D"][q.correct] || "?";
             return `
-                <div class="list-group-item bg-transparent border-secondary text-white p-3">
+                <div class="list-group-item bg-white border-bottom p-3 p-md-4" style="border-color: rgba(124, 58, 237, 0.08) !important;">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h6 class="mb-0 fw-bold">Q${idx + 1}: ${escapeHtml(q.question)}</h6>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteQuestion(${idx})"><i class="bi bi-trash"></i> Delete</button>
+                        <h6 class="mb-0 fw-bold text-slate" style="font-size: 0.95rem; line-height: 1.4;">
+                            <span class="badge badge-purple me-2">Q${idx + 1}</span>
+                            ${escapeHtml(q.question)}
+                        </h6>
+                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteQuestion(${idx})" style="border-radius: 8px;"><i class="bi bi-trash"></i></button>
                     </div>
-                    <ul class="list-unstyled mb-2 ps-3 small text-muted">
-                        <li>A. ${escapeHtml(opt[0])}</li>
-                        <li>B. ${escapeHtml(opt[1])}</li>
-                        <li>C. ${escapeHtml(opt[2])}</li>
-                        <li>D. ${escapeHtml(opt[3])}</li>
+                    <ul class="list-unstyled mb-2 ps-3 small text-secondary">
+                        <li class="py-0.5"><strong>A.</strong> ${escapeHtml(opt[0])}</li>
+                        <li class="py-0.5"><strong>B.</strong> ${escapeHtml(opt[1])}</li>
+                        <li class="py-0.5"><strong>C.</strong> ${escapeHtml(opt[2])}</li>
+                        <li class="py-0.5"><strong>D.</strong> ${escapeHtml(opt[3])}</li>
                     </ul>
-                    <div class="d-flex gap-2 small">
-                        <span class="badge bg-success">Correct: ${correctLabel}</span>
-                        ${q.explanation ? `<span class="text-info fst-italic">Has explanation</span>` : ''}
+                    <div class="d-flex gap-2 align-items-center small flex-wrap">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Correct Answer: Option ${correctLabel}</span>
+                        ${q.explanation ? `<span class="text-muted fst-italic"><i class="bi bi-info-circle me-1"></i>Has explanation</span>` : ''}
                     </div>
                 </div>
             `;
@@ -247,11 +262,11 @@
         const status = document.getElementById('ai_status');
 
         if (!topic) {
-            status.innerHTML = '<div class="alert alert-danger">Enter a topic.</div>';
+            status.innerHTML = '<div class="alert alert-danger py-2">Please enter a quiz topic.</div>';
             return;
         }
 
-        status.innerHTML = '<div class="alert alert-info"><div class="spinner-border spinner-border-sm me-2"></div> Generating...</div>';
+        status.innerHTML = '<div class="alert alert-info py-2"><div class="spinner-border spinner-border-sm me-2"></div> Generating questions with LernyX AI...</div>';
 
         try {
             const resp = await fetch('/api/customquiz/generate', {
@@ -263,10 +278,10 @@
             if (!resp.ok || data.error) throw new Error(data.error || "Failed");
 
             builderQuestions = data.quiz_data.questions || [];
-            status.innerHTML = `<div class="alert alert-success">Generated ${builderQuestions.length} questions.</div>`;
+            status.innerHTML = `<div class="alert alert-success py-2">Successfully generated ${builderQuestions.length} questions.</div>`;
             renderQuestions();
         } catch (err) {
-            status.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+            status.innerHTML = `<div class="alert alert-danger py-2">Error: ${err.message}</div>`;
         }
     }
 
@@ -286,11 +301,11 @@
         }
 
         if (!builderQuestions.length) {
-            status.innerHTML = '<div class="alert alert-danger mt-2">Generate/Add questions first.</div>';
+            status.innerHTML = '<div class="alert alert-danger mt-2 py-2">Please add or generate questions before saving.</div>';
             return;
         }
 
-        status.innerHTML = '<div class="alert alert-info mt-2">Saving...</div>';
+        status.innerHTML = '<div class="alert alert-info mt-2 py-2">Saving quiz to database...</div>';
 
         try {
             const resp = await fetch('/api/custom-quizzes', {
@@ -307,13 +322,17 @@
             if (!resp.ok || data.error) throw new Error(data.error || "Failed");
 
             status.innerHTML = `
-                <div class="alert alert-success mt-2">
-                    <strong>Quiz Saved!</strong> Code: <span class="user-select-all fw-bold">${data.code}</span>
-                    <button class="btn btn-sm btn-light ms-2" onclick="navigator.clipboard.writeText('${data.code}')">Copy</button>
+                <div class="alert alert-success mt-2 py-3">
+                    <div class="fw-bold mb-1"><i class="bi bi-check-circle-fill me-1"></i> Quiz Saved Successfully!</div>
+                    <div class="d-flex align-items-center gap-2 mt-2">
+                        <span>Shareable Exam Code:</span>
+                        <span class="user-select-all fw-bold fs-5 text-purple px-2 py-0.5 rounded" style="background: rgba(124, 58, 237, 0.1);">${data.code}</span>
+                        <button class="btn btn-sm btn-outline-primary" onclick="navigator.clipboard.writeText('${data.code}')">Copy</button>
+                    </div>
                 </div>
             `;
         } catch (err) {
-            status.innerHTML = `<div class="alert alert-danger mt-2">Error: ${err.message}</div>`;
+            status.innerHTML = `<div class="alert alert-danger mt-2 py-2">Error: ${err.message}</div>`;
         }
     }
 

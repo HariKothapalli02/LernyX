@@ -3,59 +3,77 @@
 {% block title %}Aptitude Practice - LernyX{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="display-5 fw-bold text-white">Aptitude Practice</h1>
-        <p class="lead text-muted">Practice with our extensive question bank.</p>
+<div class="container py-4 py-md-5">
+    <div class="text-center mb-4 fade-in-up">
+        <span class="badge badge-purple px-3 py-1.5 mb-2" style="font-size: 0.78rem; letter-spacing: 0.05em;">
+            <i class="bi bi-lightbulb me-1"></i>SPEED & ACCURACY TRAINING
+        </span>
+        <h1 class="h2 fw-bold text-slate mb-2 tracking-tight">Interactive Aptitude Practice</h1>
+        <p class="text-secondary mx-auto mb-0" style="max-width: 600px; font-size: 0.95rem; line-height: 1.5;">
+            Master quantitative, reasoning, and verbal aptitude with immediate automated feedback and detailed explanations.
+        </p>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <!-- Setup Section -->
-            <div id="setup-section" class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h4 class="card-title mb-4 text-white">Select Difficulty</h4>
+            <div id="setup-section" class="card border-0 shadow-sm" style="border-radius: 18px; border: 1px solid rgba(124, 58, 237, 0.12) !important; background: #ffffff;">
+                <div class="card-body p-4 p-md-5">
+                    <h5 class="fw-bold text-slate mb-3" style="font-size: 1.15rem;">
+                        <i class="bi bi-sliders text-purple me-2"></i>Select Difficulty Level
+                    </h5>
+                    <p class="text-secondary small mb-4">Choose a difficulty benchmark to load a customized 20-question evaluation batch.</p>
 
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <div class="card bg-dark border-secondary h-100 difficulty-card"
-                                onclick="selectDifficulty('easy', this)" style="cursor: pointer;">
-                                <div class="card-body text-center">
-                                    <h5 class="text-success">Easy</h5>
-                                    <small class="text-muted">Basic questions</small>
+                            <div class="card h-100 difficulty-card p-3"
+                                onclick="selectDifficulty('easy', this)" style="cursor: pointer; border-radius: 14px; border: 2px solid #e2e8f0; background: #ffffff; transition: all 0.2s ease;">
+                                <div class="card-body text-center py-3">
+                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px; background: #ecfdf5; color: #10b981;">
+                                        <i class="bi bi-shield-check fs-4"></i>
+                                    </div>
+                                    <h5 class="text-success fw-bold mb-1">Easy</h5>
+                                    <small class="text-muted">Fundamental arithmetic, number series & basic logic</small>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card bg-dark border-secondary h-100 difficulty-card"
-                                onclick="selectDifficulty('medium', this)" style="cursor: pointer;">
-                                <div class="card-body text-center">
-                                    <h5 class="text-warning">Medium</h5>
-                                    <small class="text-muted">Moderate level</small>
+                            <div class="card h-100 difficulty-card p-3"
+                                onclick="selectDifficulty('medium', this)" style="cursor: pointer; border-radius: 14px; border: 2px solid #e2e8f0; background: #ffffff; transition: all 0.2s ease;">
+                                <div class="card-body text-center py-3">
+                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px; background: #fffbeb; color: #f59e0b;">
+                                        <i class="bi bi-lightning-charge fs-4"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-1" style="color: #d97706;">Medium</h5>
+                                    <small class="text-muted">Standard placement tests (TCS, Infosys, Wipro, Accenture)</small>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <button class="btn btn-primary w-100 btn-lg" id="start-btn" onclick="startPractice()" disabled>Start
-                        Practice</button>
+                    <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm" id="start-btn" onclick="startPractice()" disabled style="border-radius: 12px; font-size: 0.95rem; letter-spacing: 0.02em;">
+                        <i class="bi bi-play-circle-fill me-2"></i>START PRACTICE SESSION
+                    </button>
                     <div id="setup-status" class="mt-3 text-center"></div>
                 </div>
             </div>
 
             <!-- Practice Section -->
             <div id="practice-section" style="display: none;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="text-white mb-0">Batch Progress</h4>
-                    <span class="badge bg-primary" id="batch-progress">0/20</span>
+                <div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded-3 bg-white shadow-sm" style="border: 1px solid rgba(124, 58, 237, 0.12);">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check2-circle fs-5 text-purple"></i>
+                        <h5 class="text-slate fw-bold mb-0" style="font-size: 1.05rem;">Batch Progress</h5>
+                    </div>
+                    <span class="badge badge-purple px-3 py-2 fs-6" id="batch-progress" style="border-radius: 20px;">0/20</span>
                 </div>
 
                 <div id="questions-container"></div>
 
-                <div class="text-center mt-4">
-                    <button class="btn btn-primary btn-lg" id="next-batch-btn" onclick="loadNextBatch()"
-                        style="display: none;">
-                        Load Next 20 Questions
+                <div class="text-center mt-4 mb-5">
+                    <button class="btn btn-primary btn-lg fw-bold px-4 py-2.5 shadow-sm" id="next-batch-btn" onclick="loadNextBatch()"
+                        style="display: none; border-radius: 12px;">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Load Next 20 Questions
                     </button>
                 </div>
             </div>
@@ -76,9 +94,13 @@
 
         // Visual selection
         document.querySelectorAll('.difficulty-card').forEach(card => {
-            card.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10');
+            card.style.borderColor = '#e2e8f0';
+            card.style.background = '#ffffff';
+            card.classList.remove('shadow');
         });
-        cardElement.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
+        cardElement.style.borderColor = 'var(--primary-purple)';
+        cardElement.style.background = 'rgba(124, 58, 237, 0.04)';
+        cardElement.classList.add('shadow');
 
         document.getElementById('start-btn').disabled = false;
     }
@@ -92,7 +114,7 @@
         const statusDiv = document.getElementById('setup-status');
         const nextBtn = document.getElementById('next-batch-btn');
 
-        if (statusDiv) statusDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading...';
+        if (statusDiv) statusDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading questions...';
         if (nextBtn) {
             nextBtn.disabled = true;
             nextBtn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div> Loading...';
@@ -116,7 +138,7 @@
             updateProgress();
 
             if (nextBtn) {
-                nextBtn.style.display = 'inline-block'; // Always show next button to allow loading more even if not finished
+                nextBtn.style.display = 'inline-block';
                 nextBtn.disabled = false;
                 nextBtn.textContent = 'Load Next 20 Questions';
             }
@@ -136,17 +158,19 @@
         container.innerHTML = questions.map((q, idx) => {
             const options = q.options || [];
             return `
-                <div class="card bg-dark border-secondary mb-4 question-item" id="question-${q._id}">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3 text-white">
-                            <span class="badge bg-secondary me-2">Q${idx + 1}</span>
-                            ${escapeHtml(q.question)}
+                <div class="card bg-white border-0 shadow-sm mb-4 question-item" id="question-${q._id}" style="border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.12) !important;">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-3 text-slate d-flex align-items-start gap-2" style="font-size: 1.05rem; line-height: 1.5;">
+                            <span class="badge badge-purple flex-shrink-0 mt-0.5">Q${idx + 1}</span>
+                            <span>${escapeHtml(q.question)}</span>
                         </h5>
-                        <div class="list-group options-list">
+                        <div class="d-flex flex-column gap-2 mt-3 options-list">
                             ${options.map((opt, optIdx) => `
-                                <button type="button" class="list-group-item list-group-item-action bg-transparent text-light border-secondary option" 
+                                <button type="button" class="btn text-start p-3 option d-flex align-items-center" 
+                                    style="border: 1.5px solid #e2e8f0; border-radius: 10px; background: #ffffff; color: #0f172a; transition: all 0.15s ease;"
                                     onclick="submitAnswer('${q._id}', ${optIdx}, this)">
-                                    <span class="fw-bold me-2">${String.fromCharCode(65 + optIdx)}.</span> ${escapeHtml(opt)}
+                                    <span class="badge rounded-circle me-3 d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px; background: rgba(124, 58, 237, 0.08); color: var(--primary-purple); font-weight: 700;">${String.fromCharCode(65 + optIdx)}</span>
+                                    <span class="flex-grow-1" style="font-size: 0.92rem;">${escapeHtml(opt)}</span>
                                 </button>
                             `).join('')}
                         </div>
@@ -158,17 +182,16 @@
     }
 
     async function submitAnswer(questionId, optionIndex, btnElement) {
-        // Prevent multiple submissions
         const questionCard = btnElement.closest('.question-item');
         if (questionCard.classList.contains('answered')) return;
 
         questionCard.classList.add('answered');
         const options = questionCard.querySelectorAll('.option');
-        options.forEach(opt => opt.disabled = true); // Disable all options
+        options.forEach(opt => opt.disabled = true);
 
-        // Visual selection immediately
-        btnElement.classList.remove('bg-transparent');
-        btnElement.classList.add('bg-primary', 'text-white');
+        // Visual selection indicator
+        btnElement.style.borderColor = 'var(--primary-purple)';
+        btnElement.style.background = 'rgba(124, 58, 237, 0.08)';
 
         try {
             const resp = await fetch('/api/aptitude/submit-answer', {
@@ -187,26 +210,29 @@
 
             if (data.success) {
                 if (data.is_correct) {
-                    btnElement.classList.remove('bg-primary');
-                    btnElement.classList.add('bg-success');
-                    feedbackArea.innerHTML = `<div class="alert alert-success py-2 mb-0">Correct! ${escapeHtml(data.explanation || '')}</div>`;
+                    btnElement.style.borderColor = '#10b981';
+                    btnElement.style.background = '#ecfdf5';
+                    btnElement.style.color = '#065f46';
+                    feedbackArea.innerHTML = `<div class="alert alert-success py-2.5 px-3 mb-0" style="border-radius: 10px;"><i class="bi bi-check-circle-fill me-2"></i><strong>Correct!</strong> ${escapeHtml(data.explanation || '')}</div>`;
                 } else {
-                    btnElement.classList.remove('bg-primary');
-                    btnElement.classList.add('bg-danger');
+                    btnElement.style.borderColor = '#ef4444';
+                    btnElement.style.background = '#fef2f2';
+                    btnElement.style.color = '#991b1b';
 
                     // Highlight correct answer
                     const correctBtn = options[data.correct_option];
                     if (correctBtn) {
-                        correctBtn.classList.remove('bg-transparent');
-                        correctBtn.classList.add('bg-success');
+                        correctBtn.style.borderColor = '#10b981';
+                        correctBtn.style.background = '#ecfdf5';
+                        correctBtn.style.color = '#065f46';
                     }
 
-                    feedbackArea.innerHTML = `<div class="alert alert-danger py-2 mb-0">Incorrect. The correct answer was ${String.fromCharCode(65 + data.correct_option)}. ${escapeHtml(data.explanation || '')}</div>`;
+                    feedbackArea.innerHTML = `<div class="alert alert-danger py-2.5 px-3 mb-0" style="border-radius: 10px;"><i class="bi bi-x-circle-fill me-2"></i><strong>Incorrect.</strong> The correct answer was <strong>Option ${String.fromCharCode(65 + data.correct_option)}</strong>. ${escapeHtml(data.explanation || '')}</div>`;
                 }
                 answeredCount++;
                 updateProgress();
             } else {
-                feedbackArea.innerHTML = `<div class="alert alert-warning py-2 mb-0">Error submitting answer: ${data.error}</div>`;
+                feedbackArea.innerHTML = `<div class="alert alert-warning py-2 px-3 mb-0" style="border-radius: 10px;">Error submitting answer: ${data.error}</div>`;
             }
 
         } catch (error) {
@@ -220,7 +246,7 @@
     }
 
     function loadNextBatch() {
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         loadQuestions();
     }
 

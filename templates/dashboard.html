@@ -7,23 +7,25 @@
     <style>
         .form-text {
             font-size: 0.85rem;
-            color: #9ca3af;
+            color: var(--text-muted);
             margin-top: 5px;
         }
 
         .dashboard-nav-grid {
             width: 100%;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
         }
 
         .dashboard-nav-grid .nav-tabs {
             display: grid !important;
             grid-template-columns: repeat(5, 1fr) !important;
-            gap: 8px !important;
+            gap: 6px !important;
             width: 100% !important;
             margin: 0 !important;
-            padding: 0 !important;
-            border-bottom: none !important;
+            padding: 6px !important;
+            background: var(--purple-light-100) !important;
+            border-radius: var(--radius-md) !important;
+            border: 1.5px solid var(--purple-border) !important;
             list-style: none !important;
         }
 
@@ -36,32 +38,32 @@
         }
 
         .dashboard-nav-grid .nav-tabs .nav-link {
-            background: #000000 !important;
-            border: 1px solid rgba(255, 255, 255, 0.25) !important;
-            color: #a3a3a3 !important;
-            border-radius: 0px !important;
+            background: transparent !important;
+            border: none !important;
+            color: var(--text-secondary) !important;
+            border-radius: var(--radius-sm) !important;
             transition: all 0.2s ease;
-            font-size: 0.74rem;
-            letter-spacing: 0.02em;
+            font-size: 0.82rem;
+            font-weight: 600;
             white-space: normal !important;
             text-align: center !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            padding: 0.65rem 0.4rem !important;
+            padding: 0.75rem 0.5rem !important;
             width: 100% !important;
             height: 100% !important;
             min-height: 48px !important;
         }
         .dashboard-nav-grid .nav-tabs .nav-link:hover {
-            color: #ffffff !important;
-            border-color: rgba(255, 255, 255, 0.6) !important;
+            color: var(--primary-purple) !important;
+            background: rgba(255, 255, 255, 0.7) !important;
         }
         .dashboard-nav-grid .nav-tabs .nav-link.active {
             background: #ffffff !important;
-            color: #000000 !important;
-            border-color: #ffffff !important;
-            font-weight: 800 !important;
+            color: var(--primary-purple) !important;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15) !important;
+            font-weight: 700 !important;
         }
 
         @media (max-width: 991.98px) {
@@ -74,20 +76,9 @@
                 grid-column: span 2 !important;
             }
             .dashboard-nav-grid .nav-tabs .nav-link {
-                padding: 0.6rem 0.2rem !important;
-                font-size: 0.68rem !important;
-                letter-spacing: 0em !important;
-                line-height: 1.15 !important;
+                padding: 0.65rem 0.3rem !important;
+                font-size: 0.76rem !important;
                 min-height: 44px !important;
-            }
-            .card-header {
-                padding: 0.75rem 1rem !important;
-            }
-            .card-body {
-                padding: 1rem !important;
-            }
-            #resume-results {
-                padding: 1rem !important;
             }
             .resume-action-btn-group {
                 width: 100% !important;
@@ -106,22 +97,22 @@
     </style>
 
     <!-- Status Bar / Metrics Card -->
-    <div class="card bg-black border border-secondary shadow-lg mb-4 p-3 p-md-4" style="border-radius: 0px !important;">
+    <div class="card shadow-md mb-4 p-3 p-md-4">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-black text-white border border-secondary mono-font px-2 py-1" style="font-size: 0.7rem;">ANALYTICS</span>
-                <h2 class="h5 mb-0 fw-bold text-white tracking-tight">Aptitude & Practice Metrics</h2>
+                <span class="badge bg-primary px-2.5 py-1 text-uppercase" style="font-size: 0.7rem;">ANALYTICS</span>
+                <h2 class="h5 mb-0 fw-bold text-dark tracking-tight">Aptitude & Practice Metrics</h2>
             </div>
-            <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-light text-black fw-bold px-3 py-1.5 btn-sm" style="border-radius: 0px !important;">
+            <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-primary fw-bold px-3 py-1.5 btn-sm shadow-sm">
                 <i class="bi bi-play-circle-fill me-1"></i>START PRACTICE
             </a>
         </div>
         <div id="status-content">
             <div class="text-center py-4">
-                <div class="spinner-border text-light" role="status">
+                <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mt-2 text-secondary mono-font small">Loading analytics data...</p>
+                <p class="mt-2 text-muted small">Loading analytics data...</p>
             </div>
         </div>
     </div>
@@ -130,33 +121,33 @@
     <div class="dashboard-nav-grid mb-4">
         <ul class="nav nav-tabs border-0 m-0" id="dashboardTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="quizzes-tab-btn" data-bs-toggle="tab"
+                <button class="nav-link active py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="quizzes-tab-btn" data-bs-toggle="tab"
                     data-bs-target="#quizzes-tab" type="button" role="tab" aria-controls="quizzes-tab" aria-selected="true"
                     onclick="loadTab('quizzes')">
                     <i class="bi bi-play-btn me-1"></i>Past Quizzes
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="custom-tab-btn" data-bs-toggle="tab" data-bs-target="#custom-tab"
+                <button class="nav-link py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="custom-tab-btn" data-bs-toggle="tab" data-bs-target="#custom-tab"
                     type="button" role="tab" aria-controls="custom-tab" aria-selected="false" onclick="loadTab('custom')">
                     <i class="bi bi-puzzle me-1"></i>Custom Quizzes
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="mock-interviews-tab-btn" data-bs-toggle="tab"
+                <button class="nav-link py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="mock-interviews-tab-btn" data-bs-toggle="tab"
                     data-bs-target="#mock-interviews-tab" type="button" role="tab" aria-controls="mock-interviews-tab"
                     aria-selected="false" onclick="loadTab('mock-interviews')">
                     <i class="bi bi-mic me-1"></i>Mock Interviews
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="resume-tab-btn" data-bs-toggle="tab" data-bs-target="#resume-tab"
+                <button class="nav-link py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="resume-tab-btn" data-bs-toggle="tab" data-bs-target="#resume-tab"
                     type="button" role="tab" aria-controls="resume-tab" aria-selected="false">
                     <i class="bi bi-file-earmark-person me-1"></i>Resume Review
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold text-uppercase mono-font py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="settings-tab-btn" data-bs-toggle="tab"
+                <button class="nav-link py-2.5 px-2 text-center w-100 h-100 justify-content-center" id="settings-tab-btn" data-bs-toggle="tab"
                     data-bs-target="#settings-tab" type="button" role="tab" aria-controls="settings-tab"
                     aria-selected="false">
                     <i class="bi bi-gear me-1"></i>Settings
@@ -169,13 +160,13 @@
     <div class="tab-content" id="dashboardTabsContent">
         <!-- Quizzes Tab -->
         <div class="tab-pane fade show active" id="quizzes-tab" role="tabpanel" aria-labelledby="quizzes-tab-btn">
-            <div class="card bg-black border border-secondary shadow" style="border-radius: 0px !important;">
-                <div class="card-header bg-black border-bottom border-secondary py-3 px-4">
-                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-play-btn me-2"></i>Generated Video Quizzes</h3>
+            <div class="card shadow-sm">
+                <div class="card-header py-3 px-4">
+                    <h3 class="h6 mb-0 text-dark fw-bold tracking-tight"><i class="bi bi-play-btn me-2 text-primary"></i>Generated Video Quizzes</h3>
                 </div>
                 <div class="card-body p-4" id="quizzes-container">
-                    <div class="text-center py-5 text-secondary mono-font">
-                        <div class="spinner-border text-light" role="status"></div>
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border text-primary" role="status"></div>
                         <p class="mt-2">Loading your quizzes...</p>
                     </div>
                 </div>
@@ -184,13 +175,13 @@
 
         <!-- Custom Quizzes Tab -->
         <div class="tab-pane fade" id="custom-tab" role="tabpanel" aria-labelledby="custom-tab-btn">
-            <div class="card bg-black border border-secondary shadow" style="border-radius: 0px !important;">
-                <div class="card-header bg-black border-bottom border-secondary py-3 px-4">
-                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-puzzle me-2"></i>My Custom Quiz Codes</h3>
+            <div class="card shadow-sm">
+                <div class="card-header py-3 px-4">
+                    <h3 class="h6 mb-0 text-dark fw-bold tracking-tight"><i class="bi bi-puzzle me-2 text-primary"></i>My Custom Quiz Codes</h3>
                 </div>
                 <div class="card-body p-4" id="custom-quizzes-container">
-                    <div class="text-center py-5 text-secondary mono-font">
-                        <div class="spinner-border text-light" role="status"></div>
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border text-primary" role="status"></div>
                         <p class="mt-2">Loading your custom quizzes...</p>
                     </div>
                 </div>
@@ -199,16 +190,16 @@
 
         <!-- Mock Interviews Tab -->
         <div class="tab-pane fade" id="mock-interviews-tab" role="tabpanel" aria-labelledby="mock-interviews-tab-btn">
-            <div class="card bg-black border border-secondary shadow" style="border-radius: 0px !important;">
-                <div class="card-header bg-black border-bottom border-secondary py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-mic-fill me-2"></i>Past AI Voice Mock Interviews</h3>
-                    <a href="{{ url_for('mock_interview') }}" class="btn btn-sm btn-light text-black fw-bold px-3" style="border-radius: 0px !important;">
+            <div class="card shadow-sm">
+                <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h3 class="h6 mb-0 text-dark fw-bold tracking-tight"><i class="bi bi-mic-fill me-2 text-primary"></i>Past AI Voice Mock Interviews</h3>
+                    <a href="{{ url_for('mock_interview') }}" class="btn btn-sm btn-primary fw-bold px-3">
                         <i class="bi bi-play-circle-fill me-1"></i>START NEW INTERVIEW
                     </a>
                 </div>
                 <div class="card-body p-4" id="mock-interviews-container">
-                    <div class="text-center py-5 text-secondary mono-font">
-                        <div class="spinner-border text-light" role="status"></div>
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border text-primary" role="status"></div>
                         <p class="mt-2">Loading your mock interviews...</p>
                     </div>
                 </div>
@@ -217,44 +208,44 @@
 
         <!-- Resume Review Tab -->
         <div class="tab-pane fade" id="resume-tab" role="tabpanel" aria-labelledby="resume-tab-btn">
-            <div class="card bg-black border border-secondary shadow" style="border-radius: 0px !important;">
-                <div class="card-header bg-black border-bottom border-secondary py-3 px-4 d-flex justify-content-between align-items-center">
-                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-file-earmark-person me-2"></i>AI Resume Reviewer & Feedback Report</h3>
-                    <span class="badge bg-black text-white border border-secondary mono-font">AI ENGINE</span>
+            <div class="card shadow-sm">
+                <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h3 class="h6 mb-0 text-dark fw-bold tracking-tight"><i class="bi bi-file-earmark-person me-2 text-primary"></i>AI Resume Reviewer & Feedback Report</h3>
+                    <span class="badge bg-primary">AI ENGINE</span>
                 </div>
                 <div class="card-body p-4">
                     <form id="resume-form" onsubmit="analyzeResume(event)" class="mb-4">
                         <div class="row g-3">
                             <div class="col-md-7">
-                                <label class="form-label text-white fw-medium small mono-font">Upload Resume (PDF, DOCX, TXT, Image)</label>
-                                <input type="file" id="resume_file" class="form-control bg-black text-white border-secondary" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" required style="border-radius: 0px !important;">
+                                <label class="form-label text-dark fw-semibold small">Upload Resume (PDF, DOCX, TXT, Image)</label>
+                                <input type="file" id="resume_file" class="form-control" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" required>
                             </div>
                             <div class="col-md-5">
-                                <label class="form-label text-white fw-medium small mono-font">Target Job Role / Domain</label>
-                                <input type="text" id="target_role" class="form-control bg-black text-white border-secondary" placeholder="e.g. Full Stack Developer, Data Analyst"
-                                    value="Software Engineer" style="border-radius: 0px !important;">
+                                <label class="form-label text-dark fw-semibold small">Target Job Role / Domain</label>
+                                <input type="text" id="target_role" class="form-control" placeholder="e.g. Full Stack Developer, Data Analyst"
+                                    value="Software Engineer">
                             </div>
                         </div>
-                        <button type="submit" id="resume-submit-btn" class="btn btn-light text-black mt-3 px-4 fw-bold py-2" style="border-radius: 0px !important;">
+                        <button type="submit" id="resume-submit-btn" class="btn btn-primary mt-3 px-4 fw-bold py-2 shadow-sm">
                             <i class="bi bi-magic me-2"></i>ANALYZE RESUME & GET RECOMMENDATIONS
                         </button>
                     </form>
 
                     <div id="resume-loading" class="d-none text-center py-5">
-                        <div class="spinner-border text-light" role="status" style="width: 2.5rem; height: 2.5rem;"></div>
-                        <h5 class="text-white mt-3 fw-bold">Analyzing Your Resume with AI...</h5>
-                        <p class="text-secondary small mono-font">Checking ATS optimization, impact metrics, formatting, and key recommendations.</p>
+                        <div class="spinner-border text-primary" role="status" style="width: 2.5rem; height: 2.5rem;"></div>
+                        <h5 class="text-dark mt-3 fw-bold">Analyzing Your Resume with AI...</h5>
+                        <p class="text-muted small">Checking ATS optimization, impact metrics, formatting, and key recommendations.</p>
                     </div>
 
-                    <div id="resume-results" class="d-none mt-4 p-3 p-md-4 bg-black border border-secondary" style="border-radius: 0px !important;">
-                        <div class="d-flex justify-content-between align-items-start align-items-md-center mb-3 pb-3 border-bottom border-secondary flex-column flex-md-row gap-2">
-                            <h4 class="text-white mb-0 fw-bold fs-6 fs-md-5 tracking-tight"><i class="bi bi-clipboard-data me-2 text-white"></i>Complete Resume Analysis Report</h4>
+                    <div id="resume-results" class="d-none mt-4 p-3 p-md-4 card border border-primary border-opacity-25 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-start align-items-md-center mb-3 pb-3 border-bottom flex-column flex-md-row gap-2">
+                            <h4 class="text-dark mb-0 fw-bold fs-6 fs-md-5 tracking-tight"><i class="bi bi-clipboard-data me-2 text-primary"></i>Complete Resume Analysis Report</h4>
                             <div class="resume-action-btn-group d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto mt-2 mt-md-0">
-                                <button class="btn btn-sm btn-outline-light me-sm-2" onclick="window.print()" style="border-radius: 0px !important;"><i class="bi bi-printer me-1"></i>Print Report</button>
-                                <button id="download-docx-btn" class="btn btn-sm btn-light text-black fw-bold" data-bs-toggle="modal" data-bs-target="#resumeTemplateModal" onclick="openResumeTemplateModal()" style="border-radius: 0px !important;"><i class="bi bi-file-earmark-word-fill me-1"></i>Download Revised Resume (.docx)</button>
+                                <button class="btn btn-sm btn-outline-secondary me-sm-2" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print Report</button>
+                                <button id="download-docx-btn" class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#resumeTemplateModal" onclick="openResumeTemplateModal()"><i class="bi bi-file-earmark-word-fill me-1"></i>Download Revised Resume (.docx)</button>
                             </div>
                         </div>
-                        <div id="resume-report-content" class="text-white markdown-body"></div>
+                        <div id="resume-report-content" class="text-dark markdown-body"></div>
                     </div>
                 </div>
             </div>
@@ -263,24 +254,23 @@
         <!-- Settings Tab -->
         <div class="tab-pane fade" id="settings-tab" role="tabpanel" aria-labelledby="settings-tab-btn">
             <!-- API Key Settings -->
-            <div class="card bg-black border border-secondary shadow mb-4" style="border-radius: 0px !important;">
-                <div class="card-header bg-black border-bottom border-secondary py-3 px-4">
-                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-key me-2"></i>API Key Configuration</h3>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 px-4">
+                    <h3 class="h6 mb-0 text-dark fw-bold tracking-tight"><i class="bi bi-key me-2 text-primary"></i>API Key Configuration</h3>
                 </div>
                 <div class="card-body p-4">
                     <form action="{{ url_for('update_api_key') }}" method="POST">
                         <div class="mb-3">
-                            <label for="api_key" class="form-label text-white small mono-font">AI API Key</label>
-                            <input type="password" id="api_key" name="api_key" class="form-control bg-black text-white border-secondary"
+                            <label for="api_key" class="form-label text-dark fw-semibold small">Custom Gemini API Key</label>
+                            <input type="password" id="api_key" name="api_key" class="form-control"
                                 placeholder="Enter your custom AI API Key"
-                                value="{{ current_user.api_key if current_user.api_key else '' }}"
-                                style="border-radius: 0px !important;">
-                            <p class="form-text text-secondary small">
+                                value="{{ current_user.api_key if current_user.api_key else '' }}">
+                            <p class="form-text text-muted small">
                                 Add your own API key to ensure uninterrupted high-speed service.
                                 Your key is encrypted securely and used exclusively for your requests.
                             </p>
                         </div>
-                        <button type="submit" class="btn btn-light text-black fw-bold px-4 py-2" style="border-radius: 0px !important;">
+                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 shadow-sm">
                             SAVE API KEY
                         </button>
                     </form>
@@ -288,41 +278,41 @@
             </div>
 
             <!-- GitHub Auto-Sync Settings -->
-            <div class="card bg-black border border-secondary shadow mb-4" style="border-radius: 0px !important;">
-                <div class="card-header bg-black border-bottom border-secondary py-3 px-4 d-flex justify-content-between align-items-center">
-                    <h3 class="h6 mb-0 text-white fw-bold tracking-tight"><i class="bi bi-github me-2"></i>GitHub Auto-Sync (DSA Solutions)</h3>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h3 class="h6 mb-0 text-dark fw-bold tracking-tight"><i class="bi bi-github me-2 text-dark"></i>GitHub Auto-Sync (DSA Solutions)</h3>
                     {% if current_user.github_token %}
-                        <span class="badge bg-success text-black fw-bold mono-font">CONNECTED</span>
+                        <span class="badge bg-success">CONNECTED</span>
                     {% else %}
-                        <span class="badge bg-secondary text-white mono-font">NOT CONNECTED</span>
+                        <span class="badge bg-secondary">NOT CONNECTED</span>
                     {% endif %}
                 </div>
                 <div class="card-body p-4">
                     <form action="{{ url_for('update_github_token') }}" method="POST">
                         <div class="mb-3">
-                            <label for="dash_github_token" class="form-label text-white small mono-font">GitHub Personal Access Token (PAT)</label>
-                            <input type="password" id="dash_github_token" name="github_token" class="form-control bg-black text-white border-secondary"
+                            <label for="dash_github_token" class="form-label text-dark fw-semibold small">GitHub Personal Access Token (PAT)</label>
+                            <input type="password" id="dash_github_token" name="github_token" class="form-control"
                                 placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                                value="{{ current_user.github_token if current_user.github_token else '' }}"
-                                style="border-radius: 0px !important;">
-                            <p class="form-text text-secondary small">
-                                Automatically push solved DSA problems, problem statements, and AI Big-O complexity notes directly to your <code class="text-white">LernyX-DSA-Solutions</code> repo! Token requires <code class="text-info">repo</code> scope.
+                                value="{{ current_user.github_token if current_user.github_token else '' }}">
+                            <p class="form-text text-muted small">
+                                Automatically push solved DSA problems, problem statements, and AI Big-O complexity notes directly to your <code class="text-primary">LernyX-DSA-Solutions</code> repo! Token requires <code>repo</code> scope.
                             </p>
                         </div>
-                        <button type="submit" class="btn btn-light text-black fw-bold px-4 py-2" style="border-radius: 0px !important;">
+                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 shadow-sm">
                             SAVE GITHUB TOKEN
                         </button>
                     </form>
                 </div>
             </div>
 
-            <div class="card bg-black border border-danger shadow" style="border-radius: 0px !important;">
+            <!-- Danger Zone -->
+            <div class="card border border-danger border-opacity-25 shadow-sm">
                 <div class="card-body p-4">
-                    <h3 class="h6 text-danger mb-3 fw-bold mono-font">⚠️ DANGER ZONE - ACCOUNT DELETION</h3>
+                    <h3 class="h6 text-danger mb-3 fw-bold">⚠️ DANGER ZONE - ACCOUNT DELETION</h3>
                     <p class="text-secondary small mb-3">
                         Deleting your account will permanently remove all your data including:
                     </p>
-                    <ul class="text-secondary small mb-3">
+                    <ul class="text-muted small mb-3">
                         <li>Your personal account information</li>
                         <li>All chat history and saved conversations</li>
                         <li>All quiz scores, aptitude stats, and DSA progress</li>
@@ -331,7 +321,7 @@
                     <p class="text-danger fw-bold small mb-3">
                         This action is irreversible and cannot be undone!
                     </p>
-                    <button class="btn btn-outline-danger fw-bold px-4 py-2" onclick="deleteAccount()" style="border-radius: 0px !important;">
+                    <button class="btn btn-outline-danger fw-bold px-4 py-2" onclick="deleteAccount()">
                         DELETE MY ACCOUNT
                     </button>
                 </div>

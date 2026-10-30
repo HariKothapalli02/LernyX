@@ -1,26 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}LernyX - The Future of Learning{% endblock %}
+{% block title %}LernyX - AI-Powered Learning & Coding Platform{% endblock %}
 
 {% block head %}
-<!-- Three.js CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
     @keyframes scroll {
-        0% {
-            opacity: 1;
-            top: 8px;
-        }
-
-        50% {
-            opacity: 0.5;
-            top: 16px;
-        }
-
-        100% {
-            opacity: 0;
-            top: 24px;
-        }
+        0% { opacity: 1; top: 8px; }
+        50% { opacity: 0.5; top: 16px; }
+        100% { opacity: 0; top: 24px; }
     }
 
     @keyframes fadeInUp {
@@ -35,7 +22,7 @@
         position: absolute;
         width: 4px;
         height: 8px;
-        background: rgba(255, 255, 255, 0.8);
+        background: var(--primary-purple);
         border-radius: 2px;
         top: 8px;
         left: 50%;
@@ -49,148 +36,192 @@
         animation: fadeInUp 0.8s ease forwards;
     }
 
-    .delay-100 {
-        animation-delay: 0.1s;
-    }
-
-    .delay-200 {
-        animation-delay: 0.2s;
-    }
-
-    .delay-300 {
-        animation-delay: 0.3s;
-    }
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
 
     .fade-in-on-scroll {
         opacity: 0;
-        transform: translateY(50px);
-        transition: all 0.8s ease;
+        transform: translateY(40px);
+        transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .fade-in-on-scroll.visible {
         opacity: 1;
         transform: translateY(0);
     }
+
+    .landing-hero-headline {
+        font-size: clamp(2.8rem, 8vw, 5.5rem);
+        line-height: 1.08;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        color: var(--text-heading);
+    }
+
+    .landing-gradient-text {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .feature-card-modern {
+        background: #ffffff;
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-xl);
+        padding: 2.75rem 2.25rem;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .feature-card-modern:hover {
+        transform: translateY(-8px);
+        border-color: var(--primary-purple);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .feature-card-modern .feature-num {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: var(--purple-light-200);
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        line-height: 1;
+    }
+
+    .stats-strip-modern {
+        background: #ffffff;
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-xl);
+        padding: 3rem 2rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .landing-stat-val {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 900;
+        color: var(--primary-purple);
+        line-height: 1;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- 3D Background Container -->
-<div id="canvas-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;"></div>
-
 <!-- Main Overlay Content -->
 <div class="immersive-wrapper" style="position: relative; z-index: 1;">
 
     <!-- Hero Section -->
-    <section class="immersive-hero d-flex align-items-center justify-content-center"
-        style="min-height: 100vh; position: relative; padding: 2rem 1rem;">
-        <div class="container text-center position-relative z-2">
-            <div class="hero-badge mb-4 fade-in-up" style="margin-bottom: 1.5rem;">
-                <span class="badge-glass"
-                    style="display: inline-block; padding: 0.5rem 1.5rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; color: rgba(255, 255, 255, 0.9);">AI-POWERED
-                    LEARNING</span>
+    <section class="immersive-hero d-flex align-items-center justify-content-center text-center"
+        style="min-height: calc(100vh - var(--navbar-height)); position: relative; padding: 4rem 1rem;">
+        <div class="container position-relative z-2">
+            <div class="mb-4 fade-in-up">
+                <span class="badge bg-primary px-3 py-1.5" style="letter-spacing: 0.1em; font-size: 0.78rem;">
+                    <i class="bi bi-stars me-1"></i>NEXT-GEN AI EDUCATION
+                </span>
             </div>
-            <h1 class="display-1 fw-bold text-white mb-4 fade-in-up delay-100"
-                style="font-size: clamp(2.5rem, 10vw, 6rem); line-height: 1.1; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 1.5rem;">
-                LERNYX<br>
-                <span
-                    style="-webkit-text-stroke: 2px rgba(255, 255, 255, 0.8); -webkit-text-fill-color: transparent; background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)); -webkit-background-clip: text; background-clip: text;">INTELLIGENCE</span>
+            
+            <h1 class="landing-hero-headline mb-4 fade-in-up delay-100">
+                Master Software & Algorithms<br>
+                <span class="landing-gradient-text">with LernyX AI</span>
             </h1>
+            
             <p class="lead mb-5 mx-auto fade-in-up delay-200"
-                style="max-width: 600px; font-size: clamp(1rem, 2vw, 1.25rem); line-height: 1.6; color: rgba(255, 255, 255, 0.7); margin-bottom: 2rem;">
-                Experience the next generation of coding education.
-                Powered by LernyX AI, driven by your curiosity.
+                style="max-width: 640px; font-size: clamp(1.05rem, 2vw, 1.25rem); line-height: 1.6; color: var(--text-secondary);">
+                The all-in-one platform for interactive coding, AI mock interviews, video quiz generation, and career placement.
             </p>
-            <div class="d-flex justify-content-center gap-4 fade-in-up delay-300" style="gap: 1rem; flex-wrap: wrap;">
+
+            <div class="d-flex justify-content-center gap-3 fade-in-up delay-300 flex-wrap">
                 {% if current_user.is_authenticated %}
-                <a href="{{ url_for('home') }}" class="btn btn-glass btn-lg"
-                    style="padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; display: inline-block; transition: all 0.3s ease; border: none; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; cursor: pointer;">
-                    ENTER DASHBOARD
+                <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow">
+                    GO TO YOUR HUB <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-lg px-5 py-3 rounded-pill fw-bold">
+                    VIEW DASHBOARD
                 </a>
                 {% else %}
-                <a href="{{ url_for('signup') }}" class="btn btn-glass btn-lg"
-                    style="padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; display: inline-block; transition: all 0.3s ease; border: none; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; cursor: pointer;">
-                    START JOURNEY
+                <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow">
+                    GET STARTED FREE <i class="bi bi-arrow-right ms-2"></i>
                 </a>
-                <a href="{{ url_for('login') }}" class="btn btn-glass-outline btn-lg"
-                    style="padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; display: inline-block; transition: all 0.3s ease; background: transparent; border: 2px solid rgba(255, 255, 255, 0.3); color: #fff; cursor: pointer;">
-                    LOGIN
+                <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg px-5 py-3 rounded-pill fw-bold">
+                    LOG IN
                 </a>
                 {% endif %}
             </div>
         </div>
 
         <!-- Scroll Indicator -->
-        <div class="scroll-indicator"
-            style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0.6;">
+        <div class="scroll-indicator d-none d-md-block"
+            style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); text-align: center;">
             <div class="mouse"
-                style="width: 24px; height: 40px; border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 12px; margin: 0 auto 0.5rem; position: relative;">
+                style="width: 24px; height: 38px; border: 2px solid var(--purple-border); border-radius: 12px; margin: 0 auto 0.5rem; position: relative;">
             </div>
-            <p style="font-size: 0.65rem; letter-spacing: 2px; color: rgba(255, 255, 255, 0.5); margin: 0;">SCROLL TO
-                EXPLORE</p>
+            <p style="font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; color: var(--text-muted); margin: 0;">SCROLL TO EXPLORE</p>
         </div>
     </section>
 
     <!-- Features Section (Floating Cards) -->
-    <section class="immersive-features py-5" style="padding: 5rem 1rem;">
+    <section class="immersive-features py-5">
         <div class="container">
-            <div class="row g-5">
+            <div class="text-center mb-5">
+                <span class="badge bg-primary px-3 py-1 text-uppercase mb-2">POWERFUL SUITE</span>
+                <h2 class="display-6 fw-bold text-dark tracking-tight">Everything You Need to Excel</h2>
+                <p class="text-muted mx-auto" style="max-width: 520px;">Built specifically for software engineers, students, and competitive programmers.</p>
+            </div>
+
+            <div class="row g-4">
                 <!-- Card 1 -->
-                <div class="col-lg-4 fade-in-on-scroll" style="padding: 0 1rem; margin-bottom: 2rem;">
-                    <div class="glass-card-feature"
-                        style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 2.5rem 2rem; height: 100%; position: relative; overflow: hidden; transition: all 0.4s ease;">
-                        <div class="feature-number"
-                            style="font-size: 3rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 1rem; right: 1.5rem; line-height: 1;">
-                            01</div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #fff;">AI Tutor</h3>
-                        <p
-                            style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; margin-bottom: 2rem; font-size: 0.95rem;">
-                            Real-time assistance powered by advanced neural networks. Debug code, get explanations, and
-                            learn faster.</p>
-                        <div class="feature-visual" style="text-align: center; margin-top: 2rem;">
-                            <i class="bi bi-robot"
-                                style="font-size: 3rem; color: rgba(255, 255, 255, 0.3); transition: all 0.3s ease;"></i>
+                <div class="col-lg-4 fade-in-on-scroll">
+                    <div class="feature-card-modern">
+                        <div class="feature-num">01</div>
+                        <div class="tool-card-icon-box icon-box-purple mb-4">
+                            <i class="bi bi-robot fs-3 text-purple"></i>
                         </div>
+                        <h3 class="h4 fw-bold text-dark mb-2">LernyX AI Tutor</h3>
+                        <p class="text-secondary mb-4" style="line-height: 1.6;">
+                            Instant debugging assistance, code reviews, and deep architectural explanations powered by advanced AI.
+                        </p>
+                        <a href="{{ url_for('chat_main') }}" class="text-primary fw-bold text-decoration-none d-inline-flex align-items-center gap-1">
+                            Explore AI Tutor <i class="bi bi-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
 
                 <!-- Card 2 -->
-                <div class="col-lg-4 fade-in-on-scroll delay-100" style="padding: 0 1rem; margin-bottom: 2rem;">
-                    <div class="glass-card-feature"
-                        style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 2.5rem 2rem; height: 100%; position: relative; overflow: hidden; transition: all 0.4s ease;">
-                        <div class="feature-number"
-                            style="font-size: 3rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 1rem; right: 1.5rem; line-height: 1;">
-                            02</div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #fff;">Video
-                            Intelligence</h3>
-                        <p
-                            style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; margin-bottom: 2rem; font-size: 0.95rem;">
-                            Transform any educational content into interactive quizzes instantly. Learn from what you
-                            watch.</p>
-                        <div class="feature-visual" style="text-align: center; margin-top: 2rem;">
-                            <i class="bi bi-youtube"
-                                style="font-size: 3rem; color: rgba(255, 255, 255, 0.3); transition: all 0.3s ease;"></i>
+                <div class="col-lg-4 fade-in-on-scroll delay-100">
+                    <div class="feature-card-modern">
+                        <div class="feature-num">02</div>
+                        <div class="tool-card-icon-box icon-box-red mb-4">
+                            <i class="bi bi-youtube fs-3 text-red"></i>
                         </div>
+                        <h3 class="h4 fw-bold text-dark mb-2">Video Intelligence</h3>
+                        <p class="text-secondary mb-4" style="line-height: 1.6;">
+                            Transform YouTube educational videos into interactive multi-choice quizzes and structured notes in seconds.
+                        </p>
+                        <a href="{{ url_for('videoquiz') }}" class="text-primary fw-bold text-decoration-none d-inline-flex align-items-center gap-1">
+                            Try Video Quiz <i class="bi bi-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
 
                 <!-- Card 3 -->
-                <div class="col-lg-4 fade-in-on-scroll delay-200" style="padding: 0 1rem; margin-bottom: 2rem;">
-                    <div class="glass-card-feature"
-                        style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 2.5rem 2rem; height: 100%; position: relative; overflow: hidden; transition: all 0.4s ease;">
-                        <div class="feature-number"
-                            style="font-size: 3rem; font-weight: 900; color: rgba(255, 255, 255, 0.1); position: absolute; top: 1rem; right: 1.5rem; line-height: 1;">
-                            03</div>
-                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #fff;">Code Compiler
-                        </h3>
-                        <p
-                            style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; margin-bottom: 2rem; font-size: 0.95rem;">
-                            Execute Java and Python code directly in the browser. Practice algorithms with zero setup.
-                        </p>
-                        <div class="feature-visual" style="text-align: center; margin-top: 2rem;">
-                            <i class="bi bi-code-slash"
-                                style="font-size: 3rem; color: rgba(255, 255, 255, 0.3); transition: all 0.3s ease;"></i>
+                <div class="col-lg-4 fade-in-on-scroll delay-200">
+                    <div class="feature-card-modern">
+                        <div class="feature-num">03</div>
+                        <div class="tool-card-icon-box icon-box-blue mb-4">
+                            <i class="bi bi-code-slash fs-3 text-blue"></i>
                         </div>
+                        <h3 class="h4 fw-bold text-dark mb-2">3-Pane IDE & DSA Vault</h3>
+                        <p class="text-secondary mb-4" style="line-height: 1.6;">
+                            High-performance browser compiler for Java, connected to a rich vault of algorithmic challenges.
+                        </p>
+                        <a href="{{ url_for('compiler') }}" class="text-primary fw-bold text-decoration-none d-inline-flex align-items-center gap-1">
+                            Launch Compiler <i class="bi bi-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -198,34 +229,21 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="immersive-stats py-5" style="padding: 3rem 1rem;">
+    <section class="immersive-stats py-5">
         <div class="container">
-            <div class="glass-strip"
-                style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 3rem 2rem;">
-                <div class="row text-center">
-                    <div class="col-md-4 border-end border-light border-opacity-10" style="padding: 1.5rem 0;">
-                        <div class="stat-number"
-                            style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; color: #fff; margin-bottom: 0.5rem; line-height: 1;">
-                            10k+</div>
-                        <div class="stat-label"
-                            style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 1px;">
-                            Active Learners</div>
+            <div class="stats-strip-modern">
+                <div class="row text-center g-4">
+                    <div class="col-md-4 border-end-md">
+                        <div class="landing-stat-val mb-1">10k+</div>
+                        <div class="text-muted fw-bold text-uppercase small" style="letter-spacing: 0.05em;">Practice Problems</div>
                     </div>
-                    <div class="col-md-4 border-end border-light border-opacity-10" style="padding: 1.5rem 0;">
-                        <div class="stat-number"
-                            style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; color: #fff; margin-bottom: 0.5rem; line-height: 1;">
-                            50k+</div>
-                        <div class="stat-label"
-                            style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 1px;">
-                            Quizzes Generated</div>
+                    <div class="col-md-4 border-end-md">
+                        <div class="landing-stat-val mb-1">50k+</div>
+                        <div class="text-muted fw-bold text-uppercase small" style="letter-spacing: 0.05em;">Quizzes Generated</div>
                     </div>
-                    <div class="col-md-4" style="padding: 1.5rem 0;">
-                        <div class="stat-number"
-                            style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; color: #fff; margin-bottom: 0.5rem; line-height: 1;">
-                            99%</div>
-                        <div class="stat-label"
-                            style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 1px;">
-                            Satisfaction Rate</div>
+                    <div class="col-md-4">
+                        <div class="landing-stat-val mb-1">99.4%</div>
+                        <div class="text-muted fw-bold text-uppercase small" style="letter-spacing: 0.05em;">Learner Satisfaction</div>
                     </div>
                 </div>
             </div>
@@ -233,21 +251,22 @@
     </section>
 
     <!-- Footer CTA -->
-    <section class="immersive-cta text-center py-5" style="padding: 5rem 1rem;">
+    <section class="immersive-cta text-center py-5 mb-4">
         <div class="container">
-            <h2 class="display-4 fw-bold text-white mb-4"
-                style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 2rem;">Ready to Evolve?
-            </h2>
-            <a href="{{ url_for('signup') }}" class="btn btn-glass btn-xl"
-                style="padding: 1.25rem 3rem; border-radius: 50px; font-weight: 600; font-size: 1rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; display: inline-block; transition: all 0.3s ease; border: none; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; cursor: pointer;">
-                JOIN THE FUTURE
-            </a>
+            <div class="card p-5 bg-white border border-primary border-opacity-25 shadow-lg rounded-4 text-center">
+                <h2 class="display-6 fw-bold text-dark mb-3">Ready to Accelerate Your Career?</h2>
+                <p class="text-secondary mx-auto mb-4" style="max-width: 500px;">Join thousands of students and engineers mastering coding and interview preparation with LernyX.</p>
+                <div>
+                    <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow">
+                        CREATE FREE ACCOUNT <i class="bi bi-rocket-takeoff ms-2"></i>
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 </div>
 
 <!-- Scripts -->
-<script src="{{ url_for('static', filename='js/three-background.js') }}"></script>
 <script>
     // Scroll Animation Observer
     const observer = new IntersectionObserver((entries) => {
@@ -259,91 +278,5 @@
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.fade-in-on-scroll').forEach(el => observer.observe(el));
-
-    // Button hover effects
-    document.querySelectorAll('.btn-glass').forEach(btn => {
-        btn.addEventListener('mouseenter', function () {
-            this.style.background = 'rgba(255, 255, 255, 0.2)';
-            this.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-            this.style.transform = 'translateY(-2px)';
-            this.style.boxShadow = '0 10px 30px rgba(255, 255, 255, 0.1)';
-        });
-        btn.addEventListener('mouseleave', function () {
-            this.style.background = 'rgba(255, 255, 255, 0.1)';
-            this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = 'none';
-        });
-    });
-
-    document.querySelectorAll('.btn-glass-outline').forEach(btn => {
-        btn.addEventListener('mouseenter', function () {
-            this.style.background = 'rgba(255, 255, 255, 0.1)';
-            this.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-            this.style.transform = 'translateY(-2px)';
-        });
-        btn.addEventListener('mouseleave', function () {
-            this.style.background = 'transparent';
-            this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-            this.style.transform = 'translateY(0)';
-        });
-    });
-
-    document.querySelectorAll('.glass-card-feature').forEach(card => {
-        card.addEventListener('mouseenter', function () {
-            this.style.transform = 'translateY(-10px)';
-            this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-            this.style.boxShadow = '0 20px 60px rgba(255, 255, 255, 0.05)';
-            const icon = this.querySelector('.feature-visual i');
-            if (icon) {
-                icon.style.color = 'rgba(255, 255, 255, 0.6)';
-                icon.style.transform = 'scale(1.1)';
-            }
-        });
-        card.addEventListener('mouseleave', function () {
-            this.style.transform = 'translateY(0)';
-            this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-            this.style.boxShadow = 'none';
-            const icon = this.querySelector('.feature-visual i');
-            if (icon) {
-                icon.style.color = 'rgba(255, 255, 255, 0.3)';
-                icon.style.transform = 'scale(1)';
-            }
-        });
-    });
-
-    // Mobile responsive adjustments
-    function handleResize() {
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-            document.querySelectorAll('.d-flex.gap-4').forEach(el => {
-                el.style.flexDirection = 'column';
-                el.style.width = '100%';
-                el.style.maxWidth = '300px';
-                el.style.margin = '0 auto';
-            });
-            document.querySelectorAll('.btn').forEach(btn => {
-                btn.style.width = '100%';
-                btn.style.padding = '1rem 1.5rem';
-                btn.style.fontSize = '0.85rem';
-            });
-            document.querySelectorAll('.border-end').forEach(el => {
-                el.style.borderRight = 'none';
-                el.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
-            });
-        } else {
-            document.querySelectorAll('.d-flex.gap-4').forEach(el => {
-                el.style.flexDirection = 'row';
-                el.style.width = 'auto';
-                el.style.maxWidth = 'none';
-            });
-            document.querySelectorAll('.btn').forEach(btn => {
-                btn.style.width = 'auto';
-            });
-        }
-    }
-
-    window.addEventListener('resize', handleResize);
-    handleResize();
 </script>
 {% endblock %}

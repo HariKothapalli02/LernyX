@@ -1,50 +1,90 @@
 {% extends "base.html" %}
 
-{% block title %}About Us - Learnex{% endblock %}
+{% block title %}About Us - LernyX{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold text-white">About Learnex</h1>
-        <p class="lead text-muted">Revolutionizing Technical Education and Interview Preparation</p>
+<div class="container py-4 py-md-5">
+    <div class="text-center mb-5 fade-in-up">
+        <span class="badge badge-purple px-3 py-1.5 mb-2" style="font-size: 0.78rem; letter-spacing: 0.05em;">
+            <i class="bi bi-compass me-1"></i>OUR MISSION & ARCHITECTURE
+        </span>
+        <h1 class="h2 fw-bold text-slate mb-2 tracking-tight">About LernyX</h1>
+        <p class="text-secondary mx-auto mb-0" style="max-width: 640px; font-size: 0.95rem; line-height: 1.5;">
+            Revolutionizing technical software education, algorithmic problem solving, and end-to-end interview placement.
+        </p>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <div class="card shadow-lg border-0 bg-dark text-white">
-                <div class="card-body p-5">
-                    <h2 class="card-title mb-4 text-primary">Problem Statement</h2>
-                    <p class="card-text mb-4">
-                        In the current landscape of online technical education and interview preparation, learners and
-                        educators face several critical challenges that reduce learning effectiveness and efficiency.
+            <!-- Problem Statement Main Card -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; border: 1px solid rgba(124, 58, 237, 0.12) !important; background: #ffffff;">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; background: rgba(124, 58, 237, 0.1); color: var(--primary-purple);">
+                            <i class="bi bi-lightbulb-fill fs-5"></i>
+                        </div>
+                        <h3 class="fw-bold text-slate mb-0" style="font-size: 1.35rem;">The Challenge in Technical Education</h3>
+                    </div>
+                    <p class="text-secondary mb-4" style="font-size: 0.98rem; line-height: 1.65;">
+                        In the current landscape of online technical education and interview preparation, learners and educators face critical challenges that reduce learning effectiveness and placement conversion. LernyX was built from the ground up to solve these three core bottlenecks:
                     </p>
 
-                    <div class="mb-4">
-                        <h4 class="text-info">1. Passive Learning Experience</h4>
-                        <p class="text-light opacity-75">
-                            Most students consume educational content, such as technical videos on platforms like
-                            YouTube, in a passive manner. There is often no immediate way to assess understanding or
-                            apply concepts, resulting in poor engagement and lower knowledge retention.
-                        </p>
-                    </div>
+                    <div class="row g-4 mt-1">
+                        <!-- Pillar 1 -->
+                        <div class="col-md-4">
+                            <div class="h-100 p-4 rounded-4" style="background: rgba(124, 58, 237, 0.04); border: 1px solid rgba(124, 58, 237, 0.12);">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 38px; height: 38px; background: rgba(124, 58, 237, 0.12); color: var(--primary-purple);">
+                                    <i class="bi bi-play-circle-fill fs-5"></i>
+                                </div>
+                                <h5 class="fw-bold text-slate mb-2" style="font-size: 1.05rem;">1. Passive Learning Experience</h5>
+                                <p class="text-secondary small mb-0" style="line-height: 1.55;">
+                                    Students consume video lectures passively on platforms like YouTube without immediate validation. LernyX transforms videos into automated quizzes and structured notes to guarantee high retention.
+                                </p>
+                            </div>
+                        </div>
 
-                    <div class="mb-4">
-                        <h4 class="text-info">2. Fragmented Preparation Process</h4>
-                        <p class="text-light opacity-75">
-                            Technical interview preparation is highly fragmented. Learners are required to use multiple
-                            platforms separately for conceptual learning (videos), coding practice (DSA), and aptitude
-                            training. This lack of integration creates a disjointed and inefficient learning experience.
-                        </p>
-                    </div>
+                        <!-- Pillar 2 -->
+                        <div class="col-md-4">
+                            <div class="h-100 p-4 rounded-4" style="background: rgba(99, 102, 241, 0.04); border: 1px solid rgba(99, 102, 241, 0.15);">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 38px; height: 38px; background: rgba(99, 102, 241, 0.12); color: var(--primary-indigo);">
+                                    <i class="bi bi-diagram-3-fill fs-5"></i>
+                                </div>
+                                <h5 class="fw-bold text-slate mb-2" style="font-size: 1.05rem;">2. Fragmented Preparation Process</h5>
+                                <p class="text-secondary small mb-0" style="line-height: 1.55;">
+                                    Job seekers juggle multiple platforms separately for DSA, aptitude, and mock interviews. LernyX consolidates all career preparation tools into a single coherent, automated workspace.
+                                </p>
+                            </div>
+                        </div>
 
-                    <div class="mb-4">
-                        <h4 class="text-info">3. Assessment Creation Bottlenecks</h4>
-                        <p class="text-light opacity-75">
-                            Educators and recruiters spend significant time manually designing quizzes and coding
-                            assessments. The absence of automated or intelligent tools makes it difficult to generate
-                            personalized, topic-specific, or adaptive assessments quickly and efficiently.
-                        </p>
+                        <!-- Pillar 3 -->
+                        <div class="col-md-4">
+                            <div class="h-100 p-4 rounded-4" style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.15);">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 38px; height: 38px; background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                                    <i class="bi bi-cpu-fill fs-5"></i>
+                                </div>
+                                <h5 class="fw-bold text-slate mb-2" style="font-size: 1.05rem;">3. Assessment Creation Bottlenecks</h5>
+                                <p class="text-secondary small mb-0" style="line-height: 1.55;">
+                                    Recruiters and students waste hours designing manual question sets. Our intelligent AI pipelines dynamically construct proctored exams, code test suites, and voice interview scenarios in seconds.
+                                </p>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Call to action card -->
+            <div class="card border-0 shadow-sm text-center p-4 p-md-5" style="border-radius: 20px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%); border: 1px solid rgba(124, 58, 237, 0.15) !important;">
+                <h4 class="fw-bold text-slate mb-2">Ready to Accelerate Your Career?</h4>
+                <p class="text-secondary mb-4 mx-auto" style="max-width: 500px; font-size: 0.92rem;">
+                    Join thousands of developers mastering DSA, cracking proctored mock interviews, and landing tech roles.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="/home" class="btn btn-primary fw-bold px-4 py-2.5 shadow-sm" style="border-radius: 10px;">
+                        <i class="bi bi-grid-fill me-1"></i>Explore All Tools
+                    </a>
+                    <a href="/mock-interview" class="btn btn-outline-primary fw-bold px-4 py-2.5" style="border-radius: 10px;">
+                        <i class="bi bi-mic-fill me-1"></i>Try AI Interview
+                    </a>
                 </div>
             </div>
         </div>

@@ -6,86 +6,86 @@
 <div class="container-fluid p-0 m-0 chat-page-wrapper">
     <div class="row g-0 h-100 m-0">
         <!-- Main Chat Area (Left Column) -->
-        <div class="col-lg-9 col-md-8 d-flex flex-column h-100 border-end border-secondary">
-            <div class="card h-100 bg-black border-0 d-flex flex-column overflow-hidden">
+        <div class="col-lg-9 col-md-8 d-flex flex-column h-100 border-end" style="border-color: rgba(124, 58, 237, 0.1) !important;">
+            <div class="card h-100 border-0 d-flex flex-column overflow-hidden bg-white">
                 <!-- Chat Card Header -->
-                <div class="px-3 py-3 border-bottom border-secondary d-flex justify-content-between align-items-center bg-black chat-header-bar">
+                <div class="px-3 px-md-4 py-3 border-bottom d-flex justify-content-between align-items-center bg-white chat-header-bar" style="border-color: rgba(124, 58, 237, 0.1) !important;">
                     <div class="d-flex align-items-center gap-2 gap-md-3">
-                        <button class="btn btn-sm btn-outline-light d-md-none px-2 py-1" type="button"
-                            data-bs-toggle="offcanvas" data-bs-target="#historySidebar" aria-controls="historySidebar" title="Chat History">
+                        <button class="btn btn-sm btn-outline-secondary d-md-none px-2 py-1" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#historySidebar" aria-controls="historySidebar" title="Chat History" style="border-radius: 8px;">
                             <i class="bi bi-layout-sidebar-inset fs-6"></i>
                         </button>
                         <div class="chat-header-robot-icon d-none d-sm-flex">
-                            <i class="bi bi-robot fs-6 text-white"></i>
+                            <i class="bi bi-robot fs-5 text-purple"></i>
                         </div>
                         <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-white fw-bold tracking-tight lh-1" style="font-size: 0.95rem;">AI CHATBOT</h6>
-                            <small class="text-secondary mt-1 lh-1 d-none d-sm-block" style="font-size: 0.72rem;">Powered by LernyX AI</small>
+                            <h6 class="mb-0 text-slate fw-bold tracking-tight lh-1" style="font-size: 1rem;">LernyX AI Tutor</h6>
+                            <small class="text-muted mt-1 lh-1 d-none d-sm-block" style="font-size: 0.76rem;">Intelligent Code, Architecture & Interview Companion</small>
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="online-pill-badge d-none d-sm-inline-flex">
                             <span class="online-dot"></span> AI ONLINE
                         </span>
-                        <button class="btn btn-sm btn-outline-light fw-bold px-2 py-1 ms-1 d-md-none" onclick="startNewChat()" title="New Chat">
+                        <button class="btn btn-sm btn-outline-primary fw-bold px-2.5 py-1 ms-1 d-md-none" onclick="startNewChat()" title="New Chat" style="border-radius: 8px;">
                             <i class="bi bi-plus-lg"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Chat Messages / Welcome Empty State -->
-                <div class="card-body p-0 flex-grow-1 overflow-hidden position-relative bg-black">
+                <div class="card-body p-0 flex-grow-1 overflow-hidden position-relative" style="background: var(--bg-canvas);">
                     <div id="chat" class="chat-scroll-box">
                         <!-- Welcome Screen -->
                         <div class="text-center welcome-screen-box fade-in-up">
                             <!-- Mascot Emblem Box -->
                             <div class="mascot-circle-wrapper mb-3">
-                                <div class="mascot-emblem-box" style="background: rgba(6, 182, 212, 0.12); border-color: rgba(6, 182, 212, 0.45); box-shadow: 0 0 16px rgba(6, 182, 212, 0.25);">
-                                    <i class="bi bi-robot fs-4" style="color: #06b6d4;"></i>
+                                <div class="mascot-emblem-box">
+                                    <i class="bi bi-robot fs-3" style="color: var(--primary-purple);"></i>
                                 </div>
                             </div>
 
-                            <h4 class="text-white fw-bold mb-1 welcome-title">How can I help you <span class="fw-normal text-secondary">today?</span></h4>
-                            <p class="text-secondary mx-auto mb-3 welcome-desc">
+                            <h4 class="text-slate fw-bold mb-1 welcome-title">How can I help you <span class="text-purple">today?</span></h4>
+                            <p class="text-secondary mx-auto mb-4 welcome-desc">
                                 Ask me anything about software engineering, code debugging, system architecture, or DSA concepts.
                             </p>
 
                             <!-- Quick Prompts Pills Grid (2x2) -->
-                            <div class="quick-prompts-grid row g-2 justify-content-center">
+                            <div class="quick-prompts-grid row g-2.5 justify-content-center">
                                 <div class="col-sm-6">
                                     <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Explain the concept of ')">
-                                        <span class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-lightbulb-fill fs-6" style="color: #f59e0b;"></i>
-                                            <span>Explain a concept</span>
+                                        <span class="d-flex align-items-center gap-2.5">
+                                            <div class="pill-icon-circle bg-amber-subtle"><i class="bi bi-lightbulb-fill" style="color: #d97706;"></i></div>
+                                            <span class="text-slate fw-semibold">Explain a concept</span>
                                         </span>
-                                        <i class="bi bi-arrow-right text-secondary small"></i>
+                                        <i class="bi bi-arrow-right text-muted small"></i>
                                     </button>
                                 </div>
                                 <div class="col-sm-6">
                                     <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Can you help me debug this code?\n\n```\n\n```')">
-                                        <span class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-code-slash fs-6" style="color: #00f2fe;"></i>
-                                            <span>Debug my code</span>
+                                        <span class="d-flex align-items-center gap-2.5">
+                                            <div class="pill-icon-circle bg-cyan-subtle"><i class="bi bi-code-slash text-info"></i></div>
+                                            <span class="text-slate fw-semibold">Debug my code</span>
                                         </span>
-                                        <i class="bi bi-arrow-right text-secondary small"></i>
+                                        <i class="bi bi-arrow-right text-muted small"></i>
                                     </button>
                                 </div>
                                 <div class="col-sm-6">
                                     <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Give me system design ideas for ')">
-                                        <span class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-layers-fill fs-6" style="color: #a855f7;"></i>
-                                            <span>System design ideas</span>
+                                        <span class="d-flex align-items-center gap-2.5">
+                                            <div class="pill-icon-circle bg-purple-subtle"><i class="bi bi-layers-fill text-purple"></i></div>
+                                            <span class="text-slate fw-semibold">System design ideas</span>
                                         </span>
-                                        <i class="bi bi-arrow-right text-secondary small"></i>
+                                        <i class="bi bi-arrow-right text-muted small"></i>
                                     </button>
                                 </div>
                                 <div class="col-sm-6">
                                     <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Help me solve a DSA problem related to ')">
-                                        <span class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-bullseye fs-6" style="color: #10b981;"></i>
-                                            <span>Solve DSA problem</span>
+                                        <span class="d-flex align-items-center gap-2.5">
+                                            <div class="pill-icon-circle bg-emerald-subtle"><i class="bi bi-bullseye text-success"></i></div>
+                                            <span class="text-slate fw-semibold">Solve DSA problem</span>
                                         </span>
-                                        <i class="bi bi-arrow-right text-secondary small"></i>
+                                        <i class="bi bi-arrow-right text-muted small"></i>
                                     </button>
                                 </div>
                             </div>
@@ -94,30 +94,30 @@
                 </div>
 
                 <!-- Input Footer -->
-                <div class="p-2.5 border-top border-secondary bg-black chat-input-footer">
+                <div class="p-3 border-top bg-white chat-input-footer" style="border-color: rgba(124, 58, 237, 0.1) !important;">
                     <!-- File Attachment Preview -->
-                    <div id="file-preview" class="d-none mb-2 p-1.5 border border-secondary bg-dark rounded position-relative align-items-center gap-2" style="width: fit-content;">
-                        <i class="bi bi-file-earmark-text text-white small"></i>
-                        <span id="file-name" class="text-white small mono-font" style="font-size: 0.78rem;"></span>
-                        <button type="button" class="btn-close btn-close-white ms-2 small" aria-label="Close" onclick="clearFile()"></button>
+                    <div id="file-preview" class="d-none mb-2 p-2 border bg-light position-relative align-items-center gap-2" style="width: fit-content; border-radius: 10px; border-color: rgba(124, 58, 237, 0.2) !important;">
+                        <i class="bi bi-file-earmark-text text-purple small"></i>
+                        <span id="file-name" class="text-slate small mono-font" style="font-size: 0.8rem;"></span>
+                        <button type="button" class="btn-close ms-2 small" aria-label="Close" onclick="clearFile()" style="font-size: 0.7rem;"></button>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
                         <input type="file" id="file-input" class="d-none" accept=".pdf,.jpg,.jpeg,.png,.webp" onchange="handleFileSelect(this)">
                         <button class="btn btn-outline-secondary attachment-square-btn" type="button" onclick="document.getElementById('file-input').click()" title="Attach File">
-                            <i class="bi bi-paperclip fs-6 text-white"></i>
+                            <i class="bi bi-paperclip fs-5 text-secondary"></i>
                         </button>
                         
                         <div class="input-group input-pill-container flex-grow-1">
-                            <input type="text" id="message" class="form-control chat-input-field" placeholder="Type your question here..." autocomplete="off">
-                            <button class="btn btn-light send-pill-btn" type="button" onclick="send()">
+                            <input type="text" id="message" class="form-control chat-input-field" placeholder="Ask a question or explain a programming problem..." autocomplete="off">
+                            <button class="btn btn-primary send-pill-btn" type="button" onclick="send()">
                                 <span>SEND</span> <i class="bi bi-send-fill ms-1 small"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div class="d-none d-sm-flex justify-content-between align-items-center text-secondary small mt-1.5 px-1" style="font-size: 0.72rem;">
-                        <span><i class="bi bi-info-circle me-1"></i>Supported: PDF, Images (JPG, PNG, WebP)</span>
+                    <div class="d-none d-sm-flex justify-content-between align-items-center text-muted small mt-2 px-1" style="font-size: 0.74rem;">
+                        <span><i class="bi bi-info-circle me-1"></i>Supports PDF documents, images (JPG, PNG, WebP)</span>
                         <span><i class="bi bi-keyboard me-1"></i>Press Enter to send</span>
                     </div>
                 </div>
@@ -125,21 +125,26 @@
         </div>
 
         <!-- History Sidebar (Right Column - Desktop) -->
-        <div class="col-lg-3 col-md-4 d-none d-md-flex flex-column h-100">
-            <div class="card h-100 bg-black border-0 d-flex flex-column overflow-hidden">
-                <div class="px-3 py-3 border-bottom border-secondary d-flex align-items-center gap-2 bg-black chat-header-bar">
-                    <i class="bi bi-clock fs-6 text-white me-1"></i>
-                    <h6 class="mb-0 text-white fw-bold lh-1">Chat History</h6>
+        <div class="col-lg-3 col-md-4 d-none d-md-flex flex-column h-100 bg-white">
+            <div class="card h-100 bg-white border-0 d-flex flex-column overflow-hidden">
+                <div class="px-3 px-md-4 py-3 border-bottom d-flex align-items-center justify-content-between bg-white chat-header-bar" style="border-color: rgba(124, 58, 237, 0.1) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-clock-history fs-5 text-purple"></i>
+                        <h6 class="mb-0 text-slate fw-bold lh-1" style="font-size: 0.95rem;">Conversations</h6>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary py-1 px-2.5" style="font-size: 0.75rem; border-radius: 8px;" onclick="startNewChat()">
+                        <i class="bi bi-plus-lg me-1"></i>New
+                    </button>
                 </div>
                 
                 <div class="card-body p-2 flex-grow-1 overflow-auto" id="history-list">
                     <!-- Populated dynamically via JS -->
                 </div>
 
-                <div class="p-2.5 border-top border-secondary bg-black">
-                    <button class="btn btn-outline-light w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2" style="font-size: 0.82rem;" onclick="startNewChat()">
+                <div class="p-3 border-top bg-white" style="border-color: rgba(124, 58, 237, 0.1) !important;">
+                    <button class="btn btn-primary w-100 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" style="font-size: 0.88rem; border-radius: 10px;" onclick="startNewChat()">
                         <i class="bi bi-plus-lg"></i>
-                        <span>NEW CHAT</span>
+                        <span>START NEW CHAT</span>
                     </button>
                 </div>
             </div>
@@ -148,18 +153,18 @@
 </div>
 
 <!-- Mobile Offcanvas Sidebar -->
-<div class="offcanvas offcanvas-start bg-black text-white border-end border-secondary" tabindex="-1" id="historySidebar" aria-labelledby="historySidebarLabel" style="width: 300px;">
-    <div class="offcanvas-header border-bottom border-secondary">
-        <h5 class="offcanvas-title fw-bold d-flex align-items-center gap-2" id="historySidebarLabel">
-            <i class="bi bi-clock text-white"></i> Chat History
+<div class="offcanvas offcanvas-start bg-white text-slate border-end" tabindex="-1" id="historySidebar" aria-labelledby="historySidebarLabel" style="width: 310px; border-color: rgba(124, 58, 237, 0.1) !important;">
+    <div class="offcanvas-header border-bottom" style="border-color: rgba(124, 58, 237, 0.1) !important;">
+        <h5 class="offcanvas-title fw-bold d-flex align-items-center gap-2 text-slate" id="historySidebarLabel">
+            <i class="bi bi-clock-history text-purple"></i> Chat History
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body p-3" id="history-list-mobile">
         <!-- Populated dynamically via JS -->
     </div>
-    <div class="p-3 border-top border-secondary bg-black">
-        <button class="btn btn-outline-light w-100 py-2.5 fw-bold rounded-3 d-flex align-items-center justify-content-center gap-2" onclick="startNewChat()" data-bs-dismiss="offcanvas">
+    <div class="p-3 border-top bg-white" style="border-color: rgba(124, 58, 237, 0.1) !important;">
+        <button class="btn btn-primary w-100 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2" style="border-radius: 10px;" onclick="startNewChat()" data-bs-dismiss="offcanvas">
             <i class="bi bi-plus-lg"></i>
             <span>NEW CHAT</span>
         </button>
@@ -168,7 +173,6 @@
 
 <!-- Page Specific CSS Styles -->
 <style>
-    /* Full Viewport Height Layout */
     .app-wrapper, main {
         display: flex;
         flex-direction: column;
@@ -183,6 +187,7 @@
         width: 100%;
         padding: 0 !important;
         margin: 0 !important;
+        background: var(--bg-canvas);
     }
 
     @media (max-width: 991.98px) {
@@ -198,47 +203,33 @@
         }
     }
 
-    .chat-page-wrapper .card {
-        padding: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        background-color: #000000 !important;
-    }
-
-    /* Header Bar */
     .chat-header-bar {
-        min-height: 56px;
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+        min-height: 58px;
         flex-shrink: 0;
         z-index: 10;
         position: relative;
     }
 
-    /* Robot Icon in Header */
     .chat-header-robot-icon {
-        width: 34px;
-        height: 34px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 0px !important;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #000000;
+        background: rgba(124, 58, 237, 0.08);
+        border: 1px solid rgba(124, 58, 237, 0.15);
         flex-shrink: 0;
     }
 
-    /* Online Pill Badge */
     .online-pill-badge {
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(16, 185, 129, 0.3);
         border-radius: 50px;
         padding: 0.25rem 0.75rem;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 700;
-        color: #ffffff;
-        background: #000000;
+        color: #065f46;
+        background: #ecfdf5;
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -246,32 +237,31 @@
     }
 
     .online-dot {
-        width: 6px;
-        height: 6px;
-        background: #ffffff;
+        width: 7px;
+        height: 7px;
+        background: #10b981;
         border-radius: 50%;
         display: inline-block;
+        box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
     }
 
-    /* Mascot Emblem Box */
     .mascot-circle-wrapper {
         display: flex;
         justify-content: center;
     }
 
     .mascot-emblem-box {
-        width: 44px;
-        height: 44px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 0px !important;
+        width: 58px;
+        height: 58px;
+        border: 2px solid rgba(124, 58, 237, 0.25);
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #000000;
-        box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+        background: rgba(124, 58, 237, 0.08);
+        box-shadow: 0 4px 18px rgba(124, 58, 237, 0.15);
     }
 
-    /* Scrollable Box */
     .chat-scroll-box {
         height: 100%;
         overflow-y: auto;
@@ -281,86 +271,103 @@
 
     .welcome-screen-box {
         margin: auto 0;
-        padding: 0.75rem 0;
+        padding: 1rem 0;
     }
 
     .welcome-title {
-        font-size: 1.25rem;
+        font-size: 1.4rem;
         letter-spacing: -0.02em;
     }
 
     .welcome-desc {
-        font-size: 0.82rem;
-        line-height: 1.45;
-        max-width: 460px;
+        font-size: 0.92rem;
+        line-height: 1.5;
+        max-width: 520px;
     }
 
-    /* Quick Prompts Pills */
     .quick-prompts-grid {
-        max-width: 460px;
+        max-width: 560px;
         margin: 0 auto;
     }
 
     .quick-prompt-pill {
-        background: #000000;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 0px !important;
-        color: #ffffff;
-        padding: 0.45rem 0.85rem;
+        background: #ffffff;
+        border: 1px solid rgba(124, 58, 237, 0.14);
+        border-radius: 12px;
+        color: var(--text-primary);
+        padding: 0.65rem 0.95rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         font-weight: 500;
-        transition: all 0.2s ease;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         cursor: pointer;
         text-align: left;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
     }
 
     .quick-prompt-pill:hover {
-        border-color: #ffffff;
-        background: #141414;
+        border-color: var(--primary-purple);
+        background: #ffffff;
         transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(124, 58, 237, 0.12);
     }
 
-    /* Input Footer & Controls */
-    .attachment-square-btn {
-        width: 40px;
-        height: 40px;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 0px !important;
+    .pill-icon-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #000000 !important;
+        font-size: 0.9rem;
+    }
+
+    .bg-amber-subtle { background: #fef3c7; }
+    .bg-cyan-subtle { background: #e0f2fe; }
+    .bg-purple-subtle { background: rgba(124, 58, 237, 0.1); }
+    .bg-emerald-subtle { background: #d1fae5; }
+
+    .attachment-square-btn {
+        width: 44px;
+        height: 44px;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc !important;
         flex-shrink: 0;
-    }
-
-    .attachment-square-btn:hover {
-        border-color: #ffffff !important;
-        background: #141414 !important;
-    }
-
-    .input-pill-container {
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 0px !important;
-        background: #000000 !important;
-        overflow: hidden;
-        height: 40px;
         transition: all 0.2s ease;
     }
 
+    .attachment-square-btn:hover {
+        border-color: var(--primary-purple) !important;
+        background: rgba(124, 58, 237, 0.06) !important;
+    }
+
+    .input-pill-container {
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 14px !important;
+        background: #ffffff !important;
+        overflow: hidden;
+        height: 44px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
     .input-pill-container:focus-within {
-        border-color: #ffffff !important;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+        border-color: var(--primary-purple) !important;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
     }
 
     .chat-input-field {
         background: transparent !important;
         border: none !important;
-        color: #ffffff !important;
-        padding: 0.5rem 0.85rem !important;
-        font-size: 0.88rem;
+        color: #0f172a !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.92rem;
     }
 
     .chat-input-field:focus {
@@ -369,57 +376,47 @@
     }
 
     .chat-input-field::placeholder {
-        color: #737373 !important;
+        color: #94a3b8 !important;
     }
 
     .send-pill-btn {
-        background: #ffffff !important;
-        color: #000000 !important;
         border: none !important;
-        border-radius: 0px !important;
+        border-radius: 10px !important;
         margin: 3px;
         font-weight: 700;
         font-size: 0.8rem;
         letter-spacing: 0.03em;
-        padding: 0 1rem !important;
+        padding: 0 1.15rem !important;
         transition: all 0.2s ease;
     }
 
-    .send-pill-btn:hover {
-        background: #e5e5e5 !important;
-        color: #000000 !important;
-    }
-
-    /* Ultra-compact Minimalist History Items */
     .history-card-item {
         background: transparent !important;
         border: none !important;
-        border-left: 2px solid transparent !important;
-        color: #d1d5db !important;
+        border-left: 3px solid transparent !important;
+        color: #475569 !important;
         cursor: pointer;
-        padding: 0.35rem 0.6rem;
-        margin-bottom: 0.15rem;
-        font-size: 0.81rem;
-        font-weight: 400;
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.25rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border-radius: 8px !important;
         transition: all 0.15s ease;
-        border-radius: 0px !important;
     }
 
     .history-card-item:hover {
-        color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.08) !important;
-        border-left-color: rgba(255, 255, 255, 0.4) !important;
-        transform: none !important;
+        color: var(--primary-purple) !important;
+        background: rgba(124, 58, 237, 0.05) !important;
+        border-left-color: var(--primary-purple) !important;
     }
 
     .history-card-item.active {
-        background: rgba(255, 255, 255, 0.14) !important;
-        color: #ffffff !important;
-        border-left: 2px solid #ffffff !important;
+        background: rgba(124, 58, 237, 0.1) !important;
+        color: var(--primary-purple) !important;
+        border-left: 3px solid var(--primary-purple) !important;
         font-weight: 600 !important;
     }
 
-    /* Message Bubbles System */
     .message-container {
         display: flex;
         gap: 0.85rem;
@@ -432,61 +429,61 @@
     }
 
     .message-avatar {
-        width: 30px;
-        height: 30px;
+        width: 34px;
+        height: 34px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        font-size: 0.85rem;
-        border-radius: 0px !important;
+        font-size: 0.9rem;
+        border-radius: 10px;
     }
 
     .message-avatar.bot {
-        background: #000000;
-        border: 1px solid #ffffff;
-        color: #ffffff;
+        background: rgba(124, 58, 237, 0.1);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        color: var(--primary-purple);
     }
 
     .message-avatar.user {
-        background: #ffffff;
-        border: 1px solid #ffffff;
-        color: #000000;
+        background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+        color: #ffffff;
     }
 
     .chat-message {
         line-height: 1.6;
         word-wrap: break-word;
-        font-size: 0.92rem;
+        font-size: 0.93rem;
     }
 
     .chat-message.user {
-        background: #ffffff !important;
-        color: #000000 !important;
-        border: 1px solid #ffffff !important;
-        font-weight: 600;
-        max-width: 78%;
-        padding: 0.6rem 1rem;
-        border-radius: 0px !important;
+        background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%) !important;
+        color: #ffffff !important;
+        font-weight: 500;
+        max-width: 75%;
+        padding: 0.75rem 1.15rem;
+        border-radius: 18px 18px 4px 18px;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.2);
     }
 
     .chat-message.bot {
-        background: transparent !important;
-        color: #e5e5e5 !important;
-        border: none !important;
-        padding: 0.1rem 0;
-        max-width: 100%;
+        background: #ffffff !important;
+        color: #1e293b !important;
+        border: 1px solid rgba(124, 58, 237, 0.12) !important;
+        padding: 1rem 1.25rem;
+        max-width: 85%;
+        border-radius: 18px 18px 18px 4px;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
         flex-grow: 1;
     }
 
-    /* Bot Markdown Formatting */
     .chat-message.bot h1,
     .chat-message.bot h2,
     .chat-message.bot h3,
     .chat-message.bot h4,
     .chat-message.bot h5,
     .chat-message.bot h6 {
-        color: #ffffff;
+        color: #0f172a;
         font-weight: 700;
         margin-top: 0.85rem;
         margin-bottom: 0.4rem;
@@ -502,7 +499,7 @@
 
     .chat-message.bot strong,
     .chat-message.bot b {
-        color: #ffffff;
+        color: #0f172a;
         font-weight: 700;
     }
 
@@ -511,7 +508,7 @@
         padding-left: 1.2rem;
         margin-top: 0.35rem;
         margin-bottom: 0.75rem;
-        color: #d1d5db;
+        color: #334155;
     }
 
     .chat-message.bot li {
@@ -519,7 +516,7 @@
     }
 
     .chat-message.bot li::marker {
-        color: #ffffff;
+        color: var(--primary-purple);
     }
 
     .chat-message.bot p {
@@ -527,30 +524,32 @@
     }
 
     .chat-message.bot pre {
-        background: #000000;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        color: #f8fafc;
         padding: 0.85rem 1rem;
         margin: 0.65rem 0;
         overflow-x: auto;
-        border-radius: 0px !important;
+        border-radius: 10px;
         font-family: var(--font-mono);
         font-size: 0.85rem;
     }
 
     .chat-message.bot code {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 0.15rem 0.35rem;
-        border-radius: 0px !important;
+        background: rgba(124, 58, 237, 0.08);
+        padding: 0.15rem 0.4rem;
+        border-radius: 6px;
         font-family: var(--font-mono);
         font-size: 0.88em;
-        color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--primary-purple);
+        border: 1px solid rgba(124, 58, 237, 0.15);
     }
 
     .chat-message.bot pre code {
         background: transparent;
         padding: 0;
         border: none;
+        color: #f8fafc;
     }
 
     .chat-message p:last-child {
@@ -568,7 +567,7 @@
     .typing-dot {
         width: 8px;
         height: 8px;
-        background: #ffffff;
+        background: var(--primary-purple);
         border-radius: 50%;
         animation: typingBounce 1.4s infinite;
     }
@@ -582,7 +581,7 @@
     }
 
     @keyframes messageFadeIn {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(8px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
@@ -594,19 +593,18 @@
 
     .chat-scroll-box::-webkit-scrollbar-track,
     #history-list::-webkit-scrollbar-track {
-        background: #000000;
+        background: transparent;
     }
 
     .chat-scroll-box::-webkit-scrollbar-thumb,
     #history-list::-webkit-scrollbar-thumb {
-        background: #333333;
-        border: 1px solid #000000;
+        background: #cbd5e1;
         border-radius: 4px;
     }
 
     .chat-scroll-box::-webkit-scrollbar-thumb:hover,
     #history-list::-webkit-scrollbar-thumb:hover {
-        background: #ffffff;
+        background: #94a3b8;
     }
 
     @media (max-width: 767.98px) {
@@ -615,12 +613,12 @@
         }
 
         .chat-header-bar {
-            min-height: 50px;
+            min-height: 52px;
             padding: 0.5rem 0.75rem !important;
         }
 
         .chat-scroll-box {
-            padding: 0.75rem !important;
+            padding: 0.85rem !important;
         }
 
         .welcome-screen-box {
@@ -628,53 +626,52 @@
         }
 
         .welcome-title {
-            font-size: 1.15rem;
+            font-size: 1.2rem;
         }
 
         .welcome-desc {
-            font-size: 0.78rem;
+            font-size: 0.84rem;
             padding: 0 0.5rem;
         }
 
         .mascot-emblem-box {
-            width: 36px !important;
-            height: 36px !important;
+            width: 48px !important;
+            height: 48px !important;
         }
 
         .quick-prompt-pill {
-            font-size: 0.76rem !important;
-            padding: 0.45rem 0.75rem !important;
-            background: #0d0d0d !important;
-            border: 1px solid rgba(255, 255, 255, 0.18) !important;
-            border-radius: 4px !important;
+            font-size: 0.8rem !important;
+            padding: 0.55rem 0.85rem !important;
         }
 
         .chat-message.user {
             max-width: 88% !important;
-            padding: 0.55rem 0.85rem !important;
+            padding: 0.65rem 0.95rem !important;
             font-size: 0.88rem !important;
         }
 
         .chat-message.bot {
+            max-width: 95% !important;
             font-size: 0.88rem !important;
+            padding: 0.75rem 1rem !important;
         }
 
         .chat-input-footer {
-            padding: 0.4rem 0.6rem !important;
+            padding: 0.5rem 0.75rem !important;
         }
 
         .attachment-square-btn {
-            width: 38px !important;
-            height: 38px !important;
+            width: 40px !important;
+            height: 40px !important;
         }
 
         .input-pill-container {
-            height: 38px !important;
+            height: 40px !important;
         }
 
         .send-pill-btn {
-            padding: 0 0.75rem !important;
-            font-size: 0.75rem !important;
+            padding: 0 0.85rem !important;
+            font-size: 0.78rem !important;
         }
     }
 </style>
@@ -736,48 +733,48 @@
             <div class="text-center welcome-screen-box fade-in-up">
                 <div class="mascot-circle-wrapper mb-3">
                     <div class="mascot-emblem-box">
-                        <i class="bi bi-robot fs-4 text-white"></i>
+                        <i class="bi bi-robot fs-3" style="color: var(--primary-purple);"></i>
                     </div>
                 </div>
-                <h4 class="text-white fw-bold mb-1 welcome-title">How can I help you <span class="fw-normal text-secondary">today?</span></h4>
-                <p class="text-secondary mx-auto mb-3 welcome-desc">
+                <h4 class="text-slate fw-bold mb-1 welcome-title">How can I help you <span class="text-purple">today?</span></h4>
+                <p class="text-secondary mx-auto mb-4 welcome-desc">
                     Ask me anything about software engineering, code debugging, system architecture, or DSA concepts.
                 </p>
-                <div class="quick-prompts-grid row g-2 justify-content-center">
+                <div class="quick-prompts-grid row g-2.5 justify-content-center">
                     <div class="col-sm-6">
                         <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Explain the concept of ')">
-                            <span class="d-flex align-items-center gap-2">
-                                <i class="bi bi-lightbulb text-white fs-6"></i>
-                                <span>Explain a concept</span>
+                            <span class="d-flex align-items-center gap-2.5">
+                                <div class="pill-icon-circle bg-amber-subtle"><i class="bi bi-lightbulb-fill" style="color: #d97706;"></i></div>
+                                <span class="text-slate fw-semibold">Explain a concept</span>
                             </span>
-                            <i class="bi bi-arrow-right text-secondary small"></i>
+                            <i class="bi bi-arrow-right text-muted small"></i>
                         </button>
                     </div>
                     <div class="col-sm-6">
                         <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Can you help me debug this code?\\n\\n\`\`\`\\n\\n\`\`\`')">
-                            <span class="d-flex align-items-center gap-2">
-                                <i class="bi bi-code-slash text-white fs-6"></i>
-                                <span>Debug my code</span>
+                            <span class="d-flex align-items-center gap-2.5">
+                                <div class="pill-icon-circle bg-cyan-subtle"><i class="bi bi-code-slash text-info"></i></div>
+                                <span class="text-slate fw-semibold">Debug my code</span>
                             </span>
-                            <i class="bi bi-arrow-right text-secondary small"></i>
+                            <i class="bi bi-arrow-right text-muted small"></i>
                         </button>
                     </div>
                     <div class="col-sm-6">
                         <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Give me system design ideas for ')">
-                            <span class="d-flex align-items-center gap-2">
-                                <i class="bi bi-layers text-white fs-6"></i>
-                                <span>System design ideas</span>
+                            <span class="d-flex align-items-center gap-2.5">
+                                <div class="pill-icon-circle bg-purple-subtle"><i class="bi bi-layers-fill text-purple"></i></div>
+                                <span class="text-slate fw-semibold">System design ideas</span>
                             </span>
-                            <i class="bi bi-arrow-right text-secondary small"></i>
+                            <i class="bi bi-arrow-right text-muted small"></i>
                         </button>
                     </div>
                     <div class="col-sm-6">
                         <button type="button" class="quick-prompt-pill w-100" onclick="setQuickPrompt('Help me solve a DSA problem related to ')">
-                            <span class="d-flex align-items-center gap-2">
-                                <i class="bi bi-bullseye text-white fs-6"></i>
-                                <span>Solve DSA problem</span>
+                            <span class="d-flex align-items-center gap-2.5">
+                                <div class="pill-icon-circle bg-emerald-subtle"><i class="bi bi-bullseye text-success"></i></div>
+                                <span class="text-slate fw-semibold">Solve DSA problem</span>
                             </span>
-                            <i class="bi bi-arrow-right text-secondary small"></i>
+                            <i class="bi bi-arrow-right text-muted small"></i>
                         </button>
                     </div>
                 </div>
@@ -798,7 +795,7 @@
                 if (!container) return;
                 container.innerHTML = '';
                 if (chats.length === 0) {
-                    container.innerHTML = '<p class="text-center text-secondary small mt-4 mono-font">No recent chats</p>';
+                    container.innerHTML = '<p class="text-center text-muted small mt-4 mono-font">No recent chats</p>';
                     return;
                 }
 
@@ -839,7 +836,7 @@
         }
 
         const chatBox = document.getElementById('chat');
-        chatBox.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-light" role="status"></div></div>';
+        chatBox.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-primary" role="status"></div></div>';
 
         try {
             const response = await fetch(`/api/get_chat/${chatId}`);

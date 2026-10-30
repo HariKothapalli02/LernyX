@@ -5,24 +5,24 @@
 {% block content %}
 <div class="container py-4 profile-page-container" style="max-width: 960px;">
     <!-- Profile Header Card -->
-    <div class="card p-4 p-md-5 mb-4 bg-black border border-secondary text-white shadow-lg">
+    <div class="card p-4 p-md-5 mb-4 shadow-md position-relative overflow-hidden">
         <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-4">
             <div class="profile-avatar-box">
                 <i class="bi bi-person-fill display-4 text-white"></i>
             </div>
             <div class="flex-grow-1 text-center text-md-start">
                 <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
-                    <h2 class="fw-bold text-white mb-0 tracking-tight">{{ current_user.username }}</h2>
-                    <span class="badge bg-black text-white border border-secondary mono-font">VERIFIED ACCOUNT</span>
+                    <h1 class="fw-bold text-dark mb-0 h3 tracking-tight">{{ current_user.username }}</h1>
+                    <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i>VERIFIED ACCOUNT</span>
                 </div>
-                <p class="text-secondary small mb-3 mono-font"><i class="bi bi-envelope me-1"></i>{{ current_user.email }}</p>
+                <p class="text-muted small mb-3"><i class="bi bi-envelope me-1 text-primary"></i>{{ current_user.email }}</p>
                 
                 <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
-                    <span class="badge bg-black text-secondary border border-secondary fw-normal">
-                        <i class="bi bi-calendar-check me-1 text-white"></i>Active Member
+                    <span class="badge bg-primary">
+                        <i class="bi bi-calendar-check me-1"></i>Active Member
                     </span>
-                    <span class="badge bg-black text-secondary border border-secondary fw-normal">
-                        <i class="bi bi-shield-lock me-1 text-white"></i>{{ 'Custom API Key' if current_user.api_key else 'LernyX AI Engine' }}
+                    <span class="badge bg-primary">
+                        <i class="bi bi-shield-lock me-1"></i>{{ 'Custom API Key' if current_user.api_key else 'LernyX AI Engine' }}
                     </span>
                 </div>
             </div>
@@ -33,19 +33,19 @@
     <div class="row g-3 mb-4">
         <!-- 1. AI Resume Score Card -->
         <div class="col-md-4">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="profile-stat-icon">
-                            <i class="bi bi-file-earmark-person fs-4 text-white"></i>
+                            <i class="bi bi-file-earmark-person fs-4 text-primary"></i>
                         </div>
-                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.68rem;">RESUME SCORE</span>
+                        <span class="badge bg-primary" style="font-size: 0.68rem;">RESUME SCORE</span>
                     </div>
-                    <h6 class="text-secondary uppercase tracking-widest small mb-1 mono-font">AI Resume Rating</h6>
-                    <h3 class="fw-bold text-white mb-2" id="profile-resume-score">--</h3>
+                    <h6 class="text-muted uppercase small mb-1">AI Resume Rating</h6>
+                    <h3 class="fw-bold text-dark mb-2" id="profile-resume-score">--</h3>
                     <p class="text-secondary small mb-0" id="profile-resume-role" style="line-height: 1.45;">Target Role: Loading...</p>
                 </div>
-                <a href="{{ url_for('dashboard') }}#resume-tab" class="btn btn-outline-light btn-sm w-100 mt-3 d-flex align-items-center justify-content-between">
+                <a href="{{ url_for('dashboard') }}#resume-tab" class="btn btn-outline-primary btn-sm w-100 mt-3 d-flex align-items-center justify-content-between">
                     <span>VIEW RESUME REPORT</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
@@ -54,19 +54,19 @@
 
         <!-- 2. AI Mock Interview Score Card -->
         <div class="col-md-4">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="profile-stat-icon">
-                            <i class="bi bi-mic-fill fs-4 text-white"></i>
+                            <i class="bi bi-mic-fill fs-4 text-primary"></i>
                         </div>
-                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.68rem;">MOCK INTERVIEW</span>
+                        <span class="badge bg-primary" style="font-size: 0.68rem;">MOCK INTERVIEW</span>
                     </div>
-                    <h6 class="text-secondary uppercase tracking-widest small mb-1 mono-font">Latest Interview Score</h6>
-                    <h3 class="fw-bold text-white mb-2" id="profile-mock-score">--</h3>
+                    <h6 class="text-muted uppercase small mb-1">Latest Interview Score</h6>
+                    <h3 class="fw-bold text-dark mb-2" id="profile-mock-score">--</h3>
                     <p class="text-secondary small mb-0" id="profile-mock-verdict" style="line-height: 1.45;">Verdict: Loading...</p>
                 </div>
-                <a href="{{ url_for('mock_interview') }}" class="btn btn-outline-light btn-sm w-100 mt-3 d-flex align-items-center justify-content-between">
+                <a href="{{ url_for('mock_interview') }}" class="btn btn-outline-primary btn-sm w-100 mt-3 d-flex align-items-center justify-content-between">
                     <span>TAKE MOCK TEST</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
@@ -75,19 +75,19 @@
 
         <!-- 3. Practice & Aptitude Stats Card -->
         <div class="col-md-4">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="profile-stat-icon">
-                            <i class="bi bi-trophy-fill fs-4 text-white"></i>
+                            <i class="bi bi-trophy-fill fs-4 text-primary"></i>
                         </div>
-                        <span class="badge bg-black text-white border border-secondary mono-font" style="font-size: 0.68rem;">PRACTICE STATS</span>
+                        <span class="badge bg-primary" style="font-size: 0.68rem;">PRACTICE STATS</span>
                     </div>
-                    <h6 class="text-secondary uppercase tracking-widest small mb-1 mono-font">Questions Answered</h6>
-                    <h3 class="fw-bold text-white mb-2" id="profile-questions-count">--</h3>
+                    <h6 class="text-muted uppercase small mb-1">Questions Answered</h6>
+                    <h3 class="fw-bold text-dark mb-2" id="profile-questions-count">--</h3>
                     <p class="text-secondary small mb-0" id="profile-accuracy-rate" style="line-height: 1.45;">Overall Accuracy: Loading...</p>
                 </div>
-                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-outline-light btn-sm w-100 mt-3 d-flex align-items-center justify-content-between">
+                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-outline-primary btn-sm w-100 mt-3 d-flex align-items-center justify-content-between">
                     <span>PRACTICE QUIZ</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
@@ -96,36 +96,36 @@
     </div>
 
     <!-- Personal & Account Details Card -->
-    <div class="card bg-black border border-secondary p-4 p-md-5 mb-4 shadow">
-        <h5 class="fw-bold text-white mb-4 tracking-tight"><i class="bi bi-person-lines-fill me-2"></i>Personal & Account Information</h5>
+    <div class="card p-4 p-md-5 mb-4 shadow-sm">
+        <h5 class="fw-bold text-dark mb-4 tracking-tight"><i class="bi bi-person-lines-fill me-2 text-primary"></i>Personal & Account Information</h5>
         
         <div class="row g-3 mb-4">
             <div class="col-md-6">
-                <div class="p-3 border border-secondary bg-dark rounded-0">
-                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">USERNAME</small>
-                    <strong class="text-white fs-6">{{ current_user.username }}</strong>
+                <div class="p-3 border rounded-3 bg-light">
+                    <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.72rem;">USERNAME</small>
+                    <strong class="text-dark fs-6">{{ current_user.username }}</strong>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="p-3 border border-secondary bg-dark rounded-0">
-                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">EMAIL ADDRESS</small>
-                    <strong class="text-white fs-6">{{ current_user.email }}</strong>
+                <div class="p-3 border rounded-3 bg-light">
+                    <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.72rem;">EMAIL ADDRESS</small>
+                    <strong class="text-dark fs-6">{{ current_user.email }}</strong>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="p-3 border border-secondary bg-dark rounded-0">
-                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">AI ENGINE KEY STATUS</small>
-                    <strong class="text-white fs-6">{{ 'Configured (Custom Key)' if current_user.api_key else 'Default (LernyX System Engine)' }}</strong>
+                <div class="p-3 border rounded-3 bg-light">
+                    <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.72rem;">AI ENGINE KEY STATUS</small>
+                    <strong class="text-dark fs-6">{{ 'Configured (Custom Key)' if current_user.api_key else 'Default (LernyX System Engine)' }}</strong>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="p-3 border border-secondary bg-dark rounded-0">
-                    <small class="text-secondary d-block uppercase mono-font" style="font-size: 0.72rem;">GITHUB DSA SYNC</small>
-                    <strong class="text-white fs-6">
+                <div class="p-3 border rounded-3 bg-light">
+                    <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.72rem;">GITHUB DSA SYNC</small>
+                    <strong class="text-dark fs-6">
                         {% if current_user.github_token %}
                             <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Connected</span>
                         {% else %}
-                            <span class="text-secondary">Not Connected</span>
+                            <span class="text-muted">Not Connected</span>
                         {% endif %}
                     </strong>
                 </div>
@@ -133,9 +133,9 @@
         </div>
 
         <!-- Action Controls (Install App & Logout) -->
-        <div class="d-flex flex-column flex-sm-row gap-3 pt-3 border-top border-secondary">
-            <button id="profile-install-pwa-btn" class="btn btn-light fw-bold py-2.5 flex-grow-1 d-flex align-items-center justify-content-center gap-2 text-black">
-                <i class="bi bi-download fs-6"></i>
+        <div class="d-flex flex-column flex-sm-row gap-3 pt-3 border-top">
+            <button id="profile-install-pwa-btn" class="btn btn-light fw-bold py-2.5 flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-download fs-6 text-primary"></i>
                 <span>INSTALL APP</span>
             </button>
             <a href="{{ url_for('logout') }}" class="btn btn-outline-danger fw-bold py-2.5 flex-grow-1 d-flex align-items-center justify-content-center gap-2">
@@ -146,17 +146,17 @@
     </div>
 
     <!-- GitHub Auto-Sync Integration Card -->
-    <div class="card bg-black border border-secondary p-4 p-md-5 mb-4 shadow">
+    <div class="card p-4 p-md-5 mb-4 shadow-sm">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h5 class="fw-bold text-white mb-0 tracking-tight">
-                <i class="bi bi-github me-2 text-white"></i>GitHub Auto-Sync for Solved Problems
+            <h5 class="fw-bold text-dark mb-0 tracking-tight">
+                <i class="bi bi-github me-2 text-dark"></i>GitHub Auto-Sync for Solved Problems
             </h5>
             {% if current_user.github_token %}
-                <span class="badge bg-success text-black fw-bold px-3 py-1.5 mono-font" style="border-radius: 0px !important;">
+                <span class="badge bg-success">
                     <i class="bi bi-check-circle-fill me-1"></i>SYNC ACTIVE
                 </span>
             {% else %}
-                <span class="badge bg-secondary text-white px-3 py-1.5 mono-font" style="border-radius: 0px !important;">
+                <span class="badge bg-secondary">
                     OPTIONAL
                 </span>
             {% endif %}
@@ -165,24 +165,24 @@
         <p class="text-secondary small mb-3" style="max-width: 720px; line-height: 1.5;">
             Whenever you pass all test cases in the <strong>DSA Compiler</strong>, LernyX will commit your solution, problem statement, and 
             <strong>LernyX Intelligence complexity analysis (Big-O)</strong> directly to your personal GitHub repository 
-            <code class="text-white">LernyX-DSA-Solutions</code> to build your GitHub streak & portfolio!
+            <code class="text-primary">LernyX-DSA-Solutions</code> to build your GitHub streak & portfolio!
         </p>
 
         <form action="{{ url_for('update_github_token') }}" method="POST">
             <div class="mb-3">
-                <label for="github_token" class="form-label text-white small mono-font">
-                    GitHub Personal Access Token (classic or fine-grained with <code class="text-info">repo</code> scope)
+                <label for="github_token" class="form-label text-dark fw-semibold small">
+                    GitHub Personal Access Token (classic or fine-grained with <code>repo</code> scope)
                 </label>
                 <div class="input-group">
-                    <span class="input-group-text bg-dark border-secondary text-secondary rounded-0"><i class="bi bi-key-fill"></i></span>
-                    <input type="password" id="github_token" name="github_token" class="form-control bg-black text-white border-secondary rounded-0"
+                    <span class="input-group-text"><i class="bi bi-key-fill text-primary"></i></span>
+                    <input type="password" id="github_token" name="github_token" class="form-control"
                         placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                         value="{{ current_user.github_token if current_user.github_token else '' }}">
-                    <button type="submit" class="btn btn-light text-black fw-bold px-4 rounded-0">
+                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">
                         <i class="bi bi-save me-1"></i>SAVE TOKEN
                     </button>
                 </div>
-                <div class="form-text text-secondary small mt-2">
+                <div class="form-text text-muted small mt-2">
                     <i class="bi bi-info-circle me-1"></i>Need a token? Go to GitHub &rarr; <em>Settings &rarr; Developer Settings &rarr; Personal access tokens &rarr; Tokens (classic)</em> &rarr; Check <strong>repo</strong> scope.
                 </div>
             </div>
@@ -194,22 +194,21 @@
     .profile-avatar-box {
         width: 80px;
         height: 80px;
-        background: #000000;
-        border: 1px solid #ffffff;
-        border-radius: 0px !important;
+        background: var(--primary-gradient);
+        border-radius: var(--radius-lg);
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+        box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
     }
 
     .profile-stat-icon {
         width: 44px;
         height: 44px;
-        background: #000000;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 0px !important;
+        background: var(--purple-light-100);
+        border: 1px solid var(--purple-border);
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;

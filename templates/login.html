@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Login - LernyX{% endblock %}
+{% block title %}Sign In - LernyX{% endblock %}
 
 {% block content %}
 <style>
-    /* Hide Navbar and Footer for this page to achieve full-screen look */
+    /* Full-screen auth layout */
     .navbar,
     footer,
     #canvas-container {
@@ -14,23 +14,22 @@
     body {
         min-height: 100vh;
         overflow-y: auto !important;
-        background: var(--bg-deep);
+        background: #ffffff;
     }
 
     .split-screen {
         min-height: 100vh;
         width: 100vw;
-        overflow-y: auto;
     }
 
     .left-pane {
-        background: #000000;
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2.5rem;
+        padding: 3rem;
         position: relative;
-        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        border-right: 1px solid var(--border-subtle);
         min-height: 100vh;
     }
 
@@ -38,18 +37,16 @@
         max-width: 80%;
         max-height: 75vh;
         object-fit: contain;
-        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.15));
+        filter: drop-shadow(0 15px 35px rgba(124, 58, 237, 0.18));
     }
 
     .right-pane {
-        background: rgba(0, 0, 0, 0.95);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        background: #ffffff;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 2.5rem 1.5rem;
+        padding: 3rem 2rem;
         position: relative;
         z-index: 1;
         min-height: 100vh;
@@ -58,59 +55,59 @@
 
     .login-container {
         width: 100%;
-        max-width: 400px;
-        text-align: center;
+        max-width: 420px;
     }
 
     .custom-input {
-        background: #000000;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 0px !important;
-        color: #ffffff;
-        padding: 0.8rem 1rem;
+        background: #ffffff !important;
+        border: 1.5px solid var(--border-slate-dark) !important;
+        border-radius: var(--radius-sm) !important;
+        color: var(--text-heading) !important;
+        padding: 0.8rem 1.1rem;
         font-size: 0.95rem;
         transition: all 0.2s ease;
     }
 
     .custom-input:focus {
-        background: #080808;
-        border-color: #ffffff;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
-        color: #ffffff;
+        background: #ffffff !important;
+        border-color: var(--primary-purple) !important;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2) !important;
+        color: var(--text-heading) !important;
     }
 
     .custom-input::placeholder {
-        color: #737373;
+        color: var(--text-subtle) !important;
     }
 
     .btn-login {
-        background: #ffffff !important;
-        color: #000000 !important;
-        border: 1px solid #ffffff !important;
-        border-radius: 0px !important;
-        padding: 0.8rem;
+        background: var(--primary-gradient) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: var(--radius-sm) !important;
+        padding: 0.85rem;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        font-size: 0.95rem;
+        letter-spacing: 0.02em;
         transition: all 0.2s ease;
+        box-shadow: var(--shadow-purple-btn);
         margin-top: 1rem;
     }
 
     .btn-login:hover {
-        background: #000000 !important;
+        background: var(--primary-gradient-hover) !important;
         color: #ffffff !important;
-        box-shadow: 3px 3px 0px #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
     }
 
-    /* Mobile adjustments */
-    @media (max-width: 992px) {
+    @media (max-width: 991.98px) {
         .left-pane {
             display: none !important;
         }
 
         .right-pane {
             width: 100%;
-            border-left: none;
+            padding: 2.5rem 1.5rem;
         }
     }
 </style>
@@ -125,45 +122,54 @@
         <!-- Right Side: Form -->
         <div class="col-lg-5 col-md-12 right-pane">
             <div class="login-container fade-in-up">
-                <!-- Mobile-Only Illustration Image Above Title & Text Fields -->
+                <!-- Mobile-Only Illustration Image -->
                 <div class="mobile-auth-illustration d-lg-none text-center mb-3">
-                    <img src="{{ url_for('static', filename='img/login-bro.png') }}" alt="Login Illustration" class="img-fluid" style="max-height: 160px; object-fit: contain; filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.18));">
+                    <img src="{{ url_for('static', filename='img/login-bro.png') }}" alt="Login Illustration" class="img-fluid" style="max-height: 160px; object-fit: contain; filter: drop-shadow(0 8px 20px rgba(124, 58, 237, 0.15));">
                 </div>
 
-                <h1 class="fw-bold text-white mb-4 display-5">Sign in</h1>
+                <!-- Brand -->
+                <div class="mb-3">
+                    <a href="{{ url_for('home') }}" class="text-decoration-none d-inline-flex align-items-center">
+                        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="LernyX" class="brand-logo-img me-2" width="34" height="34">
+                        <span class="brand-title" style="font-size: 1.55rem;">Lerny<span class="brand-x">X</span></span>
+                    </a>
+                </div>
+
+                <h1 class="fw-bold text-dark mb-2 h2 tracking-tight">Welcome Back</h1>
+                <p class="text-secondary small mb-4">Enter your credentials to access your personalized learning space.</p>
 
                 <form method="POST" action="{{ url_for('login') }}">
                     <div class="mb-3">
+                        <label for="username" class="form-label text-dark fw-semibold small">Username or Email</label>
                         <input type="text" class="form-control custom-input" id="username" name="username"
-                            placeholder="Username or Email" required>
+                            placeholder="e.g., alex_dev or user@example.com" required autocomplete="username">
                     </div>
 
                     <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="password" class="form-label text-dark fw-semibold small mb-0">Password</label>
+                            <a href="{{ url_for('forgot_password') }}" class="text-primary text-decoration-none small fw-semibold">Forgot password?</a>
+                        </div>
                         <input type="password" class="form-control custom-input" id="password" name="password"
-                            placeholder="Password" required>
+                            placeholder="••••••••" required autocomplete="current-password">
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="form-check">
-                            <input class="form-check-input bg-transparent border-secondary" type="checkbox"
-                                id="remember">
-                            <label class="form-check-label text-secondary small" for="remember">
-                                Remember me
-                            </label>
-                        </div>
-                        <a href="{{ url_for('forgot_password') }}"
-                            class="text-secondary text-decoration-none small hover-white">Forgot your password?</a>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="remember">
+                        <label class="form-check-label text-secondary small" for="remember">
+                            Remember this device
+                        </label>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100 btn-login">
-                        Sign In
+                        Sign In <i class="bi bi-arrow-right ms-1"></i>
                     </button>
                 </form>
 
-                <div class="mt-4">
-                    <p class="text-secondary small">
-                        Don't have an account?
-                        <a href="{{ url_for('signup') }}" class="text-primary text-decoration-none fw-bold">Sign Up</a>
+                <div class="mt-4 text-center">
+                    <p class="text-secondary small mb-0">
+                        Don't have an account yet?
+                        <a href="{{ url_for('signup') }}" class="text-primary text-decoration-none fw-bold ms-1">Create an account</a>
                     </p>
                 </div>
             </div>

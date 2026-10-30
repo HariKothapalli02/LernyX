@@ -5,37 +5,39 @@
 {% block content %}
 <div class="container py-4 home-page-container">
     <!-- Top Hero Banner Card -->
-    <div class="card p-4 p-md-5 mb-4 bg-black border border-secondary text-white overflow-hidden position-relative hero-banner-card shadow-lg">
+    <div class="card p-4 p-md-5 mb-4 hero-banner-card shadow-lg position-relative overflow-hidden">
         <div class="row align-items-center">
             <!-- Left Hero Content -->
             <div class="col-lg-7 col-md-8">
-                <div class="text-secondary small fw-bold tracking-widest uppercase mb-2 mono-font">LEARN × PRACTICE × GROW</div>
-                <h1 class="display-4 fw-bold text-white mb-2 tracking-tight">Your Learning <span class="fw-extrabold text-white">Hub</span></h1>
+                <div class="badge bg-primary text-uppercase mb-3 px-3 py-1.5" style="letter-spacing: 0.08em; font-size: 0.72rem;">
+                    LEARN × PRACTICE × GROW
+                </div>
+                <h1 class="display-5 fw-bold text-dark mb-2 tracking-tight">Your Learning <span class="text-primary fw-extrabold">Hub</span></h1>
                 <p class="lead text-secondary mb-4" style="max-width: 540px; font-size: 1.05rem;">
-                    Access your AI tools, quizzes, and progress all in one place.
+                    Access your AI tools, quizzes, coding practice, and progress all in one unified platform.
                 </p>
 
                 <!-- Hero Metric Badges Box -->
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     <div class="hero-metric-box">
-                        <i class="bi bi-book fs-5 text-cyan"></i>
+                        <i class="bi bi-book fs-5 text-primary"></i>
                         <div>
-                            <strong class="d-block text-white leading-none">6+</strong>
-                            <small class="text-secondary" style="font-size: 0.75rem;">Learning Tools</small>
+                            <strong class="d-block text-dark leading-none">6+</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Learning Tools</small>
                         </div>
                     </div>
                     <div class="hero-metric-box">
                         <i class="bi bi-people fs-5 text-amber"></i>
                         <div>
-                            <strong class="d-block text-white leading-none">10K+</strong>
-                            <small class="text-secondary" style="font-size: 0.75rem;">Practice Questions</small>
+                            <strong class="d-block text-dark leading-none">10K+</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Practice Questions</small>
                         </div>
                     </div>
                     <div class="hero-metric-box">
                         <i class="bi bi-bar-chart-line fs-5 text-emerald"></i>
                         <div>
-                            <strong class="d-block text-white leading-none">Smarter</strong>
-                            <small class="text-secondary" style="font-size: 0.75rem;">Learning with AI</small>
+                            <strong class="d-block text-dark leading-none">Smarter</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Learning with AI</small>
                         </div>
                     </div>
                 </div>
@@ -49,9 +51,9 @@
                         <img src="{{ url_for('static', filename='img/robot-face-pana.png') }}" alt="LernyX AI Robot Mascot" class="hero-robot-img">
                     </div>
                     
-                    <div class="hero-quote-box d-none d-lg-block">
-                        <p class="fs-5 fst-italic text-white mb-1">“ Better skills<br>brighter future. ”</p>
-                        <small class="text-secondary mono-font" style="font-size: 0.8rem;">— LernyX AI</small>
+                    <div class="hero-quote-box d-none d-lg-block text-start">
+                        <p class="fs-5 fst-italic text-dark mb-1">“ Better skills,<br>brighter future. ”</p>
+                        <small class="text-primary fw-semibold" style="font-size: 0.8rem;">— LernyX AI</small>
                     </div>
                 </div>
             </div>
@@ -62,7 +64,7 @@
     <div class="row g-3 mb-4">
         <!-- 1. AI Chatbot -->
         <div class="col-lg-4 col-md-6">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between tool-grid-card shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="tool-card-icon-box icon-box-cyan">
@@ -72,12 +74,12 @@
                             <i class="bi bi-arrow-right fs-6"></i>
                         </a>
                     </div>
-                    <h5 class="fw-bold text-white mb-2">AI CHATBOT</h5>
-                    <p class="text-secondary small mb-4">Ask coding questions, get explanations, and debug code with LernyX AI.</p>
+                    <h5 class="fw-bold text-dark mb-2">AI CHATBOT</h5>
+                    <p class="text-secondary small mb-4">Ask coding questions, get conceptual explanations, and debug code with LernyX AI.</p>
                 </div>
-                <a href="{{ url_for('chat_main') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                <a href="{{ url_for('chat_main') }}" class="btn btn-outline-primary tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-chat-dots-fill fs-6 text-cyan"></i>
+                        <i class="bi bi-chat-dots-fill fs-6"></i>
                         <span class="fw-bold">OPEN CHAT</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -87,7 +89,7 @@
 
         <!-- 2. Video Quiz -->
         <div class="col-lg-4 col-md-6">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between tool-grid-card shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="tool-card-icon-box icon-box-red">
@@ -97,12 +99,12 @@
                             <i class="bi bi-arrow-right fs-6"></i>
                         </a>
                     </div>
-                    <h5 class="fw-bold text-white mb-2">VIDEO QUIZ</h5>
-                    <p class="text-secondary small mb-4">Generate practice quizzes and notes from any educational YouTube video.</p>
+                    <h5 class="fw-bold text-dark mb-2">VIDEO QUIZ</h5>
+                    <p class="text-secondary small mb-4">Generate practice quizzes and revision notes from any educational YouTube video.</p>
                 </div>
-                <a href="{{ url_for('videoquiz') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                <a href="{{ url_for('videoquiz') }}" class="btn btn-outline-primary tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-play-fill fs-5 text-red"></i>
+                        <i class="bi bi-play-fill fs-5"></i>
                         <span class="fw-bold">START QUIZ</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -112,7 +114,7 @@
 
         <!-- 3. Quiz Builder -->
         <div class="col-lg-4 col-md-6">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between tool-grid-card shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="tool-card-icon-box icon-box-emerald">
@@ -122,12 +124,12 @@
                             <i class="bi bi-arrow-right fs-6"></i>
                         </a>
                     </div>
-                    <h5 class="fw-bold text-white mb-2">QUIZ BUILDER</h5>
-                    <p class="text-secondary small mb-4">Create custom exams and share unique codes with students.</p>
+                    <h5 class="fw-bold text-dark mb-2">QUIZ BUILDER</h5>
+                    <p class="text-secondary small mb-4">Create custom exams with AI or manual input and share unique codes with students.</p>
                 </div>
-                <a href="{{ url_for('custom_quiz_builder') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                <a href="{{ url_for('custom_quiz_builder') }}" class="btn btn-outline-primary tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-plus-lg fs-6 text-emerald"></i>
+                        <i class="bi bi-plus-lg fs-6"></i>
                         <span class="fw-bold">BUILD QUIZ</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -137,7 +139,7 @@
 
         <!-- 4. Take Exam -->
         <div class="col-lg-4 col-md-6">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between tool-grid-card shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="tool-card-icon-box icon-box-amber">
@@ -147,12 +149,12 @@
                             <i class="bi bi-arrow-right fs-6"></i>
                         </a>
                     </div>
-                    <h5 class="fw-bold text-white mb-2">TAKE EXAM</h5>
-                    <p class="text-secondary small mb-4">Enter an exam code to take a custom assessment created by others.</p>
+                    <h5 class="fw-bold text-dark mb-2">TAKE EXAM</h5>
+                    <p class="text-secondary small mb-4">Enter an exam code to take a custom assessment created by educators or peers.</p>
                 </div>
-                <a href="{{ url_for('custom_quiz_exam') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                <a href="{{ url_for('custom_quiz_exam') }}" class="btn btn-outline-primary tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-file-earmark-check-fill fs-6 text-amber"></i>
+                        <i class="bi bi-file-earmark-check-fill fs-6"></i>
                         <span class="fw-bold">ENTER CODE</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -162,7 +164,7 @@
 
         <!-- 5. Aptitude Quiz -->
         <div class="col-lg-4 col-md-6">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between tool-grid-card shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="tool-card-icon-box icon-box-purple">
@@ -172,12 +174,12 @@
                             <i class="bi bi-arrow-right fs-6"></i>
                         </a>
                     </div>
-                    <h5 class="fw-bold text-white mb-2">APTITUDE QUIZ</h5>
-                    <p class="text-secondary small mb-4">Practice with 10,000+ aptitude questions across various difficulty levels.</p>
+                    <h5 class="fw-bold text-dark mb-2">APTITUDE QUIZ</h5>
+                    <p class="text-secondary small mb-4">Practice with 10,000+ aptitude questions across varied topics and difficulty levels.</p>
                 </div>
-                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                <a href="{{ url_for('aptitude_quiz') }}" class="btn btn-outline-primary tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-bullseye fs-6 text-purple"></i>
+                        <i class="bi bi-bullseye fs-6"></i>
                         <span class="fw-bold">START PRACTICE</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -187,7 +189,7 @@
 
         <!-- 6. DSA Practice -->
         <div class="col-lg-4 col-md-6">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between tool-grid-card shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="tool-card-icon-box icon-box-blue">
@@ -197,12 +199,12 @@
                             <i class="bi bi-arrow-right fs-6"></i>
                         </a>
                     </div>
-                    <h5 class="fw-bold text-white mb-2">DSA PRACTICE</h5>
-                    <p class="text-secondary small mb-4">Write and execute Java code for Data Structures and Algorithms.</p>
+                    <h5 class="fw-bold text-dark mb-2">DSA PRACTICE</h5>
+                    <p class="text-secondary small mb-4">Solve algorithmic challenges, write code in our 3-pane IDE, and execute with AI assistance.</p>
                 </div>
-                <a href="{{ url_for('compiler') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                <a href="{{ url_for('compiler') }}" class="btn btn-outline-primary tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-code fs-5 text-blue"></i>
+                        <i class="bi bi-code fs-5"></i>
                         <span class="fw-bold">START CODING</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -212,13 +214,16 @@
     </div>
 
     <!-- AI Career & Placement Section Header -->
-    <h5 class="fw-bold text-white mb-3 mt-4 tracking-tight text-uppercase">AI Career & Placement</h5>
+    <div class="d-flex align-items-center gap-2 mb-3 mt-4">
+        <span class="badge bg-primary px-2.5 py-1 text-uppercase" style="font-size: 0.68rem;">CAREER SUITE</span>
+        <h5 class="fw-bold text-dark mb-0 tracking-tight text-uppercase">AI Career & Placement</h5>
+    </div>
 
     <!-- 2 Column Career Suite Cards -->
     <div class="row g-3">
         <!-- 1. AI Voice Mock Interview Card -->
         <div class="col-lg-6">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between tool-grid-card shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="tool-card-icon-box icon-box-pink">
@@ -228,13 +233,13 @@
                             <i class="bi bi-arrow-right fs-6"></i>
                         </a>
                     </div>
-                    <h5 class="fw-bold text-white mb-2">MOCK INTERVIEW</h5>
-                    <p class="text-secondary small mb-4">1-on-1 voice AI mock interviews with real-time scoring and feedback.</p>
+                    <h5 class="fw-bold text-dark mb-2">MOCK INTERVIEW</h5>
+                    <p class="text-secondary small mb-4">1-on-1 voice AI mock interviews tailored to your resume with real-time scoring and feedback.</p>
                 </div>
 
-                <a href="{{ url_for('mock_interview') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                <a href="{{ url_for('mock_interview') }}" class="btn btn-outline-primary tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-mic-fill fs-6 text-pink"></i>
+                        <i class="bi bi-mic-fill fs-6"></i>
                         <span class="fw-bold">START MOCK INTERVIEW</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -244,7 +249,7 @@
 
         <!-- 2. AI Virtual Placement Officer Card -->
         <div class="col-lg-6">
-            <div class="card h-100 bg-black border border-secondary p-4 d-flex flex-column justify-content-between tool-grid-card shadow">
+            <div class="card h-100 p-4 d-flex flex-column justify-content-between tool-grid-card shadow-sm">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="tool-card-icon-box icon-box-sky">
@@ -254,13 +259,13 @@
                             <i class="bi bi-arrow-right fs-6"></i>
                         </a>
                     </div>
-                    <h5 class="fw-bold text-white mb-2">PLACEMENT OFFICER</h5>
-                    <p class="text-secondary small mb-4">Resume assessment, relocation matching & LinkedIn job listings.</p>
+                    <h5 class="fw-bold text-dark mb-2">PLACEMENT OFFICER</h5>
+                    <p class="text-secondary small mb-4">Deep resume assessment, role gap analysis & live LinkedIn job post matcher.</p>
                 </div>
 
-                <a href="{{ url_for('virtual_placement') }}" class="btn btn-outline-light tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
+                <a href="{{ url_for('virtual_placement') }}" class="btn btn-outline-primary tool-card-bottom-btn w-100 d-flex align-items-center justify-content-between px-3 py-2.5">
                     <span class="d-flex align-items-center gap-2">
-                        <i class="bi bi-rocket-takeoff fs-6 text-sky"></i>
+                        <i class="bi bi-rocket-takeoff fs-6"></i>
                         <span class="fw-bold">START ASSESSMENT</span>
                     </span>
                     <i class="bi bi-arrow-right fs-6"></i>
@@ -276,17 +281,28 @@
         max-width: 1240px;
     }
 
-    /* Hero Banner Card */
     .hero-banner-card {
-        background: linear-gradient(135deg, #0d0d0d 0%, #000000 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 0px !important;
+        background: #ffffff !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: var(--radius-xl) !important;
+        box-shadow: var(--shadow-md) !important;
+    }
+
+    .hero-banner-card::before {
+        content: '';
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 320px;
+        height: 320px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%);
+        pointer-events: none;
     }
 
     .hero-metric-box {
-        background: #000000;
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        border-radius: 0px !important;
+        background: var(--purple-light-50);
+        border: 1px solid var(--purple-border);
+        border-radius: var(--radius-md) !important;
         padding: 0.6rem 1.1rem;
         display: flex;
         align-items: center;
@@ -300,131 +316,116 @@
     .hero-robot-img {
         max-width: 160px;
         height: auto;
-        filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+        filter: drop-shadow(0 10px 25px rgba(124, 58, 237, 0.15));
         object-fit: contain;
     }
 
-    /* Grid Cards */
     .tool-grid-card {
-        background: #000000 !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 0px !important;
-        transition: all 0.2s ease;
+        background: #ffffff !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: var(--radius-lg) !important;
+        box-shadow: var(--shadow-sm) !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .tool-grid-card:hover {
-        border-color: #ffffff !important;
-        background: #0a0a0a !important;
+        border-color: var(--primary-purple) !important;
         transform: translateY(-4px);
-        box-shadow: 4px 4px 0px rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow-lg) !important;
     }
 
     .tool-card-icon-box {
         width: 52px;
         height: 52px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 0px !important;
+        border-radius: var(--radius-md) !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #000000;
         flex-shrink: 0;
         transition: all 0.25s ease;
     }
 
-    /* Colored Icon Boxes & Text Colors for Home Page Tools */
-    .text-cyan { color: #06b6d4 !important; }
+    .text-cyan { color: #0891b2 !important; }
     .icon-box-cyan {
-        background: rgba(6, 182, 212, 0.12) !important;
-        border: 1px solid rgba(6, 182, 212, 0.45) !important;
-        box-shadow: 0 0 16px rgba(6, 182, 212, 0.22) !important;
+        background: #ecfeff !important;
+        border: 1px solid rgba(8, 145, 178, 0.25) !important;
     }
 
-    .text-red { color: #ef4444 !important; }
+    .text-red { color: #e11d48 !important; }
     .icon-box-red {
-        background: rgba(239, 68, 68, 0.12) !important;
-        border: 1px solid rgba(239, 68, 68, 0.45) !important;
-        box-shadow: 0 0 16px rgba(239, 68, 68, 0.22) !important;
+        background: #fff1f2 !important;
+        border: 1px solid rgba(225, 29, 72, 0.25) !important;
     }
 
-    .text-emerald { color: #10b981 !important; }
+    .text-emerald { color: #059669 !important; }
     .icon-box-emerald {
-        background: rgba(16, 185, 129, 0.12) !important;
-        border: 1px solid rgba(16, 185, 129, 0.45) !important;
-        box-shadow: 0 0 16px rgba(16, 185, 129, 0.22) !important;
+        background: #ecfdf5 !important;
+        border: 1px solid rgba(5, 150, 105, 0.25) !important;
     }
 
-    .text-amber { color: #f59e0b !important; }
+    .text-amber { color: #d97706 !important; }
     .icon-box-amber {
-        background: rgba(245, 158, 11, 0.12) !important;
-        border: 1px solid rgba(245, 158, 11, 0.45) !important;
-        box-shadow: 0 0 16px rgba(245, 158, 11, 0.22) !important;
+        background: #fffbeb !important;
+        border: 1px solid rgba(217, 119, 6, 0.25) !important;
     }
 
-    .text-purple { color: #a855f7 !important; }
+    .text-purple { color: #7c3aed !important; }
     .icon-box-purple {
-        background: rgba(168, 85, 247, 0.12) !important;
-        border: 1px solid rgba(168, 85, 247, 0.45) !important;
-        box-shadow: 0 0 16px rgba(168, 85, 247, 0.22) !important;
+        background: var(--purple-light-100) !important;
+        border: 1px solid var(--purple-border) !important;
     }
 
-    .text-blue { color: #3b82f6 !important; }
+    .text-blue { color: #2563eb !important; }
     .icon-box-blue {
-        background: rgba(59, 130, 246, 0.12) !important;
-        border: 1px solid rgba(59, 130, 246, 0.45) !important;
-        box-shadow: 0 0 16px rgba(59, 130, 246, 0.22) !important;
+        background: #eff6ff !important;
+        border: 1px solid rgba(37, 99, 235, 0.25) !important;
     }
 
-    .text-pink { color: #ec4899 !important; }
+    .text-pink { color: #db2777 !important; }
     .icon-box-pink {
-        background: rgba(236, 72, 153, 0.12) !important;
-        border: 1px solid rgba(236, 72, 153, 0.45) !important;
-        box-shadow: 0 0 16px rgba(236, 72, 153, 0.22) !important;
+        background: #fdf2f8 !important;
+        border: 1px solid rgba(219, 39, 119, 0.25) !important;
     }
 
-    .text-sky { color: #0ea5e9 !important; }
+    .text-sky { color: #0284c7 !important; }
     .icon-box-sky {
-        background: rgba(14, 165, 233, 0.12) !important;
-        border: 1px solid rgba(14, 165, 233, 0.45) !important;
-        box-shadow: 0 0 16px rgba(14, 165, 233, 0.22) !important;
+        background: #f0f9ff !important;
+        border: 1px solid rgba(2, 132, 199, 0.25) !important;
     }
 
     .tool-card-corner-arrow {
-        width: 34px;
-        height: 34px;
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        border-radius: 0px !important;
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--border-slate);
+        border-radius: var(--radius-pill) !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #ffffff;
+        color: var(--primary-purple);
         transition: all 0.2s ease;
         text-decoration: none;
-        background: #000000;
+        background: var(--purple-light-50);
     }
 
-    .tool-card-corner-arrow:hover {
-        background: #ffffff;
-        color: #000000;
-        border-color: #ffffff;
-    }
-
-    .tool-card-corner-arrow:hover i {
-        color: #000000 !important;
+    .tool-grid-card:hover .tool-card-corner-arrow {
+        background: var(--primary-purple);
+        color: #ffffff;
+        border-color: var(--primary-purple);
     }
 
     .tool-card-bottom-btn {
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 0px !important;
-        background: #000000 !important;
-        color: #ffffff !important;
+        border: 1px solid var(--purple-border) !important;
+        border-radius: var(--radius-sm) !important;
+        background: var(--purple-light-50) !important;
+        color: var(--primary-purple) !important;
         transition: all 0.2s ease;
     }
 
     .tool-card-bottom-btn:hover {
-        background: #ffffff !important;
-        color: #000000 !important;
-        border-color: #ffffff !important;
+        background: var(--primary-gradient) !important;
+        color: #ffffff !important;
+        border-color: transparent !important;
+        box-shadow: var(--shadow-purple-btn);
     }
 
     @media (max-width: 767.98px) {

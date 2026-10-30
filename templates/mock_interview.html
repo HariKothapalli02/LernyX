@@ -6,43 +6,45 @@
 <div class="container py-3 py-md-4">
     <!-- Page Header -->
     <div class="text-center mb-3 mb-md-4 fade-in-up">
-        <span class="badge bg-black text-white border border-secondary px-3 py-1.5 mono-font mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em; border-radius: 0px !important;">
-            <i class="bi bi-soundwave me-1 text-pink"></i>AI VOICE MOCK INTERVIEW
+        <span class="badge bg-primary px-3 py-1.5 mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+            <i class="bi bi-soundwave me-1"></i>AI VOICE MOCK INTERVIEW
         </span>
-        <h1 class="h3 h-md-2 fw-bold text-white mb-2 tracking-tight">1-on-1 Interactive Mock Interview</h1>
-        <p class="small text-secondary mx-auto mb-0" style="max-width: 600px; font-size: 0.85rem; line-height: 1.4;">
-            Experience a realistic technical mock interview tailored to your resume with real-time speech AI evaluation.
+        <h1 class="h3 h-md-2 fw-bold text-dark mb-2 tracking-tight">1-on-1 Interactive Mock Interview</h1>
+        <p class="small text-secondary mx-auto mb-0" style="max-width: 600px; font-size: 0.88rem; line-height: 1.5;">
+            Experience a realistic technical mock interview tailored to your resume with real-time speech AI evaluation and instant scoring.
         </p>
     </div>
 
     <!-- 1. SETUP CARD (Pre-Interview) -->
-    <div id="setup-card" class="card mb-4 mb-md-5 bg-black border border-secondary shadow-lg" style="border-radius: 0px !important;">
+    <div id="setup-card" class="card mb-4 mb-md-5 shadow-md">
         <div class="card-body p-3 p-md-4">
-            <h5 class="fw-bold text-white mb-3 text-uppercase tracking-tight" style="font-size: 0.95rem;"><i class="bi bi-sliders text-white me-2"></i>Interview Configuration</h5>
+            <h5 class="fw-bold text-dark mb-3 text-uppercase tracking-tight" style="font-size: 0.95rem;">
+                <i class="bi bi-sliders text-primary me-2"></i>Interview Configuration
+            </h5>
             
-            <div id="saved-resume-alert" class="alert alert-dark py-2 px-3 mb-3 d-none border border-secondary bg-black d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-radius: 0px !important;">
+            <div id="saved-resume-alert" class="alert alert-info py-2 px-3 mb-3 d-none d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2 text-truncate" style="max-width: 75%;">
-                    <i class="bi bi-file-earmark-check-fill text-white fs-6 flex-shrink-0"></i>
-                    <span class="text-white small text-truncate">Resume: <strong id="saved-resume-name" class="text-white mono-font">Saved Resume</strong></span>
+                    <i class="bi bi-file-earmark-check-fill text-primary fs-6 flex-shrink-0"></i>
+                    <span class="text-dark small text-truncate">Resume: <strong id="saved-resume-name" class="text-dark">Saved Resume</strong></span>
                 </div>
-                <span class="badge bg-black text-white border border-secondary px-2 py-1" style="border-radius: 0px !important; font-size: 0.68rem;"><i class="bi bi-check-circle-fill me-1 text-success"></i>READY</span>
+                <span class="badge bg-success px-2 py-1" style="font-size: 0.68rem;"><i class="bi bi-check-circle-fill me-1"></i>READY</span>
             </div>
 
             <form id="start-interview-form" onsubmit="startInterview(event)">
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label fw-bold text-white small mono-font mb-1"><i class="bi bi-file-earmark-arrow-up text-white me-2"></i>Upload Candidate Resume (Optional)</label>
-                        <input type="file" id="interview_resume_file" class="form-control bg-black text-white border-secondary" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" style="border-radius: 0px !important; font-size: 0.82rem;">
-                        <div class="form-text text-secondary small mt-1" style="font-size: 0.75rem;">Supports PDF, DOCX, TXT, or Image files. If empty, your saved resume will be used.</div>
+                        <label class="form-label fw-semibold text-dark small mb-1"><i class="bi bi-file-earmark-arrow-up text-primary me-2"></i>Upload Candidate Resume (Optional)</label>
+                        <input type="file" id="interview_resume_file" class="form-control" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg">
+                        <div class="form-text text-muted small mt-1">Supports PDF, DOCX, TXT, or Image files. If empty, your saved profile resume will be used.</div>
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label fw-bold text-white small mono-font mb-1"><i class="bi bi-briefcase text-white me-2"></i>Target Job Role / Position <span class="text-danger">*</span></label>
-                        <input type="text" id="target_role_input" class="form-control bg-black text-white border-secondary" placeholder="e.g., Full Stack Developer, Java Backend Engineer" value="Software Engineer" required style="border-radius: 0px !important; font-size: 0.88rem; padding: 0.6rem 0.85rem;">
+                        <label class="form-label fw-semibold text-dark small mb-1"><i class="bi bi-briefcase text-primary me-2"></i>Target Job Role / Position <span class="text-danger">*</span></label>
+                        <input type="text" id="target_role_input" class="form-control" placeholder="e.g., Full Stack Developer, Java Backend Engineer" value="Software Engineer" required>
                     </div>
                 </div>
 
-                <button type="submit" id="start-btn" class="btn btn-light text-black fw-bold py-2.5 px-4 mt-3 w-100" style="border-radius: 0px !important; font-size: 0.88rem; letter-spacing: 0.03em;">
+                <button type="submit" id="start-btn" class="btn btn-primary fw-bold py-2.5 px-4 mt-3 w-100 shadow-sm" style="font-size: 0.92rem; letter-spacing: 0.02em;">
                     <i class="bi bi-play-circle-fill me-2"></i>START AI VOICE MOCK INTERVIEW
                 </button>
             </form>
@@ -51,60 +53,60 @@
 
     <!-- LOADING STATE -->
     <div id="loading-state" class="d-none text-center py-5">
-        <div class="spinner-border text-light" role="status" style="width: 3.5rem; height: 3.5rem;"></div>
-        <h4 class="text-white mt-4 fw-bold" id="loading-title">Analyzing Resume & Preparing Interview Questions...</h4>
-        <p class="text-muted"><i class="bi bi-cpu-fill text-white me-1"></i>Powered by LernyX Intelligence & Speech Engine.</p>
+        <div class="spinner-border text-primary" role="status" style="width: 3.5rem; height: 3.5rem;"></div>
+        <h4 class="text-dark mt-4 fw-bold" id="loading-title">Analyzing Resume & Preparing Interview Questions...</h4>
+        <p class="text-muted"><i class="bi bi-cpu-fill text-primary me-1"></i>Powered by LernyX Intelligence & Speech Engine.</p>
     </div>
 
     <!-- 2. INTERVIEW ROOM CONTAINER -->
     <div id="interview-room" class="d-none">
         <!-- Interview Header & Progress Bar -->
-        <div class="card p-4 mb-4">
+        <div class="card p-4 mb-4 shadow-sm">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
                 <div>
-                    <span class="badge bg-dark text-white border border-white px-3 py-2 fs-6 mb-1" id="q-category-badge">Background & Introduction</span>
-                    <h5 class="fw-bold text-white mb-0" id="interview-role-title">Software Engineer Mock Interview</h5>
+                    <span class="badge bg-primary fs-6 mb-1" id="q-category-badge">Background & Introduction</span>
+                    <h5 class="fw-bold text-dark mb-0" id="interview-role-title">Software Engineer Mock Interview</h5>
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <span class="fs-5 fw-bold text-white mono-font" id="question-progress-text">Question 1 of 5</span>
+                    <span class="fs-5 fw-bold text-dark" id="question-progress-text">Question 1 of 5</span>
                     <button type="button" class="btn btn-sm btn-outline-warning fw-bold px-3 py-1" onclick="forceFinishInterviewFromModal()">
                         <i class="bi bi-flag-fill me-1"></i>FINISH & VIEW RESULT
                     </button>
                 </div>
             </div>
             <div class="progress" style="height: 10px;">
-                <div id="interview-progress-bar" class="progress-bar bg-white progress-bar-striped progress-bar-animated" role="progressbar" style="width: 20%;"></div>
+                <div id="interview-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 20%;"></div>
             </div>
         </div>
 
         <!-- Question & Answer Area -->
-        <div class="card p-4 p-md-5 mb-4">
+        <div class="card p-4 p-md-5 mb-4 shadow-sm">
             <!-- Question Box -->
-            <div class="mb-4 p-4 border border-white bg-black">
+            <div class="mb-4 p-4 rounded-3 border bg-light">
                 <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                    <span class="text-white fw-bold uppercase tracking-wider small mono-font"><i class="bi bi-patch-question-fill me-1"></i>INTERVIEWER QUESTION</span>
-                    <button type="button" class="btn btn-sm btn-outline-light fw-bold px-3" onclick="speakCurrentQuestion()">
+                    <span class="text-primary fw-bold uppercase tracking-wider small"><i class="bi bi-patch-question-fill me-1"></i>INTERVIEWER QUESTION</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary fw-bold px-3" onclick="speakCurrentQuestion()">
                         <i class="bi bi-volume-up-fill me-1"></i>LISTEN AGAIN
                     </button>
                 </div>
-                <h3 class="fw-bold text-white mb-2" id="current-question-text" style="line-height: 1.4; font-size: 1.35rem;">
+                <h3 class="fw-bold text-dark mb-2" id="current-question-text" style="line-height: 1.4; font-size: 1.35rem;">
                     "Loading question..."
                 </h3>
-                <small class="text-white-50"><i class="bi bi-info-circle me-1"></i>Key Focus: <span id="current-question-focus" class="text-light">Background experience & clarity</span></small>
+                <small class="text-muted"><i class="bi bi-info-circle me-1 text-primary"></i>Key Focus: <span id="current-question-focus" class="text-dark fw-medium">Background experience & clarity</span></small>
             </div>
 
             <!-- Speech Audio Controls & Input Area -->
             <div class="mb-4">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                    <label class="form-label fw-bold text-white fs-6 mb-0">
-                        <i class="bi bi-chat-quote-fill text-white me-2"></i>YOUR RESPONSE (SPEAK OR TYPE):
+                    <label class="form-label fw-bold text-dark fs-6 mb-0">
+                        <i class="bi bi-chat-quote-fill text-primary me-2"></i>YOUR RESPONSE (SPEAK OR TYPE):
                     </label>
 
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <!-- Accent / Regional Language Selector -->
-                        <div class="d-flex align-items-center gap-1 bg-black px-2 py-1 border border-white">
-                            <i class="bi bi-translate text-white small"></i>
-                            <select id="speech-lang-select" class="form-select form-select-sm bg-black text-white border-0 py-0 shadow-none" style="font-size: 0.85rem; cursor: pointer;" onchange="changeSpeechLanguage()">
+                        <div class="d-flex align-items-center gap-1 bg-white px-2 py-1 border rounded">
+                            <i class="bi bi-translate text-primary small"></i>
+                            <select id="speech-lang-select" class="form-select form-select-sm border-0 py-0 shadow-none text-dark" style="font-size: 0.85rem; cursor: pointer;" onchange="changeSpeechLanguage()">
                                 <option value="en-IN" selected>🇮🇳 English (India)</option>
                                 <option value="en-US">🇺🇸 English (US)</option>
                                 <option value="en-GB">🇬🇧 English (UK)</option>
@@ -114,7 +116,7 @@
                         </div>
 
                         <!-- Mic Button -->
-                        <button type="button" id="mic-toggle-btn" class="btn btn-outline-light fw-bold px-3 d-flex align-items-center gap-2" onclick="toggleSpeechRecognition()">
+                        <button type="button" id="mic-toggle-btn" class="btn btn-outline-primary fw-bold px-3 d-flex align-items-center gap-2" onclick="toggleSpeechRecognition()">
                             <i class="bi bi-mic-fill fs-5" id="mic-icon"></i>
                             <span id="mic-btn-text">START SPEAKING</span>
                         </button>
@@ -122,29 +124,29 @@
                 </div>
 
                 <!-- Live Mic Visualizer & Audio Meter Bar -->
-                <div id="speech-status-banner" class="alert alert-dark py-2 px-3 mb-2 d-none border border-white small d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div class="d-flex align-items-center gap-2 text-white fw-semibold">
-                        <span class="spinner-grow spinner-grow-sm text-light" role="status"></span>
+                <div id="speech-status-banner" class="alert alert-info py-2 px-3 mb-2 d-none small d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2 text-dark fw-semibold">
+                        <span class="spinner-grow spinner-grow-sm text-primary" role="status"></span>
                         <span id="speech-status-text">Listening... Speak clearly into your mic.</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="text-white-50 small"><i class="bi bi-soundwave me-1"></i>Volume Level:</span>
-                        <div class="progress" style="width: 120px; height: 10px; background: rgba(255, 255, 255, 0.15);">
-                            <div id="mic-volume-bar" class="progress-bar bg-white" role="progressbar" style="width: 0%; transition: width 0.08s ease-out;"></div>
+                        <span class="text-muted small"><i class="bi bi-soundwave me-1"></i>Volume Level:</span>
+                        <div class="progress" style="width: 120px; height: 10px;">
+                            <div id="mic-volume-bar" class="progress-bar" role="progressbar" style="width: 0%; transition: width 0.08s ease-out;"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Textarea -->
-                <textarea id="user-answer-input" class="form-control bg-black text-white border-white border-opacity-25 p-3" rows="6" placeholder="Click 'Start Speaking' and talk, or type your response here..."></textarea>
+                <textarea id="user-answer-input" class="form-control p-3" rows="6" placeholder="Click 'Start Speaking' and talk, or type your response here..."></textarea>
                 <div class="d-flex justify-content-between text-muted small mt-1">
-                    <span><i class="bi bi-shield-check me-1 text-white"></i>Echo & Noise Cancellation Active (<strong id="active-lang-label" class="text-white">English (en-IN)</strong>)</span>
-                    <span id="char-counter" class="mono-font">0 characters</span>
+                    <span><i class="bi bi-shield-check me-1 text-primary"></i>Echo & Noise Cancellation Active (<strong id="active-lang-label" class="text-dark">English (en-IN)</strong>)</span>
+                    <span id="char-counter">0 characters</span>
                 </div>
             </div>
 
             <!-- Submit Answer Action -->
-            <button type="button" id="submit-answer-btn" class="btn btn-primary btn-lg w-100 fw-bold py-3" onclick="submitAnswer()">
+            <button type="button" id="submit-answer-btn" class="btn btn-primary btn-lg w-100 fw-bold py-3 shadow" onclick="submitAnswer()">
                 <i class="bi bi-arrow-right-circle-fill me-2"></i>SUBMIT ANSWER & NEXT QUESTION
             </button>
         </div>
@@ -152,59 +154,59 @@
 
     <!-- 3. FINAL INTERVIEW REPORT & SCORE PERCENTAGE CARD -->
     <div id="final-report-card" class="d-none">
-        <div class="card p-4 p-md-5 mb-5">
+        <div class="card p-4 p-md-5 mb-5 shadow-lg">
             <!-- Header Result Badge -->
             <div class="text-center mb-4">
-                <span class="badge bg-dark border border-white px-3 py-2 fs-6 mb-2" id="report-verdict-badge">
+                <span class="badge bg-primary px-3 py-2 fs-6 mb-2" id="report-verdict-badge">
                     <i class="bi bi-trophy-fill me-2"></i>EXCELLENT - READY FOR TECHNICAL INTERVIEWS
                 </span>
-                <h1 class="display-3 fw-bold text-white mb-1"><span id="report-percentage-score">85</span>%</h1>
-                <p class="text-secondary fs-5 mono-font">OVERALL MOCK INTERVIEW PERFORMANCE SCORE</p>
+                <h1 class="display-3 fw-bold text-primary mb-1"><span id="report-percentage-score">85</span>%</h1>
+                <p class="text-muted fs-6 fw-semibold text-uppercase">OVERALL MOCK INTERVIEW PERFORMANCE SCORE</p>
             </div>
 
             <!-- Executive Summary -->
-            <div class="alert p-4 mb-4 text-white border border-white bg-black">
-                <h5 class="fw-bold text-white mb-2"><i class="bi bi-clipboard-data-fill me-2"></i>Executive Performance Verdict</h5>
-                <p class="mb-0 text-white-50 fs-6" id="report-executive-summary">Detailed executive summary...</p>
+            <div class="alert alert-info p-4 mb-4">
+                <h5 class="fw-bold text-dark mb-2"><i class="bi bi-clipboard-data-fill me-2 text-primary"></i>Executive Performance Verdict</h5>
+                <p class="mb-0 text-secondary fs-6" id="report-executive-summary">Detailed executive summary...</p>
             </div>
 
             <!-- Top Strengths & Improvements -->
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <div class="p-4 border border-white bg-black h-100">
-                        <h5 class="fw-bold text-white mb-3"><i class="bi bi-check-circle-fill me-2"></i>Top Demonstrated Strengths</h5>
-                        <ul id="report-strengths-list" class="text-white-50 ps-3 mb-0"></ul>
+                    <div class="p-4 border rounded-3 bg-light h-100">
+                        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-check-circle-fill me-2 text-success"></i>Top Demonstrated Strengths</h5>
+                        <ul id="report-strengths-list" class="text-secondary ps-3 mb-0"></ul>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="p-4 border border-white bg-black h-100">
-                        <h5 class="fw-bold text-white mb-3"><i class="bi bi-tools me-2"></i>Key Areas to Refine</h5>
-                        <ul id="report-improvements-list" class="text-white-50 ps-3 mb-0"></ul>
+                    <div class="p-4 border rounded-3 bg-light h-100">
+                        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-tools me-2 text-warning"></i>Key Areas to Refine</h5>
+                        <ul id="report-improvements-list" class="text-secondary ps-3 mb-0"></ul>
                     </div>
                 </div>
             </div>
 
             <!-- Recommendation Alert -->
-            <div class="alert alert-dark p-3 mb-4 border border-white bg-black">
+            <div class="card p-3 mb-4 bg-light border">
                 <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-rocket-takeoff-fill fs-2 text-white flex-shrink-0"></i>
+                    <i class="bi bi-rocket-takeoff-fill fs-2 text-primary flex-shrink-0"></i>
                     <div>
-                        <strong class="text-white d-block mono-font">CAREER RECOMMENDATION:</strong>
-                        <span class="text-white-50" id="report-recommendation">Recommendation text...</span>
+                        <strong class="text-dark d-block">CAREER RECOMMENDATION:</strong>
+                        <span class="text-secondary" id="report-recommendation">Recommendation text...</span>
                     </div>
                 </div>
             </div>
 
             <!-- Detailed Question Breakdown -->
-            <h4 class="fw-bold text-white mb-3"><i class="bi bi-list-check text-white me-2"></i>Detailed Per-Question Analysis & Enhancements</h4>
+            <h4 class="fw-bold text-dark mb-3"><i class="bi bi-list-check text-primary me-2"></i>Detailed Per-Question Analysis & Enhancements</h4>
             <div id="report-questions-breakdown" class="d-flex flex-column gap-4 mb-4"></div>
 
             <!-- Action Buttons -->
             <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
-                <button type="button" class="btn btn-outline-light btn-lg px-4 fw-bold" onclick="location.reload()">
+                <button type="button" class="btn btn-outline-primary btn-lg px-4 fw-bold" onclick="location.reload()">
                     <i class="bi bi-arrow-counterclockwise me-2"></i>Retake Mock Interview
                 </button>
-                <a href="{{ url_for('home') }}" class="btn btn-success btn-lg px-4 fw-bold" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">
+                <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg px-4 fw-bold shadow">
                     <i class="bi bi-house-door-fill me-2"></i>Back to Home
                 </a>
             </div>

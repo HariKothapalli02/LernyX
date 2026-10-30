@@ -3,60 +3,72 @@
 {% block title %}Quiz Studio - LernyX{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="display-5 fw-bold text-white">Quiz Studio</h1>
-        <p class="lead text-muted">Generate AI-powered practice quizzes from YouTube videos.</p>
+<div class="container py-4 py-md-5">
+    <div class="text-center mb-4 fade-in-up">
+        <span class="badge badge-purple px-3 py-1.5 mb-2" style="font-size: 0.78rem; letter-spacing: 0.05em;">
+            <i class="bi bi-youtube me-1 text-danger"></i>MULTIMEDIA KNOWLEDGE EXTRACTOR
+        </span>
+        <h1 class="h2 fw-bold text-slate mb-2 tracking-tight">AI Video Quiz Studio</h1>
+        <p class="text-secondary mx-auto mb-0" style="max-width: 620px; font-size: 0.95rem; line-height: 1.5;">
+            Transform any public or unlisted YouTube video lecture into an interactive quiz with structured study notes.
+        </p>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body p-4">
-                    <h4 class="card-title fw-bold text-white mb-3">YouTube Quiz Generator</h4>
-                    <p class="card-text text-muted mb-4">Paste any public or unlisted YouTube link to generate questions
-                        and study notes for practice.</p>
-
-                    <div class="mb-3">
-                        <label for="yt_url" class="form-label text-uppercase text-muted small fw-bold">YouTube
-                            URL</label>
-                        <input type="text" class="form-control form-control-lg bg-dark text-white border-secondary"
-                            id="yt_url" placeholder="https://www.youtube.com/watch?v=...">
+            <!-- URL Input Card -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 18px; border: 1px solid rgba(124, 58, 237, 0.12) !important; background: #ffffff;">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                            <i class="bi bi-play-btn-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title fw-bold text-slate mb-0" style="font-size: 1.15rem;">YouTube Video Source</h5>
+                            <small class="text-muted">Extracts automated transcripts and generates exam-ready MCQs</small>
+                        </div>
                     </div>
 
-                    <button class="btn btn-primary btn-lg w-100" onclick="validateAndShowSettings()">
-                        Start Quiz Builder <i class="bi bi-arrow-right ms-2"></i>
+                    <div class="mb-4">
+                        <label for="yt_url" class="form-label text-slate small fw-bold">YouTube URL or Share Link</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-danger" style="border-color: #cbd5e1;"><i class="bi bi-youtube fs-5"></i></span>
+                            <input type="text" class="form-control form-control-lg border-start-0"
+                                id="yt_url" placeholder="https://www.youtube.com/watch?v=..." style="border-color: #cbd5e1; font-size: 0.95rem;">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-lg w-100 fw-bold shadow-sm py-2.5" onclick="validateAndShowSettings()" style="border-radius: 12px; font-size: 0.95rem;">
+                        <span>CONFIGURE QUIZ GENERATOR</span> <i class="bi bi-arrow-right ms-2"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Share Banner -->
-            <div id="share_quiz_banner" class="alert alert-success d-flex align-items-center justify-content-between"
-                style="display: none !important;">
-                <div>
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    Quiz code ready! Share this: <strong id="share_quiz_code" class="ms-1"></strong>
+            <div id="share_quiz_banner" class="alert d-flex align-items-center justify-content-between mb-4 shadow-sm"
+                style="display: none !important; border-radius: 14px; background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); color: var(--primary-purple);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill fs-5"></i>
+                    <span>Quiz code ready! Share this exam code: <strong id="share_quiz_code" class="ms-1 fs-6"></strong></span>
                 </div>
-                <button class="btn btn-sm btn-success" onclick="copyShareCode()">Copy</button>
+                <button class="btn btn-sm btn-primary fw-bold px-3" onclick="copyShareCode()" style="border-radius: 8px;">Copy</button>
             </div>
 
             <!-- Settings Panel -->
             <div id="quiz-settings" class="collapse">
-                <div class="card shadow-sm mb-4 border-primary">
-                    <div class="card-header bg-transparent border-bottom border-secondary">
-                        <h5 class="mb-0 text-white">Quiz Configuration</h5>
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 18px; border: 1px solid rgba(124, 58, 237, 0.15) !important; background: #ffffff;">
+                    <div class="card-header bg-white border-bottom p-3" style="border-color: rgba(124, 58, 237, 0.1) !important; border-top-left-radius: 18px; border-top-right-radius: 18px;">
+                        <h5 class="mb-0 text-slate fw-bold" style="font-size: 1.05rem;"><i class="bi bi-sliders text-purple me-2"></i>Quiz Configuration</h5>
                     </div>
                     <div class="card-body p-4">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="num_questions" class="form-label text-muted small fw-bold">Number of
-                                    Questions</label>
-                                <input type="number" class="form-control bg-dark text-white border-secondary"
-                                    id="num_questions" min="3" max="20" value="5">
+                                <label for="num_questions" class="form-label text-slate small fw-bold">Number of Questions</label>
+                                <input type="number" class="form-control" id="num_questions" min="3" max="20" value="5" style="border-radius: 10px; border-color: #cbd5e1;">
                             </div>
                             <div class="col-md-6">
-                                <label for="difficulty" class="form-label text-muted small fw-bold">Difficulty</label>
-                                <select class="form-select bg-dark text-white border-secondary" id="difficulty">
+                                <label for="difficulty" class="form-label text-slate small fw-bold">Difficulty</label>
+                                <select class="form-select" id="difficulty" style="border-radius: 10px; border-color: #cbd5e1;">
                                     <option value="easy">Easy</option>
                                     <option value="medium" selected>Medium</option>
                                     <option value="hard">Hard</option>
@@ -64,9 +76,10 @@
                             </div>
                         </div>
                         <div class="d-flex gap-2 mt-4">
-                            <button class="btn btn-primary flex-grow-1" onclick="generateQuizNotes()">Generate
-                                Quiz</button>
-                            <button class="btn btn-outline-secondary" onclick="resetForm()">Start Over</button>
+                            <button class="btn btn-primary flex-grow-1 fw-bold py-2.5 shadow-sm" onclick="generateQuizNotes()" style="border-radius: 10px;">
+                                <i class="bi bi-cpu-fill me-1"></i>Generate Video Quiz & Notes
+                            </button>
+                            <button class="btn btn-outline-secondary py-2.5" onclick="resetForm()" style="border-radius: 10px;">Start Over</button>
                         </div>
                     </div>
                 </div>
@@ -98,7 +111,8 @@
         const el = document.getElementById(targetId);
         if (!el) return;
 
-        el.className = 'mt-3 text-center alert';
+        el.className = 'mt-3 text-center alert py-2.5 px-3';
+        el.style.borderRadius = '10px';
         if (type === 'error') el.classList.add('alert-danger');
         else if (type === 'success') el.classList.add('alert-success');
         else el.classList.add('alert-info');
@@ -127,12 +141,12 @@
         let resultsDiv = document.getElementById('results');
 
         if (!yt_url) {
-            showStatusMessage('custom_attempt_result', "Please enter a YouTube link.", "error");
+            showStatusMessage('custom_attempt_result', "Please enter a YouTube video link.", "error");
             return;
         }
 
         if (!yt_url.includes('youtube.com/watch?v=') && !yt_url.includes('youtu.be/')) {
-            showStatusMessage('custom_attempt_result', "Please enter a valid YouTube link.", "error");
+            showStatusMessage('custom_attempt_result', "Please enter a valid YouTube video URL.", "error");
             return;
         }
 
@@ -175,9 +189,10 @@
         }
 
         resultsDiv.innerHTML = `
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary mb-3" role="status"></div>
-                <p class="text-muted">Processing video and generating quiz...</p>
+            <div class="text-center py-5 bg-white p-4 rounded-4 shadow-sm" style="border: 1px solid rgba(124, 58, 237, 0.12);">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+                <h5 class="fw-bold text-slate">Processing YouTube transcript...</h5>
+                <p class="text-muted small mb-0">LernyX AI is analyzing key lecture points and authoring challenge questions.</p>
             </div>
         `;
         toggleShareBanner(false);
@@ -206,10 +221,10 @@
                 currentVideoId = urlMatch ? urlMatch[1] : null;
                 displayQuiz(quizData);
             } else {
-                resultsDiv.innerHTML = `<div class="alert alert-danger">${data.error || "Error occurred. Please try again."}</div>`;
+                resultsDiv.innerHTML = `<div class="alert alert-danger" style="border-radius: 12px;">${data.error || "An error occurred while generating quiz. Please check video availability."}</div>`;
             }
         } catch (error) {
-            resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            resultsDiv.innerHTML = `<div class="alert alert-danger" style="border-radius: 12px;">Error: ${error.message}</div>`;
         }
     }
 
@@ -219,58 +234,77 @@
         score = 0;
         userAnswers = {};
 
-        let html = '<div class="card shadow-sm border-0">';
-        html += '<div class="card-body p-4">';
+        let html = '<div class="card border-0 shadow-sm" style="border-radius: 18px; border: 1px solid rgba(124, 58, 237, 0.12) !important; background: #ffffff;">';
+        html += '<div class="card-body p-4 p-md-5">';
 
         if (isCustomQuiz && activeCustomCode) {
-            const label = activeCustomQuizTitle ? `· ${activeCustomQuizTitle}` : '';
-            html += `<div class="badge bg-info text-dark mb-3">Custom Quiz ${activeCustomCode} ${label}</div>`;
+            const label = activeCustomQuizTitle ? `· ${escapeHtml(activeCustomQuizTitle)}` : '';
+            html += `<div class="badge badge-purple mb-3 px-3 py-1.5 fs-6">Custom Quiz ${activeCustomCode} ${label}</div>`;
         }
 
         if (!isCustomQuiz) {
-            html += '<div class="d-flex justify-content-between align-items-center mb-4">';
-            html += '<h4 class="mb-0 text-white">Score: <span id="score" class="text-primary">0</span> / ' + totalQuestions + '</h4>';
-            html += '<div class="btn-group">';
-            html += '<button class="btn btn-outline-primary btn-sm" onclick="downloadQuizPDF(event)">📥 PDF</button>';
-            html += '<button class="btn btn-outline-secondary btn-sm" onclick="createShareableQuiz()">Share Code</button>';
-            html += '</div></div>';
+            html += `
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom flex-wrap gap-2" style="border-color: rgba(124, 58, 237, 0.1) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-award-fill fs-4 text-purple"></i>
+                        <h4 class="mb-0 text-slate fw-bold" style="font-size: 1.2rem;">Live Score: <span id="score" class="text-purple">0</span> / ${totalQuestions}</h4>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm fw-bold px-3" onclick="downloadQuizPDF(event)" style="border-radius: 8px;">
+                            <i class="bi bi-download me-1"></i>PDF Notes
+                        </button>
+                        <button class="btn btn-primary btn-sm fw-bold px-3 shadow-sm" onclick="createShareableQuiz()" style="border-radius: 8px;">
+                            <i class="bi bi-share me-1"></i>Share Code
+                        </button>
+                    </div>
+                </div>
+            `;
         }
 
         html += '<div id="quiz-container">';
 
         data.questions.forEach((q, index) => {
-            html += `<div class="card bg-dark border-secondary mb-3 question-container" data-question-index="${index}">`;
-            html += `<div class="card-body">`;
-            html += `<h5 class="card-title mb-3 text-white">${index + 1}. ${q.question}</h5>`;
-            html += `<div class="list-group">`;
+            html += `<div class="card bg-white border mb-4 question-container" data-question-index="${index}" style="border-radius: 14px; border-color: rgba(124, 58, 237, 0.12) !important;">`;
+            html += `<div class="card-body p-4">`;
+            html += `<h5 class="card-title mb-3 text-slate d-flex align-items-start gap-2" style="font-size: 1.05rem; line-height: 1.5;">
+                        <span class="badge badge-purple flex-shrink-0 mt-0.5">Q${index + 1}</span>
+                        <span>${escapeHtml(q.question)}</span>
+                     </h5>`;
+            html += `<div class="d-flex flex-column gap-2 mt-3">`;
 
             q.options.forEach((option, optIndex) => {
                 html += `
-                    <button type="button" class="list-group-item list-group-item-action bg-transparent text-light border-secondary option" 
+                    <button type="button" class="btn text-start p-3 option d-flex align-items-center" 
+                        style="border: 1.5px solid #e2e8f0; border-radius: 10px; background: #ffffff; color: #0f172a; transition: all 0.15s ease;"
                         data-question="${index}" data-option="${optIndex}" onclick="selectAnswer(${index}, ${optIndex})">
-                        <span class="fw-bold me-2">${String.fromCharCode(65 + optIndex)}.</span> ${option}
+                        <span class="badge rounded-circle me-3 d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px; background: rgba(124, 58, 237, 0.08); color: var(--primary-purple); font-weight: 700;">${String.fromCharCode(65 + optIndex)}</span>
+                        <span class="flex-grow-1" style="font-size: 0.92rem;">${escapeHtml(option)}</span>
                     </button>
                 `;
             });
 
             html += `</div>`;
-            html += `<div class="alert alert-info mt-3 collapse explanation" id="explanation-${index}">`;
-            html += `<strong>Explanation:</strong> ${q.explanation}`;
+            html += `<div class="alert alert-info mt-3 collapse explanation" id="explanation-${index}" style="border-radius: 10px;">`;
+            html += `<strong><i class="bi bi-info-circle me-1"></i>Explanation:</strong> ${escapeHtml(q.explanation || 'No explanation provided.')}`;
             html += `</div></div></div>`;
         });
 
         html += '</div>';
 
         if (!isCustomQuiz && data.notes) {
-            html += '<div class="card bg-dark border-secondary mt-4">';
-            html += '<div class="card-header border-secondary"><h5 class="mb-0 text-white">📝 Study Notes</h5></div>';
-            html += `<div class="card-body text-muted">${data.notes}</div>`;
-            html += '</div>';
+            html += `
+                <div class="card border-0 shadow-sm mt-4" style="border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.15) !important; background: #ffffff;">
+                    <div class="card-header bg-white border-bottom p-3" style="border-color: rgba(124, 58, 237, 0.1) !important; border-top-left-radius: 16px; border-top-right-radius: 16px;">
+                        <h5 class="mb-0 text-slate fw-bold"><i class="bi bi-journal-text text-purple me-2"></i>Structured Video Study Notes</h5>
+                    </div>
+                    <div class="card-body p-4 text-secondary" style="line-height: 1.7; font-size: 0.95rem;">${data.notes}</div>
+                </div>
+            `;
         }
 
         if (isCustomQuiz) {
             html += '<div class="text-end mt-4">';
-            html += '<button class="btn btn-primary btn-lg" onclick="onSubmitCustomQuiz()">Submit Quiz</button>';
+            html += '<button class="btn btn-primary btn-lg fw-bold px-4 shadow-sm" onclick="onSubmitCustomQuiz()" style="border-radius: 12px;">Submit Quiz</button>';
             html += '</div>';
         }
 
@@ -288,9 +322,12 @@
         if (isCustomQuiz) {
             userAnswers[questionIndex] = optionIndex;
             allOptions.forEach((opt, idx) => {
-                opt.classList.remove('active', 'bg-primary', 'border-primary');
                 if (idx === optionIndex) {
-                    opt.classList.add('active', 'bg-primary', 'border-primary');
+                    opt.style.borderColor = 'var(--primary-purple)';
+                    opt.style.background = 'rgba(124, 58, 237, 0.08)';
+                } else {
+                    opt.style.borderColor = '#e2e8f0';
+                    opt.style.background = '#ffffff';
                 }
             });
             return;
@@ -308,20 +345,28 @@
 
         allOptions.forEach((opt, idx) => {
             opt.disabled = true;
-            opt.classList.remove('list-group-item-action');
 
             if (idx === optionIndex) {
                 if (isCorrect) {
-                    opt.classList.add('bg-success', 'text-white', 'border-success');
+                    opt.style.borderColor = '#10b981';
+                    opt.style.background = '#ecfdf5';
+                    opt.style.color = '#065f46';
                 } else {
-                    opt.classList.add('bg-danger', 'text-white', 'border-danger');
+                    opt.style.borderColor = '#ef4444';
+                    opt.style.background = '#fef2f2';
+                    opt.style.color = '#991b1b';
                 }
             } else if (idx === question.correct) {
-                opt.classList.add('bg-success', 'text-white', 'border-success');
+                opt.style.borderColor = '#10b981';
+                opt.style.background = '#ecfdf5';
+                opt.style.color = '#065f46';
             }
         });
 
-        new bootstrap.Collapse(document.getElementById('explanation-' + questionIndex)).show();
+        const expEl = document.getElementById('explanation-' + questionIndex);
+        if (expEl) {
+            new bootstrap.Collapse(expEl).show();
+        }
 
         if (Object.keys(userAnswers).length === totalQuestions) {
             saveQuizScore();
@@ -338,10 +383,14 @@
             options.forEach((opt, idx) => {
                 opt.disabled = true;
                 if (userAnswers[qIndex] === idx) {
-                    opt.classList.add('active');
+                    opt.style.borderColor = 'var(--primary-purple)';
+                    opt.style.background = 'rgba(124, 58, 237, 0.12)';
                 }
             });
-            new bootstrap.Collapse(document.getElementById('explanation-' + qIndex)).show();
+            const expEl = document.getElementById('explanation-' + qIndex);
+            if (expEl) {
+                new bootstrap.Collapse(expEl).show();
+            }
         });
 
         quizData.questions.forEach((_, idx) => {
@@ -406,7 +455,7 @@
             let videoTitle = "Video_Quiz";
             let downloadBtn = event ? event.target : document.querySelector('.download-btn');
             let originalText = downloadBtn.innerHTML;
-            downloadBtn.innerHTML = "⏳ Generating...";
+            downloadBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Generating...';
             downloadBtn.disabled = true;
 
             let resp = await fetch('/api/download-quiz-pdf', {
@@ -468,7 +517,13 @@
         const code = document.getElementById("share_quiz_code").textContent;
         if (!code) return;
         navigator.clipboard.writeText(code);
-        alert("Quiz code copied!");
+        alert("Quiz code copied to clipboard!");
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || "";
+        return div.innerHTML;
     }
 </script>
 {% endblock %}

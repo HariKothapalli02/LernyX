@@ -18,14 +18,15 @@
     }
 
     .output-console {
-        background-color: #0d0d0d;
-        color: #d4d4d4;
+        background-color: #090d16;
+        color: #e2e8f0;
         font-family: 'Consolas', 'Monaco', monospace;
-        padding: 10px;
+        padding: 12px;
         height: 100%;
         overflow-y: auto;
-        border: 1px solid #262626;
+        border: 1px solid #1e293b;
         font-size: 0.88rem;
+        border-radius: 8px;
     }
 
     .problem-row {
@@ -34,44 +35,47 @@
     }
 
     .problem-row:hover {
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: rgba(124, 58, 237, 0.04) !important;
     }
 
     /* 3-View Workspace Side-by-Side Cards */
     .workspace-pane-card {
-        height: calc(100vh - 140px);
+        height: calc(100vh - 145px);
         min-height: 580px;
         display: flex;
         flex-direction: column;
-        border-radius: 6px;
-        border: 1px solid #2d2d2d;
-        background-color: #0c0c0c;
+        border-radius: 14px;
+        border: 1px solid rgba(124, 58, 237, 0.12);
+        background-color: #ffffff;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
         overflow: hidden;
     }
 
     .ai-chat-stream {
         overflow-y: auto;
-        padding: 12px;
+        padding: 14px;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        background: #f8fafc;
     }
 
     .ai-bubble {
-        background: #171717;
-        border: 1px solid #2a2a2a;
-        border-radius: 8px;
-        padding: 10px 12px;
-        color: #e5e5e5;
+        background: #ffffff;
+        border: 1px solid rgba(124, 58, 237, 0.12);
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: #1e293b;
         font-size: 0.88rem;
-        line-height: 1.55;
+        line-height: 1.6;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
     }
 
     .ai-bubble pre {
-        background: #000;
-        border: 1px solid #333;
-        border-radius: 6px;
-        padding: 10px;
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 8px;
+        padding: 10px 12px;
         position: relative;
         margin-top: 8px;
         margin-bottom: 8px;
@@ -84,13 +88,14 @@
     }
 
     .user-bubble {
-        background: #1e3a8a;
-        color: #fff;
-        border-radius: 8px;
-        padding: 8px 12px;
+        background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+        color: #ffffff;
+        border-radius: 12px;
+        padding: 8px 14px;
         align-self: flex-end;
         max-width: 90%;
         font-size: 0.88rem;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
     }
 
     .code-action-bar {
@@ -102,33 +107,43 @@
     }
 
     .quick-chip {
-        font-size: 0.74rem;
-        border-radius: 16px;
-        padding: 3px 8px;
+        font-size: 0.76rem;
+        border-radius: 20px;
+        padding: 4px 10px;
         font-weight: 600;
         white-space: nowrap;
+        background: #ffffff;
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        color: var(--primary-purple);
+        transition: all 0.2s ease;
+    }
+
+    .quick-chip:hover {
+        background: var(--primary-purple);
+        color: #ffffff;
+        border-color: var(--primary-purple);
     }
 
     /* Formatted Problem Description Content */
     .problem-description-content {
         line-height: 1.7;
-        color: #d1d5db;
+        color: #334155;
         font-size: 0.93rem;
     }
 
     .problem-description-content code {
-        background: #18181b;
-        color: #38bdf8;
+        background: rgba(124, 58, 237, 0.08);
+        color: var(--primary-purple);
         padding: 2px 6px;
         border-radius: 4px;
         font-size: 0.88em;
-        border: 1px solid #3f3f46;
+        border: 1px solid rgba(124, 58, 237, 0.15);
         font-family: 'Consolas', 'Monaco', monospace;
     }
 
     .problem-description-content b,
     .problem-description-content strong {
-        color: #ffffff;
+        color: #0f172a;
         font-weight: 700;
     }
 
@@ -149,33 +164,34 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-2 px-md-3">
+<div class="container-fluid py-3 px-md-4">
 
     <!-- ========================================== -->
     <!-- VIEW 1: PROBLEMS CATALOG (DEFAULT)         -->
     <!-- ========================================== -->
     <div id="view-problems-list">
         <!-- Catalog Header Banner -->
-        <div class="card bg-black border-secondary mb-3 shadow">
-            <div class="card-body p-4">
+        <div class="card bg-white border-0 mb-3 shadow-sm" style="border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.12) !important;">
+            <div class="card-body p-4 p-md-5">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <h2 class="fw-bold tracking-tight mb-0 text-white">
-                                <i class="bi bi-code-slash text-primary me-2"></i>DSA Problem Vault
-                            </h2>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2">Interactive</span>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge badge-purple px-2.5 py-1">DSA Master Suite</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Interactive 3-Pane</span>
                         </div>
-                        <p class="text-secondary mb-0 small">
+                        <h2 class="fw-bold tracking-tight mb-2 text-slate" style="font-size: clamp(1.4rem, 2.5vw, 1.85rem);">
+                            <i class="bi bi-code-slash text-purple me-2"></i>DSA Problem Vault & Code Workspace
+                        </h2>
+                        <p class="text-secondary mb-0" style="max-width: 680px; font-size: 0.92rem; line-height: 1.5;">
                             Solve algorithmic challenges, master Data Structures, test code in Python/Java/C, and get instant explanations with LernyX Intelligence.
                         </p>
                     </div>
                     <div class="d-flex align-items-center gap-3">
-                        <div class="text-end d-none d-sm-block">
-                            <div class="small text-secondary">Your DSA Score</div>
-                            <div class="fs-4 fw-bold text-success" id="dsa-score-display">{{ current_user.dsa_score }} pts</div>
+                        <div class="text-end d-none d-sm-block p-3 rounded-3" style="background: rgba(124, 58, 237, 0.05); border: 1px solid rgba(124, 58, 237, 0.12);">
+                            <div class="small text-secondary fw-semibold">Your DSA Score</div>
+                            <div class="fs-4 fw-bold" style="color: var(--primary-purple);" id="dsa-score-display">{{ current_user.dsa_score }} pts</div>
                         </div>
-                        <button class="btn btn-outline-primary fw-bold d-flex align-items-center gap-2" onclick="generateQuestions()">
+                        <button class="btn btn-primary fw-bold d-flex align-items-center gap-2 shadow-sm py-2.5 px-3" style="border-radius: 10px;" onclick="generateQuestions()">
                             <i class="bi bi-magic"></i>
                             <span>Generate New</span>
                         </button>
@@ -183,40 +199,40 @@
                 </div>
 
                 <!-- Stats summary bar -->
-                <div class="row g-3 mt-3 pt-3 border-top border-secondary">
+                <div class="row g-3 mt-3 pt-3 border-top" style="border-color: rgba(124, 58, 237, 0.08) !important;">
                     <div class="col-6 col-md-3">
-                        <div class="text-secondary small">Total Questions</div>
-                        <div class="fs-5 fw-bold text-white" id="stat-total-questions">-</div>
+                        <div class="text-muted small">Total Questions</div>
+                        <div class="fs-5 fw-bold text-slate" id="stat-total-questions">-</div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="text-secondary small">Solved by You</div>
+                        <div class="text-muted small">Solved by You</div>
                         <div class="fs-5 fw-bold text-success" id="stat-solved-questions">-</div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="text-secondary small">Completion Rate</div>
-                        <div class="fs-5 fw-bold text-info" id="stat-completion-rate">0%</div>
+                        <div class="text-muted small">Completion Rate</div>
+                        <div class="fs-5 fw-bold text-purple" id="stat-completion-rate">0%</div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="text-secondary small">Supported Languages</div>
-                        <div class="fs-6 fw-bold text-white">Python &bull; Java &bull; C</div>
+                        <div class="text-muted small">Supported Languages</div>
+                        <div class="fs-6 fw-bold text-slate">Python &bull; Java &bull; C</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Search and Filter Bar -->
-        <div class="card bg-dark border-secondary mb-3 shadow-sm">
-            <div class="card-body py-2 px-3">
+        <div class="card bg-white border-0 mb-3 shadow-sm" style="border-radius: 12px; border: 1px solid rgba(124, 58, 237, 0.1) !important;">
+            <div class="card-body py-2.5 px-3">
                 <div class="row g-2 align-items-center">
                     <div class="col-md-5">
                         <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-black border-secondary text-secondary"><i class="bi bi-search"></i></span>
-                            <input type="text" id="catalog-search" class="form-control bg-black border-secondary text-white"
-                                placeholder="Search by title, topic, or keyword..." autocomplete="off" onkeyup="filterProblemsList()">
+                            <span class="input-group-text bg-white border-end-0 text-secondary" style="border-color: #cbd5e1;"><i class="bi bi-search"></i></span>
+                            <input type="text" id="catalog-search" class="form-control border-start-0"
+                                placeholder="Search by title, topic, or keyword..." autocomplete="off" onkeyup="filterProblemsList()" style="border-color: #cbd5e1; font-size: 0.88rem;">
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <select id="catalog-difficulty-filter" class="form-select form-select-sm bg-black border-secondary text-white" onchange="filterProblemsList()">
+                        <select id="catalog-difficulty-filter" class="form-select form-select-sm" onchange="filterProblemsList()" style="border-color: #cbd5e1; font-size: 0.88rem;">
                             <option value="all">All Difficulties</option>
                             <option value="Easy">Easy</option>
                             <option value="Medium">Medium</option>
@@ -224,14 +240,14 @@
                         </select>
                     </div>
                     <div class="col-6 col-md-3">
-                        <select id="catalog-status-filter" class="form-select form-select-sm bg-black border-secondary text-white" onchange="filterProblemsList()">
+                        <select id="catalog-status-filter" class="form-select form-select-sm" onchange="filterProblemsList()" style="border-color: #cbd5e1; font-size: 0.88rem;">
                             <option value="all">All Status</option>
                             <option value="solved">Solved</option>
                             <option value="unsolved">Unsolved</option>
                         </select>
                     </div>
                     <div class="col-md-1 text-end">
-                        <button class="btn btn-sm btn-outline-secondary w-100" onclick="resetFilters()" title="Reset Filters">
+                        <button class="btn btn-sm btn-outline-secondary w-100" onclick="resetFilters()" title="Reset Filters" style="border-radius: 8px;">
                             <i class="bi bi-arrow-repeat"></i>
                         </button>
                     </div>
@@ -240,16 +256,16 @@
         </div>
 
         <!-- Problems Table -->
-        <div class="card bg-black border-secondary shadow">
+        <div class="card bg-white border-0 shadow-sm overflow-hidden" style="border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.12) !important;">
             <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle mb-0" id="problems-table">
-                    <thead class="table-dark text-secondary border-bottom border-secondary small text-uppercase">
+                <table class="table table-hover align-middle mb-0" id="problems-table">
+                    <thead style="background: rgba(124, 58, 237, 0.04); color: #475569; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase;">
                         <tr>
-                            <th style="width: 100px;">Status</th>
-                            <th>Problem Title</th>
-                            <th style="width: 180px;">Topic</th>
-                            <th style="width: 130px;">Difficulty</th>
-                            <th style="width: 150px;" class="text-end">Action</th>
+                            <th class="py-3 px-3" style="width: 110px;">Status</th>
+                            <th class="py-3">Problem Title</th>
+                            <th class="py-3" style="width: 180px;">Topic</th>
+                            <th class="py-3" style="width: 130px;">Difficulty</th>
+                            <th class="py-3 px-3 text-end" style="width: 160px;">Action</th>
                         </tr>
                     </thead>
                     <tbody id="problems-table-body">
@@ -272,22 +288,22 @@
     <!-- ========================================================================= -->
     <div id="view-problem-workspace" style="display: none;">
         <!-- Workspace Top Navigation -->
-        <div class="card bg-black border-secondary mb-2 shadow-sm">
+        <div class="card bg-white border-0 mb-2 shadow-sm" style="border-radius: 12px; border: 1px solid rgba(124, 58, 237, 0.12) !important;">
             <div class="card-body py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 fw-bold" onclick="backToProblemsList()">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 fw-bold" onclick="backToProblemsList()" style="border-radius: 8px;">
                         <i class="bi bi-arrow-left"></i>
                         <span>Problems</span>
                     </button>
-                    <span class="text-secondary">|</span>
-                    <h5 class="mb-0 text-white fw-bold" id="workspace-title">Loading Problem...</h5>
+                    <span class="text-muted d-none d-sm-inline">|</span>
+                    <h5 class="mb-0 text-slate fw-bold text-truncate" id="workspace-title" style="max-width: 400px; font-size: 1.05rem;">Loading Problem...</h5>
                     <span id="workspace-difficulty" class="badge bg-secondary">Easy</span>
-                    <span id="workspace-topic" class="badge bg-dark border border-secondary text-secondary d-none d-sm-inline">Topic</span>
-                    <span id="workspace-status-badge" class="badge bg-success d-none"><i class="bi bi-check-circle-fill me-1"></i> Solved</span>
+                    <span id="workspace-topic" class="badge bg-light text-secondary border d-none d-sm-inline">Topic</span>
+                    <span id="workspace-status-badge" class="badge bg-success-subtle text-success border border-success-subtle d-none"><i class="bi bi-check-circle-fill me-1"></i> Solved</span>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
-                    <button id="workspace-github-btn" class="btn btn-sm btn-outline-light d-none align-items-center gap-1 fw-bold" onclick="handlePushToGitHub()">
+                    <button id="workspace-github-btn" class="btn btn-sm btn-outline-dark d-none align-items-center gap-1 fw-bold" onclick="handlePushToGitHub()" style="border-radius: 8px;">
                         <i class="bi bi-github"></i>
                         <span>Push to GitHub</span>
                     </button>
@@ -300,9 +316,9 @@
             <!-- 1. Left View: Problem Description & Test Cases -->
             <div class="col-xl-4 col-lg-4 col-md-12">
                 <div class="card workspace-pane-card shadow-sm">
-                    <div class="card-header bg-dark border-bottom border-secondary d-flex justify-content-between align-items-center py-2 px-3">
-                        <span class="fw-bold text-white small text-uppercase tracking-wider">
-                            <i class="bi bi-file-text me-1 text-primary"></i> Problem Description
+                    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2.5 px-3" style="border-color: rgba(124, 58, 237, 0.1) !important;">
+                        <span class="fw-bold text-slate small text-uppercase tracking-wider">
+                            <i class="bi bi-file-text me-1 text-purple"></i> Problem Description
                         </span>
                     </div>
                     <div class="card-body overflow-auto p-3" id="workspace-description-body" style="flex: 1;">
@@ -315,22 +331,22 @@
             <div class="col-xl-4 col-lg-4 col-md-12">
                 <div class="card workspace-pane-card shadow-sm">
                     <!-- Editor Top Control Bar -->
-                    <div class="card-header bg-dark border-bottom border-secondary py-2 px-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div class="card-header bg-white border-bottom py-2 px-3 d-flex flex-wrap justify-content-between align-items-center gap-2" style="border-color: rgba(124, 58, 237, 0.1) !important;">
                         <div class="d-flex align-items-center gap-2">
-                            <select id="language-select" class="form-select form-select-sm bg-black border-secondary text-white fw-bold" style="width: 105px;" onchange="changeLanguage()">
+                            <select id="language-select" class="form-select form-select-sm fw-bold" style="width: 105px; border-color: #cbd5e1; border-radius: 8px;" onchange="changeLanguage()">
                                 <option value="java" selected>Java</option>
                                 <option value="python">Python</option>
                                 <option value="c">C</option>
                             </select>
-                            <button id="reset-btn" class="btn btn-outline-secondary btn-sm" onclick="resetToBoilerplate()" title="Reset to standard template">
+                            <button id="reset-btn" class="btn btn-outline-secondary btn-sm" onclick="resetToBoilerplate()" title="Reset to standard template" style="border-radius: 8px;">
                                 <i class="bi bi-arrow-counterclockwise"></i>
                             </button>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <button id="run-btn" class="btn btn-sm btn-outline-success fw-bold px-3 d-flex align-items-center gap-1" onclick="runCode()">
+                            <button id="run-btn" class="btn btn-sm btn-outline-success fw-bold px-3 d-flex align-items-center gap-1" onclick="runCode()" style="border-radius: 8px;">
                                 <i class="bi bi-play-fill fs-6"></i> Run
                             </button>
-                            <button id="submit-btn" class="btn btn-sm btn-primary fw-bold px-3 d-flex align-items-center gap-1" onclick="submitCode()">
+                            <button id="submit-btn" class="btn btn-sm btn-primary fw-bold px-3 d-flex align-items-center gap-1 shadow-sm" onclick="submitCode()" style="border-radius: 8px;">
                                 <i class="bi bi-check-circle-fill"></i> Submit
                             </button>
                         </div>
@@ -342,9 +358,9 @@
                     </div>
 
                     <!-- Output Console Area -->
-                    <div class="card-footer bg-black border-top border-secondary p-2" style="height: 175px; display: flex; flex-direction: column;">
+                    <div class="card-footer bg-light border-top p-2" style="height: 180px; display: flex; flex-direction: column; border-color: rgba(124, 58, 237, 0.1) !important;">
                         <div class="d-flex justify-content-between align-items-center mb-1 px-1">
-                            <span class="small text-secondary text-uppercase fw-bold mono-font">
+                            <span class="small text-secondary text-uppercase fw-bold mono-font" style="font-size: 0.74rem;">
                                 <i class="bi bi-terminal me-1"></i> Console Output
                             </span>
                             <small class="text-muted" id="run-status-text"></small>
@@ -360,49 +376,49 @@
             <div class="col-xl-4 col-lg-4 col-md-12">
                 <div class="card workspace-pane-card shadow-sm">
                     <!-- AI Header -->
-                    <div class="card-header bg-dark border-bottom border-secondary py-2 px-3 d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-white border-bottom py-2.5 px-3 d-flex justify-content-between align-items-center" style="border-color: rgba(124, 58, 237, 0.1) !important;">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-primary text-white p-1"><i class="bi bi-robot"></i></span>
-                            <span class="fw-bold text-white small text-uppercase tracking-wider">LernyX AI Copilot</span>
+                            <span class="badge badge-purple p-1"><i class="bi bi-robot"></i></span>
+                            <span class="fw-bold text-slate small text-uppercase tracking-wider">LernyX AI Copilot</span>
                             <span class="badge bg-success-subtle text-success border border-success-subtle py-0 px-2" style="font-size: 0.7rem;">Online</span>
                         </div>
-                        <button class="btn btn-xs btn-outline-secondary py-0 px-2" onclick="clearAiChat()" title="Reset Chat">
+                        <button class="btn btn-xs btn-outline-secondary py-0 px-2" onclick="clearAiChat()" title="Reset Chat" style="border-radius: 6px;">
                             <i class="bi bi-trash3"></i> Clear
                         </button>
                     </div>
 
                     <!-- Quick Action Chips -->
-                    <div class="p-2 px-2 bg-black border-bottom border-secondary d-flex gap-1 overflow-auto text-nowrap" style="scrollbar-width: thin;">
-                        <button class="btn btn-xs btn-outline-info quick-chip" onclick="triggerQuickAi('Give me the complete optimal code in ' + document.getElementById('language-select').value + ' with explanation.')">
-                            <i class="bi bi-code-slash"></i> Complete Code
+                    <div class="p-2 px-2 bg-light border-bottom d-flex gap-1.5 overflow-auto text-nowrap" style="scrollbar-width: thin; border-color: rgba(124, 58, 237, 0.1) !important;">
+                        <button class="btn btn-xs quick-chip" onclick="triggerQuickAi('Give me the complete optimal code in ' + document.getElementById('language-select').value + ' with explanation.')">
+                            <i class="bi bi-code-slash me-1"></i> Complete Code
                         </button>
-                        <button class="btn btn-xs btn-outline-warning quick-chip" onclick="triggerQuickAi('Explain the approach, intuition, and algorithm logic step by step.')">
-                            <i class="bi bi-lightbulb"></i> Intuition
+                        <button class="btn btn-xs quick-chip" onclick="triggerQuickAi('Explain the approach, intuition, and algorithm logic step by step.')">
+                            <i class="bi bi-lightbulb me-1"></i> Intuition
                         </button>
-                        <button class="btn btn-xs btn-outline-danger quick-chip" onclick="triggerQuickAi('Analyze my current code in the editor, find any bugs or edge cases, and show how to fix them.')">
-                            <i class="bi bi-bug"></i> Fix Bugs
+                        <button class="btn btn-xs quick-chip" onclick="triggerQuickAi('Analyze my current code in the editor, find any bugs or edge cases, and show how to fix them.')">
+                            <i class="bi bi-bug me-1"></i> Fix Bugs
                         </button>
-                        <button class="btn btn-xs btn-outline-light quick-chip" onclick="triggerQuickAi('What is the optimal Time and Space Complexity for this problem?')">
-                            <i class="bi bi-speedometer2"></i> Complexity
+                        <button class="btn btn-xs quick-chip" onclick="triggerQuickAi('What is the optimal Time and Space Complexity for this problem?')">
+                            <i class="bi bi-speedometer2 me-1"></i> Complexity
                         </button>
                     </div>
 
                     <!-- Message Stream Area -->
                     <div class="ai-chat-stream" id="ai-chat-stream" style="flex: 1; overflow-y: auto;">
                         <div class="ai-bubble">
-                            <strong>Hi! 👋 I am your LernyX AI Assistant.</strong><br>
+                            <strong class="text-slate">Hi! 👋 I am your LernyX AI Assistant.</strong><br>
                             I have full context of this problem, your current code in the editor, and test cases.<br>
                             Click <em>"Complete Code"</em> above or ask me any doubt below!
                         </div>
                     </div>
 
                     <!-- AI Input Form -->
-                    <div class="card-footer bg-dark border-top border-secondary p-2">
+                    <div class="card-footer bg-white border-top p-2" style="border-color: rgba(124, 58, 237, 0.1) !important;">
                         <form id="ai-chat-form" onsubmit="event.preventDefault(); sendAiMessage();" class="d-flex gap-2">
-                            <textarea id="ai-chat-input" class="form-control bg-black border-secondary text-white small" rows="2"
-                                placeholder="Ask any doubt or question..." style="resize: none; font-size: 0.88rem;"
+                            <textarea id="ai-chat-input" class="form-control small" rows="2"
+                                placeholder="Ask any doubt or question..." style="resize: none; font-size: 0.88rem; border-color: #cbd5e1; border-radius: 10px;"
                                 onkeydown="if(event.key === 'Enter' && !event.shiftKey){ event.preventDefault(); sendAiMessage(); }"></textarea>
-                            <button type="submit" id="ai-send-btn" class="btn btn-primary px-3 fw-bold d-flex align-items-center justify-content-center">
+                            <button type="submit" id="ai-send-btn" class="btn btn-primary px-3 fw-bold d-flex align-items-center justify-content-center" style="border-radius: 10px;">
                                 <i class="bi bi-send-fill"></i>
                             </button>
                         </form>
@@ -421,21 +437,21 @@
 <!-- API Key Modal -->
 <div class="modal fade" id="apiKeyModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content bg-black border border-secondary text-white">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title fw-bold"><i class="bi bi-magic me-2 text-primary"></i>Generate New Problems</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-content bg-white border-0 shadow-lg text-slate" style="border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.15) !important;">
+            <div class="modal-header border-bottom" style="border-color: #f1f5f9 !important;">
+                <h5 class="modal-title fw-bold text-slate"><i class="bi bi-magic me-2 text-purple"></i>Generate New Problems</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <p class="text-secondary small">LernyX AI will automatically craft new structured DSA problems with hidden and edge-case test suites.</p>
                 <div class="mb-3">
-                    <label class="form-label small text-white">AI API Key (Optional if configured on server)</label>
-                    <input type="password" id="gemini-api-key" class="form-control bg-dark border-secondary text-white" placeholder="AIzaSy...">
+                    <label class="form-label small fw-semibold text-slate">AI API Key (Optional if configured on server)</label>
+                    <input type="password" id="gemini-api-key" class="form-control" placeholder="AIzaSy..." style="border-radius: 8px;">
                 </div>
             </div>
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary fw-bold" onclick="submitGeneration()">Generate Problems</button>
+            <div class="modal-footer border-top" style="border-color: #f1f5f9 !important;">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                <button type="button" class="btn btn-primary fw-bold" onclick="submitGeneration()" style="border-radius: 8px;">Generate Problems</button>
             </div>
         </div>
     </div>
@@ -444,17 +460,17 @@
 <!-- Test Results Modal -->
 <div class="modal fade" id="resultsModal" tabindex="-1" aria-labelledby="resultsModalLabel" aria-hidden="true" style="z-index: 100050;">
     <div class="modal-dialog modal-lg modal-dialog-centered" style="z-index: 100051; pointer-events: auto;">
-        <div class="modal-content bg-black border border-secondary text-white shadow-lg" style="position: relative; z-index: 100052; pointer-events: auto;">
-            <div class="modal-header border-secondary d-flex justify-content-between align-items-center">
-                <h5 class="modal-title fw-bold" id="resultsModalLabel"><i class="bi bi-cpu me-2 text-primary"></i>Submission Results</h5>
-                <button type="button" class="btn-close btn-close-white" onclick="closeResultsModal()" aria-label="Close" style="cursor: pointer; z-index: 100055; pointer-events: auto;"></button>
+        <div class="modal-content bg-white text-slate shadow-lg" style="position: relative; z-index: 100052; pointer-events: auto; border-radius: 18px; border: 1px solid rgba(124, 58, 237, 0.15);">
+            <div class="modal-header border-bottom d-flex justify-content-between align-items-center" style="border-color: #f1f5f9 !important;">
+                <h5 class="modal-title fw-bold text-slate" id="resultsModalLabel"><i class="bi bi-cpu me-2 text-purple"></i>Submission Results</h5>
+                <button type="button" class="btn-close" onclick="closeResultsModal()" aria-label="Close" style="cursor: pointer; z-index: 100055; pointer-events: auto;"></button>
             </div>
-            <div class="modal-body" id="results-body">
+            <div class="modal-body p-4" id="results-body">
                 <!-- Results injected here -->
             </div>
-            <div class="modal-footer border-secondary d-flex justify-content-between align-items-center">
+            <div class="modal-footer border-top d-flex justify-content-between align-items-center" style="border-color: #f1f5f9 !important;">
                 <div id="github-sync-action-container"></div>
-                <button type="button" class="btn btn-secondary px-4 fw-bold" onclick="closeResultsModal()" style="cursor: pointer; z-index: 100055; pointer-events: auto;">Close</button>
+                <button type="button" class="btn btn-secondary px-4 fw-bold" onclick="closeResultsModal()" style="cursor: pointer; z-index: 100055; pointer-events: auto; border-radius: 8px;">Close</button>
             </div>
         </div>
     </div>
@@ -463,27 +479,27 @@
 <!-- GitHub Token Modal -->
 <div class="modal fade" id="githubTokenModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content bg-black border border-secondary text-white">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title fw-bold"><i class="bi bi-github me-2"></i>Connect GitHub Auto-Sync</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-content bg-white text-slate shadow-lg" style="border-radius: 18px; border: 1px solid rgba(124, 58, 237, 0.15);">
+            <div class="modal-header border-bottom" style="border-color: #f1f5f9 !important;">
+                <h5 class="modal-title fw-bold text-slate"><i class="bi bi-github me-2"></i>Connect GitHub Auto-Sync</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <p class="text-secondary small mb-3">
-                    LernyX commits your solution and <strong>LernyX Intelligence complexity notes</strong> directly to your repository <code class="text-white">LernyX-DSA-Solutions</code> to turn your GitHub activity streak green!
+                    LernyX commits your solution and <strong>LernyX Intelligence complexity notes</strong> directly to your repository <code class="text-purple">LernyX-DSA-Solutions</code> to turn your GitHub activity streak green!
                 </p>
                 <div class="mb-3">
-                    <label class="form-label small mono-font text-white">GitHub Personal Access Token (PAT)</label>
-                    <input type="password" id="github-pat-input" class="form-control bg-dark border-secondary text-white" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                    <div class="form-text text-secondary small mt-2">
-                        Requires <code class="text-info">repo</code> scope.
+                    <label class="form-label small fw-semibold text-slate">GitHub Personal Access Token (PAT)</label>
+                    <input type="password" id="github-pat-input" class="form-control" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="border-radius: 8px;">
+                    <div class="form-text text-muted small mt-2">
+                        Requires <code class="text-purple">repo</code> scope.
                     </div>
                 </div>
                 <div id="github-modal-alert" class="d-none alert alert-danger small py-2"></div>
             </div>
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-light text-black fw-bold px-3" onclick="saveGitHubTokenAndPush()">Save & Push Now</button>
+            <div class="modal-footer border-top" style="border-color: #f1f5f9 !important;">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                <button type="button" class="btn btn-primary fw-bold px-3" onclick="saveGitHubTokenAndPush()" style="border-radius: 8px;">Save & Push Now</button>
             </div>
         </div>
     </div>
@@ -568,7 +584,7 @@
             tbody.innerHTML = `
                 <tr>
                     <td colspan="5" class="text-center py-5 text-secondary">
-                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        <i class="bi bi-inbox fs-2 d-block mb-2 text-muted"></i>
                         No DSA problems found. Click "Generate New" to create curated challenges!
                     </td>
                 </tr>
@@ -581,24 +597,24 @@
             const isSolved = Boolean(q.solved);
             const statusHtml = isSolved
                 ? `<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i> Solved</span>`
-                : `<span class="badge bg-dark border border-secondary text-secondary px-2 py-1"><i class="bi bi-circle me-1"></i> Unsolved</span>`;
+                : `<span class="badge bg-light border text-muted px-2 py-1"><i class="bi bi-circle me-1"></i> Unsolved</span>`;
 
             const diffColor = q.difficulty === 'Easy' ? 'success' : (q.difficulty === 'Medium' ? 'warning' : 'danger');
 
             html += `
                 <tr class="problem-row" onclick="openProblemById('${q._id}')">
-                    <td>${statusHtml}</td>
+                    <td class="px-3">${statusHtml}</td>
                     <td>
-                        <span class="fw-bold text-white fs-6 d-block">${escapeHtml(q.title)}</span>
+                        <span class="fw-bold text-slate fs-6 d-block">${escapeHtml(q.title)}</span>
                     </td>
                     <td>
-                        <span class="badge bg-dark text-secondary border border-secondary">${escapeHtml(q.topic || 'General')}</span>
+                        <span class="badge bg-light text-secondary border">${escapeHtml(q.topic || 'General')}</span>
                     </td>
                     <td>
                         <span class="badge bg-${diffColor}-subtle text-${diffColor} border border-${diffColor}-subtle">${escapeHtml(q.difficulty)}</span>
                     </td>
-                    <td class="text-end">
-                        <button class="btn btn-sm ${isSolved ? 'btn-outline-success' : 'btn-outline-primary'} fw-bold" onclick="event.stopPropagation(); openProblemById('${q._id}')">
+                    <td class="text-end px-3">
+                        <button class="btn btn-sm ${isSolved ? 'btn-outline-success' : 'btn-outline-primary'} fw-bold" style="border-radius: 8px;" onclick="event.stopPropagation(); openProblemById('${q._id}')">
                             ${isSolved ? 'Review Code' : 'Solve Challenge'} <i class="bi bi-arrow-right ms-1"></i>
                         </button>
                     </td>
@@ -694,20 +710,20 @@
         let descHtml = `<div class="problem-description-content mb-4">${formattedDesc}</div>`;
 
         if (q.test_cases && q.test_cases.length > 0) {
-            descHtml += `<h6 class="text-white fw-bold mb-2"><i class="bi bi-card-checklist text-primary me-2"></i>Example Cases:</h6>`;
+            descHtml += `<h6 class="text-slate fw-bold mb-2"><i class="bi bi-card-checklist text-purple me-2"></i>Example Cases:</h6>`;
             q.test_cases.forEach((tc, idx) => {
                 if (!tc.hidden) {
                     descHtml += `
-                        <div class="card bg-dark border-secondary mb-2">
-                            <div class="card-header bg-black border-secondary py-1 px-2 d-flex justify-content-between align-items-center">
+                        <div class="card bg-light border mb-2" style="border-radius: 10px; border-color: rgba(124, 58, 237, 0.12) !important;">
+                            <div class="card-header bg-white py-1 px-2.5 d-flex justify-content-between align-items-center" style="border-bottom: 1px solid rgba(124, 58, 237, 0.08);">
                                 <span class="small text-secondary fw-bold">Example ${idx + 1}</span>
                                 <button class="btn btn-xs btn-outline-secondary py-0 px-2" onclick="copyToClipboard('${escapeJs(tc.input)}')">
                                     <i class="bi bi-clipboard"></i> Copy
                                 </button>
                             </div>
                             <div class="card-body p-2 font-monospace small">
-                                <div><strong class="text-secondary">Input:</strong> <span class="text-white">${escapeHtml(tc.input)}</span></div>
-                                <div><strong class="text-secondary">Output:</strong> <span class="text-success">${escapeHtml(tc.output)}</span></div>
+                                <div><strong class="text-muted">Input:</strong> <span class="text-slate">${escapeHtml(tc.input)}</span></div>
+                                <div><strong class="text-muted">Output:</strong> <span class="text-success fw-bold">${escapeHtml(tc.output)}</span></div>
                             </div>
                         </div>
                     `;
@@ -885,12 +901,10 @@
                 let html = '';
 
                 if (data.all_passed) {
-                    // Update state
                     currentQuestion.solved = true;
                     currentQuestion.user_code = code;
                     currentQuestion.user_language = lang;
 
-                    // Update UI elements
                     document.getElementById('workspace-status-badge').classList.remove('d-none');
                     document.getElementById('workspace-github-btn').classList.remove('d-none');
                     const scoreDisp = document.getElementById('dsa-score-display');
@@ -901,16 +915,16 @@
                     submitBtn.classList.add('btn-success');
 
                     html += `
-                        <div class="alert alert-success border-success bg-dark text-white p-3 mb-3">
+                        <div class="alert alert-success border-success bg-success-subtle text-success p-3 mb-3" style="border-radius: 12px;">
                             <h4 class="text-success fw-bold mb-1"><i class="bi bi-trophy-fill me-2"></i> All Test Cases Passed!</h4>
-                            <p class="mb-1 text-secondary">Points Awarded: <strong class="text-success">+${data.points_awarded}</strong></p>
-                            <p class="mb-0 text-secondary">Total DSA Score: <strong class="text-white">${data.new_total_score}</strong></p>
+                            <p class="mb-1 text-slate">Points Awarded: <strong class="text-success">+${data.points_awarded}</strong></p>
+                            <p class="mb-0 text-slate">Total DSA Score: <strong>${data.new_total_score}</strong></p>
                         </div>
                     `;
 
                     if (githubActionContainer) {
                         githubActionContainer.innerHTML = `
-                            <button id="push-github-btn" class="btn btn-outline-light d-flex align-items-center gap-2 fw-bold" onclick="handlePushToGitHub()">
+                            <button id="push-github-btn" class="btn btn-outline-dark d-flex align-items-center gap-2 fw-bold" onclick="handlePushToGitHub()" style="border-radius: 8px;">
                                 <i class="bi bi-github fs-5"></i>
                                 <span>PUSH TO GITHUB</span>
                             </button>
@@ -918,9 +932,9 @@
                     }
                 } else {
                     html += `
-                        <div class="alert alert-danger border-danger bg-dark text-white p-3 mb-3">
+                        <div class="alert alert-danger border-danger bg-danger-subtle text-danger p-3 mb-3" style="border-radius: 12px;">
                             <h4 class="text-danger fw-bold mb-1"><i class="bi bi-x-circle-fill me-2"></i> Some Test Cases Failed</h4>
-                            <p class="mb-0 text-secondary">Check failed cases below or ask <strong>LernyX AI Copilot</strong> on the right for help!</p>
+                            <p class="mb-0 text-slate">Check failed cases below or ask <strong>LernyX AI Copilot</strong> on the right for help!</p>
                         </div>
                     `;
                     if (githubActionContainer) githubActionContainer.innerHTML = '';
@@ -929,19 +943,19 @@
                 html += '<ul class="list-group list-group-flush mb-0">';
                 data.results.forEach(r => {
                     html += `
-                        <li class="list-group-item bg-black text-white border-secondary d-flex justify-content-between align-items-center">
+                        <li class="list-group-item bg-white text-slate border-bottom d-flex justify-content-between align-items-center py-2.5">
                             <div>
                                 <strong>Test Case ${r.case_index}</strong>
-                                ${r.hidden ? '<span class="badge bg-secondary ms-2">Hidden Case</span>' : ''}
+                                ${r.hidden ? '<span class="badge bg-light text-secondary border ms-2">Hidden Case</span>' : ''}
                             </div>
-                            <span class="badge bg-${r.passed ? 'success' : 'danger'} rounded-pill">
+                            <span class="badge bg-${r.passed ? 'success' : 'danger'} rounded-pill px-2.5 py-1">
                                 ${r.passed ? 'Passed' : 'Failed'}
                             </span>
                         </li>
                     `;
                     if (!r.passed && !r.hidden) {
                         html += `
-                            <li class="list-group-item bg-dark text-danger border-secondary py-2 small font-monospace">
+                            <li class="list-group-item bg-light text-danger border-bottom py-2 small font-monospace">
                                 <div>Expected: ${escapeHtml(r.expected)}</div>
                                 <div>Actual:   ${escapeHtml(r.actual)}</div>
                             </li>
@@ -999,7 +1013,7 @@
         const stream = document.getElementById('ai-chat-stream');
         stream.innerHTML = `
             <div class="ai-bubble">
-                <strong>Hi! 👋 I am your LernyX AI Copilot for "${escapeHtml(currentQuestion.title)}".</strong><br>
+                <strong class="text-slate">Hi! 👋 I am your LernyX AI Copilot for "${escapeHtml(currentQuestion.title)}".</strong><br>
                 I have full context of this problem statement, your code in the editor, and test cases.<br>
                 Click <em>"Complete Code"</em> above or ask me any doubt below!
             </div>
@@ -1232,7 +1246,7 @@
                 const link = document.createElement('a');
                 link.href = pushData.repo_url;
                 link.target = '_blank';
-                link.className = 'btn btn-sm btn-outline-info ms-2 fw-bold mono-font';
+                link.className = 'btn btn-sm btn-outline-primary ms-2 fw-bold mono-font';
                 link.innerHTML = '<i class="bi bi-box-arrow-up-right me-1"></i> View Repo';
                 container.appendChild(link);
             }
