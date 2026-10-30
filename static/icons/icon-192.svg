@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <defs>
+    <!-- Primary Royal Purple to Deep Indigo Gradient -->
+    <linearGradient id="lx-192-front" x1="30" y1="30" x2="162" y2="162" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="45%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+
+    <!-- Secondary Upper Wing Gradient -->
+    <linearGradient id="lx-192-back-top" x1="162" y1="30" x2="100" y2="92" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="50%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+
+    <!-- Secondary Lower Wing Gradient -->
+    <linearGradient id="lx-192-back-bottom" x1="92" y1="100" x2="30" y2="162" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="60%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#3730a3" />
+    </linearGradient>
+
+    <!-- Drop Shadow for realistic 3D depth over crossing wing -->
+    <filter id="lx-192-shadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="6" dy="8" stdDeviation="8" flood-color="#1e1b4b" flood-opacity="0.38" />
+    </filter>
+
+    <!-- Ambient Purple Glow -->
+    <filter id="lx-192-glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#7c3aed" flood-opacity="0.30" />
+    </filter>
+  </defs>
+
+  <g transform="translate(12, 12) scale(4.666)" filter="url(#lx-192-glow)">
+    <!-- Back Wing: Lower-Left Segment -->
+    <path d="M14.2 20.2L9.5 24.9C8.1 26.3 8.1 28.5 9.5 29.9C10.9 31.3 13.1 31.3 14.5 29.9L19.2 25.2C17.6 23.8 15.8 22 14.2 20.2Z" 
+          fill="url(#lx-192-back-bottom)" />
+
+    <!-- Back Wing: Upper-Right Segment -->
+    <path d="M26.5 6.1C25.1 4.7 22.9 4.7 21.5 6.1L16.8 10.8C18.4 12.2 20.2 14 21.8 15.8L26.5 11.1C27.9 9.7 27.9 7.5 26.5 6.1Z" 
+          fill="url(#lx-192-back-top)" />
+
+    <!-- Front Wing: Full Continuous Diagonal Ribbon with Drop Shadow -->
+    <path d="M11.5 6.5L29.5 24.5C30.9 25.9 30.9 28.1 29.5 29.5C28.1 30.9 25.9 30.9 24.5 29.5L6.5 11.5C5.1 10.1 5.1 7.9 6.5 6.5C7.9 5.1 10.1 5.1 11.5 6.5Z" 
+          fill="url(#lx-192-front)" 
+          filter="url(#lx-192-shadow)" />
+
+    <!-- Micro-Accent: Innovation Spark at the Upper Edge -->
+    <circle cx="28" cy="8" r="1.6" fill="#f5f3ff" opacity="0.95" />
+  </g>
+</svg>

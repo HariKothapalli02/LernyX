@@ -19,7 +19,14 @@
 
     .split-screen {
         min-height: 100vh;
-        width: 100vw;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .split-screen > .row {
+        width: 100% !important;
+        min-height: 100vh !important;
+        margin: 0 !important;
     }
 
     .left-pane {
@@ -46,7 +53,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 3rem 2rem;
+        padding: 3rem 2.5rem;
         position: relative;
         z-index: 1;
         min-height: 100vh;
@@ -55,7 +62,8 @@
 
     .login-container {
         width: 100%;
-        max-width: 420px;
+        max-width: 440px;
+        margin: 0 auto;
     }
 
     .custom-input {
@@ -115,28 +123,27 @@
 <div class="container-fluid p-0 split-screen">
     <div class="row g-0 h-100">
         <!-- Left Side: Image -->
-        <div class="col-lg-7 left-pane d-none d-lg-flex">
+        <div class="col-lg-6 left-pane d-none d-lg-flex">
             <img src="{{ url_for('static', filename='img/signup-bro.png') }}" alt="LernyX Sign Up Illustration" class="auth-illustration-img">
         </div>
 
-        <!-- Right Side: Form -->
-        <div class="col-lg-5 col-md-12 right-pane">
+        <!-- Right Side: Form (Centered in 50% Pane) -->
+        <div class="col-lg-6 col-12 right-pane">
             <div class="login-container fade-in-up">
                 <!-- Mobile-Only Illustration Image -->
                 <div class="mobile-auth-illustration d-lg-none text-center mb-3">
                     <img src="{{ url_for('static', filename='img/signup-bro.png') }}" alt="Sign Up Illustration" class="img-fluid" style="max-height: 150px; object-fit: contain; filter: drop-shadow(0 8px 20px rgba(124, 58, 237, 0.15));">
                 </div>
 
-                <!-- Brand -->
-                <div class="mb-3">
-                    <a href="{{ url_for('home') }}" class="text-decoration-none d-inline-flex align-items-center">
-                        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="LernyX" class="brand-logo-img me-2" width="34" height="34">
-                        <span class="brand-title" style="font-size: 1.55rem;">Lerny<span class="brand-x">X</span></span>
+                <!-- Brand & Heading Centered -->
+                <div class="text-center mb-4">
+                    <a href="{{ url_for('home') }}" class="text-decoration-none d-inline-flex align-items-center mb-3">
+                        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="LernyX" class="brand-logo-img me-2" width="36" height="36">
+                        <span class="brand-title" style="font-size: 1.65rem;">Lerny<span class="brand-x">X</span></span>
                     </a>
+                    <h1 class="fw-bold text-dark mb-1 h2 tracking-tight">Create Account</h1>
+                    <p class="text-secondary small mb-0">Join LernyX to accelerate your coding and interview mastery.</p>
                 </div>
-
-                <h1 class="fw-bold text-dark mb-1 h2 tracking-tight">Create Account</h1>
-                <p class="text-secondary small mb-4">Join LernyX to accelerate your coding and interview mastery.</p>
 
                 <form method="POST" action="{{ url_for('signup') }}">
                     <div class="mb-3">

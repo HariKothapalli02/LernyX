@@ -59,9 +59,9 @@
     <meta name="theme-color" content="#7c3aed">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/logo.svg') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
 
     <!-- Global Theme CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
@@ -162,34 +162,34 @@
             </div>
         </nav>
 
+        <!-- Modern Floating Toast Notifications Container (Positioned Safely Below Navbar) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="toast-container" style="position: fixed; top: calc(var(--navbar-height, 70px) + 16px); right: 24px; z-index: 100000;">
+            {% for category, message in messages %}
+            {% set bs_class = 'danger' if category in ['error', 'danger'] else ('success' if category == 'success' else ('warning' if category == 'warning' else 'primary')) %}
+            {% set icon_class = 'bi-exclamation-octagon-fill' if category in ['error', 'danger'] else ('bi-check-circle-fill' if category == 'success' else ('bi-exclamation-triangle-fill' if category == 'warning' else 'bi-info-circle-fill')) %}
+            <div class="toast show align-items-center bg-white border border-{{ bs_class }} border-start border-4 rounded-3 shadow-lg mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="6000" style="min-width: 320px; max-width: 440px; box-shadow: 0 14px 38px -4px rgba(124, 58, 237, 0.18), 0 4px 12px rgba(0,0,0,0.06);">
+                <div class="d-flex align-items-center p-3">
+                    <div class="fs-4 me-3 text-{{ bs_class }} flex-shrink-0">
+                        <i class="bi {{ icon_class }}"></i>
+                    </div>
+                    <div class="toast-body p-0 flex-grow-1" style="font-size: 0.92rem; line-height: 1.45;">
+                        <div class="fw-bold text-uppercase small text-{{ bs_class }} mb-0.5" style="letter-spacing: 0.04em;">
+                            {{ 'Error' if category in ['error', 'danger'] else ('Success' if category == 'success' else ('Notice' if category == 'warning' else 'Information')) }}
+                        </div>
+                        <div class="text-dark fw-medium">{{ message }}</div>
+                    </div>
+                    <button type="button" class="btn-close ms-2 me-0 flex-shrink-0" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
         <!-- Main Content -->
         <main class="flex-grow-1 position-relative" style="z-index: 1;">
-            <!-- Modern Floating Toast Notifications Container -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 99999;">
-                {% for category, message in messages %}
-                {% set bs_class = 'danger' if category in ['error', 'danger'] else ('success' if category == 'success' else ('warning' if category == 'warning' else 'primary')) %}
-                {% set icon_class = 'bi-exclamation-octagon-fill' if category in ['error', 'danger'] else ('bi-check-circle-fill' if category == 'success' else ('bi-exclamation-triangle-fill' if category == 'warning' else 'bi-info-circle-fill')) %}
-                <div class="toast show align-items-center bg-white border border-{{ bs_class }} shadow-lg rounded-3 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="6000" style="min-width: 300px; max-width: 420px; box-shadow: 0 10px 30px rgba(124,58,237,0.12);">
-                    <div class="d-flex align-items-center p-3">
-                        <div class="fs-4 me-3 text-{{ bs_class }} flex-shrink-0">
-                            <i class="bi {{ icon_class }}"></i>
-                        </div>
-                        <div class="toast-body p-0 flex-grow-1" style="font-size: 0.9rem; line-height: 1.4;">
-                            <div class="fw-bold text-uppercase small text-{{ bs_class }} mb-1">
-                                {{ 'Error' if category in ['error', 'danger'] else ('Success' if category == 'success' else ('Notice' if category == 'warning' else 'Information')) }}
-                            </div>
-                            <div class="text-dark">{{ message }}</div>
-                        </div>
-                        <button type="button" class="btn-close ms-2 me-0 flex-shrink-0" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% endwith %}
-
             {% block content %}{% endblock %}
         </main>
 
@@ -234,6 +234,15 @@
                 window.location.href = "{{ url_for('home') }}";
             }
         }
+
+        // Auto-initialize and display toasts cleanly
+        document.addEventListener('DOMContentLoaded', function () {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            toastElList.forEach(function (toastEl) {
+                var toast = new bootstrap.Toast(toastEl, { delay: 6000, autohide: true });
+                toast.show();
+            });
+        });
 
         // Navbar scroll effect
         window.addEventListener('scroll', function () {

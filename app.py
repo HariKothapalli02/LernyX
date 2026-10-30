@@ -21,6 +21,161 @@ for src_name, dst_name in [
         except Exception:
             pass
 
+def _init_pwa_icons():
+    import os, math, zlib, struct
+    icons_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "icons")
+    os.makedirs(icons_dir, exist_ok=True)
+
+    def write_png(filepath, width, height, rgba_bytes):
+        def chunk(tag, data):
+            return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xffffffff)
+        header = b"\x89PNG\r\n\x1a\n"
+        ihdr = chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
+        raw_data = bytearray()
+        row_bytes = width * 4
+        for y in range(height):
+            raw_data.append(0)
+            raw_data.extend(rgba_bytes[y * row_bytes : (y + 1) * row_bytes])
+        idat = chunk(b"IDAT", zlib.compress(bytes(raw_data), 9))
+        iend = chunk(b"IEND", b"")
+        with open(filepath, "wb") as f:
+            f.write(header + ihdr + idat + iend)
+
+    def render_icon(width, height, is_maskable=False, is_apple=False):
+        rgba = bytearray(width * height * 4)
+        scale = 0.68 if (is_maskable or is_apple) else 0.78
+        r_half = 0.095 * scale
+        feather = 1.8 / width
+        
+        p1x, p1y = 0.5 - 0.28 * scale, 0.5 - 0.28 * scale
+        p2x, p2y = 0.5 + 0.28 * scale, 0.5 + 0.28 * scale
+        vx, vy = p2x - p1x, p2y - p1y
+        v_len_sq = vx*vx + vy*vy
+
+        q1x, q1y = 0.5 + 0.28 * scale, 0.5 - 0.28 * scale
+        q2x, q2y = 0.5 - 0.28 * scale, 0.5 + 0.28 * scale
+        wx, wy = q2x - q1x, q2y - q1y
+        w_len_sq = wx*wx + wy*wy
+
+        sx, sy = 0.5 + 0.26 * scale, 0.5 - 0.27 * scale
+        s_rad = 0.038 * scale
+
+        def clamp(val, low=0.0, high=1.0):
+            return max(low, min(high, val))
+
+        def lerp(c1, c2, t):
+            return [c1[i] + (c2[i] - c1[i]) * t for i in range(3)]
+
+        c_p1 = [139, 92, 246]
+        c_p2 = [124, 58, 237]
+        c_p3 = [79, 70, 229]
+        c_b_top1 = [192, 132, 252]
+        c_b_top2 = [168, 85, 247]
+        c_b_bot1 = [99, 102, 241]
+        c_b_bot2 = [55, 48, 163]
+
+        for y in range(height):
+            ny = (y + 0.5) / height
+            for x in range(width):
+                nx = (x + 0.5) / width
+                if is_maskable:
+                    dx_c, dy_c = nx - 0.5, ny - 0.5
+                    dist_c = math.sqrt(dx_c*dx_c + dy_c*dy_c) / 0.707
+                    bg_r = int(30 * (1 - dist_c) + 15 * dist_c)
+                    bg_g = int(27 * (1 - dist_c) + 23 * dist_c)
+                    bg_b = int(75 * (1 - dist_c) + 42 * dist_c)
+                    cr, cg, cb, ca = bg_r, bg_g, bg_b, 255
+                elif is_apple:
+                    dx_c, dy_c = nx - 0.5, ny - 0.5
+                    dist_c = math.sqrt(dx_c*dx_c + dy_c*dy_c) / 0.707
+                    bg_r = int(255 * (1 - dist_c * 0.04))
+                    bg_g = int(255 * (1 - dist_c * 0.05))
+                    bg_b = 255
+                    cr, cg, cb, ca = bg_r, bg_g, bg_b, 255
+                else:
+                    cr, cg, cb, ca = 0, 0, 0, 0
+
+                # Back Wing Ribbon
+                u = clamp(((nx - q1x) * wx + (ny - q1y) * wy) / w_len_sq)
+                proj_bx = q1x + u * wx
+                proj_by = q1y + u * wy
+                dist_b = math.sqrt((nx - proj_bx)**2 + (ny - proj_by)**2)
+                gap_fade = clamp(abs(u - 0.50) / 0.12 - 0.1) if (0.38 <= u <= 0.62) else 1.0
+
+                if dist_b <= r_half + feather and gap_fade > 0.01:
+                    alpha_b = clamp((r_half - dist_b) / feather) * gap_fade
+                    col_b = lerp(c_b_top1, c_b_top2, clamp(u / 0.4)) if u < 0.5 else lerp(c_b_bot1, c_b_bot2, clamp((u - 0.6) / 0.4))
+                    src_a = alpha_b
+                    out_a = src_a + (ca / 255.0) * (1.0 - src_a)
+                    if out_a > 0.001:
+                        cr = (col_b[0] * src_a + cr * (ca / 255.0) * (1.0 - src_a)) / out_a
+                        cg = (col_b[1] * src_a + cg * (ca / 255.0) * (1.0 - src_a)) / out_a
+                        cb = (col_b[2] * src_a + cb * (ca / 255.0) * (1.0 - src_a)) / out_a
+                        ca = int(out_a * 255)
+
+                # Shadow from Front Wing
+                sh_ox, sh_oy = 0.018 * scale, 0.024 * scale
+                t_sh = clamp(((nx - sh_ox - p1x) * vx + (ny - sh_oy - p1y) * vy) / v_len_sq)
+                proj_shx = p1x + t_sh * vx + sh_ox
+                proj_shy = p1y + t_sh * vy + sh_oy
+                dist_sh = math.sqrt((nx - proj_shx)**2 + (ny - proj_shy)**2)
+                if dist_sh <= r_half + 0.035 * scale:
+                    sh_alpha = clamp((r_half + 0.035 * scale - dist_sh) / (0.04 * scale)) * 0.35
+                    cr = cr * (1.0 - sh_alpha * 0.6)
+                    cg = cg * (1.0 - sh_alpha * 0.6)
+                    cb = cb * (1.0 - sh_alpha * 0.4)
+
+                # Front Wing Ribbon
+                t = clamp(((nx - p1x) * vx + (ny - p1y) * vy) / v_len_sq)
+                proj_fx = p1x + t * vx
+                proj_fy = p1y + t * vy
+                dist_f = math.sqrt((nx - proj_fx)**2 + (ny - proj_fy)**2)
+                if dist_f <= r_half + feather:
+                    alpha_f = clamp((r_half - dist_f) / feather)
+                    col_f = lerp(c_p1, c_p2, t * 2.0) if t < 0.5 else lerp(c_p2, c_p3, (t - 0.5) * 2.0)
+                    src_a = alpha_f
+                    out_a = src_a + (ca / 255.0) * (1.0 - src_a)
+                    if out_a > 0.001:
+                        cr = (col_f[0] * src_a + cr * (ca / 255.0) * (1.0 - src_a)) / out_a
+                        cg = (col_f[1] * src_a + cg * (ca / 255.0) * (1.0 - src_a)) / out_a
+                        cb = (col_f[2] * src_a + cb * (ca / 255.0) * (1.0 - src_a)) / out_a
+                        ca = int(out_a * 255)
+
+                # Spark
+                dist_s = math.sqrt((nx - sx)**2 + (ny - sy)**2)
+                if dist_s <= s_rad + feather:
+                    alpha_s = clamp((s_rad - dist_s) / feather) * 0.95
+                    col_s = [245, 243, 255]
+                    src_a = alpha_s
+                    out_a = src_a + (ca / 255.0) * (1.0 - src_a)
+                    if out_a > 0.001:
+                        cr = (col_s[0] * src_a + cr * (ca / 255.0) * (1.0 - src_a)) / out_a
+                        cg = (col_s[1] * src_a + cg * (ca / 255.0) * (1.0 - src_a)) / out_a
+                        cb = (col_s[2] * src_a + cb * (ca / 255.0) * (1.0 - src_a)) / out_a
+                        ca = int(out_a * 255)
+
+                idx = (y * width + x) * 4
+                rgba[idx] = int(clamp(cr, 0, 255))
+                rgba[idx+1] = int(clamp(cg, 0, 255))
+                rgba[idx+2] = int(clamp(cb, 0, 255))
+                rgba[idx+3] = int(clamp(ca, 0, 255))
+        return bytes(rgba)
+
+    try:
+        # Generate 192x192
+        write_png(os.path.join(icons_dir, "icon-192.png"), 192, 192, render_icon(192, 192))
+        # Generate 512x512
+        write_png(os.path.join(icons_dir, "icon-512.png"), 512, 512, render_icon(512, 512))
+        # Generate maskable 512x512
+        write_png(os.path.join(icons_dir, "maskable-512.png"), 512, 512, render_icon(512, 512, is_maskable=True))
+        # Generate apple touch icon 180x180
+        write_png(os.path.join(icons_dir, "apple-touch-icon.png"), 180, 180, render_icon(180, 180, is_apple=True))
+        print(">> [LernyX] PWA Icons Generated Successfully!")
+    except Exception as e:
+        print(">> [LernyX] PWA Icon Gen Warning:", e)
+
+_init_pwa_icons()
+
 import re
 import json
 import random
@@ -1019,6 +1174,17 @@ def pwa_serviceworker():
     response = make_response(send_from_directory(app.static_folder, 'sw.js', mimetype='application/javascript'))
     response.headers['Service-Worker-Allowed'] = '/'
     return response
+
+@app.route('/static/icons/<path:filename>')
+def pwa_icon_handler(filename):
+    icons_dir = os.path.join(app.static_folder, 'icons')
+    target_path = os.path.join(icons_dir, filename)
+    try:
+        if not os.path.exists(target_path) or os.path.getsize(target_path) < 4000:
+            _init_pwa_icons()
+    except Exception:
+        pass
+    return send_from_directory(icons_dir, filename)
 
 @app.route("/compiler")
 @login_required

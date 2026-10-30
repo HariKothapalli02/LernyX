@@ -1,9 +1,13 @@
-const CACHE_NAME = 'lernyx-pwa-v1';
+const CACHE_NAME = 'lernyx-pwa-v2';
 const STATIC_ASSETS = [
   '/',
   '/static/css/theme.css',
   '/static/js/three-background.js',
   '/static/manifest.json',
+  '/static/img/logo.svg',
+  '/static/icons/maskable-512.svg',
+  '/static/icons/icon-512.svg',
+  '/static/icons/icon-192.svg',
   '/static/icons/icon-192.png',
   '/static/icons/icon-512.png',
   '/static/icons/apple-touch-icon.png'

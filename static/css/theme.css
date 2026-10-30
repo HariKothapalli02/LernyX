@@ -713,9 +713,15 @@ div.bg-dark:not(#editor) {
 
 .split-screen {
     min-height: 100vh;
-    width: 100vw;
-    display: flex;
+    width: 100%;
     background: #ffffff;
+    overflow-x: hidden;
+}
+
+.split-screen > .row {
+    width: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
 }
 
 .left-pane {
@@ -762,7 +768,9 @@ div.bg-dark:not(#editor) {
 
 .login-container {
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 .login-container h2,
@@ -1175,4 +1183,46 @@ div.bg-dark:not(#editor) {
 
 .text-slate {
     color: var(--text-heading) !important;
+}
+
+/* ==========================================================================
+   Toast Notifications Styling & Positioning (Safe Clearance Below Navbar)
+   ========================================================================== */
+
+.toast-container {
+    position: fixed !important;
+    top: calc(var(--navbar-height, 70px) + 16px) !important;
+    right: 24px !important;
+    left: auto !important;
+    z-index: 100000 !important;
+    pointer-events: none;
+    max-width: 440px;
+}
+
+.toast {
+    pointer-events: auto;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--radius-md) !important;
+    animation: toastSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-16px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 991.98px) {
+    .toast-container {
+        top: 76px !important;
+        right: 14px !important;
+        left: 14px !important;
+        max-width: none !important;
+    }
 }
