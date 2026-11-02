@@ -5664,9 +5664,11 @@ def chat():
         try:
             # Create temp directory if not exists
             temp_dir = tempfile.mkdtemp()
-            filename = file.filename
-            # Sanitize filename
-            filename = "".join([c for c in filename if c.isalpha() or c.isdigit() or c in "._- "])
+            # Sanitize filename thoroughly: remove spaces, parens, special characters for WAF safety
+            raw_filename = os.path.basename(file.filename)
+            filename = "".join([c if c.isalnum() or c in "._-" else "_" for c in raw_filename]).strip("._")
+            if not filename:
+                filename = f"upload_{int(time.time())}.dat"
             attachment_path = os.path.join(temp_dir, filename)
             file.save(attachment_path)
             
@@ -5675,10 +5677,13 @@ def chat():
                 "type": "image" if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')) else "pdf" if filename.lower().endswith('.pdf') else "file"
             }
             
-            # Index for RAG if it's a PDF or Text
+            # Index for RAG if it's a PDF or Text (safely without breaking chat flow)
             if filename.lower().endswith(('.pdf', '.txt')):
-                print(f"Indexing {filename} for RAG...")
-                rag_utils.process_document(attachment_path)
+                try:
+                    print(f"Indexing {filename} for RAG...")
+                    rag_utils.process_document(attachment_path)
+                except Exception as rag_err:
+                    print(f"Non-critical: RAG indexing skipped for {filename}: {rag_err}")
         except Exception as e:
             print(f"Error saving uploaded file: {str(e)}")
             return jsonify({"error": f"Failed to process file: {str(e)}"}), 500

@@ -899,7 +899,12 @@
 
         const formData = new FormData();
         formData.append('message', message);
-        if (selectedFile) formData.append('file', selectedFile);
+        if (selectedFile) {
+            // Sanitize filename on client side to prevent WAF / edge firewall rejections (e.g. parens, spaces)
+            const cleanName = (selectedFile.name || 'upload.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+            const safeFile = new File([selectedFile], cleanName, { type: selectedFile.type || 'application/octet-stream' });
+            formData.append('file', safeFile);
+        }
         if (currentChatId) formData.append('chat_id', currentChatId);
 
         const controller = new AbortController();
@@ -913,7 +918,20 @@
             });
             clearTimeout(timeoutId);
             
-            const data = await response.json();
+            let data;
+            const contentType = response.headers.get("content-type") || "";
+            if (contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                const textResponse = await response.text();
+                if (response.status === 403) {
+                    throw new Error("Request blocked (403 Forbidden). File upload may be blocked by deployment firewall (WAF) or file size exceeds Vercel limits (<4.5MB). Please try a smaller PDF.");
+                } else if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${textResponse.substring(0, 150)}`);
+                } else {
+                    data = { response: textResponse };
+                }
+            }
             if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
 
             if (data.error) {

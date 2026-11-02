@@ -10,8 +10,20 @@ load_dotenv()
 # Configure Gemini
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
-# Local storage for the "vector db"
-KNOWLEDGE_BASE_PATH = "knowledge_base.json"
+# Local storage for the "vector db" (safe for Vercel/serverless /tmp)
+def get_knowledge_base_path():
+    if os.path.exists("/tmp"):
+        tmp_kb = "/tmp/knowledge_base.json"
+        if not os.path.exists(tmp_kb) and os.path.exists("knowledge_base.json"):
+            try:
+                import shutil
+                shutil.copy("knowledge_base.json", tmp_kb)
+            except Exception:
+                pass
+        return tmp_kb
+    return "knowledge_base.json"
+
+KNOWLEDGE_BASE_PATH = get_knowledge_base_path()
 
 def dot_product(v1, v2):
     return sum(x * y for x, y in zip(v1, v2))
@@ -55,7 +67,7 @@ def process_document(file_path):
         text = ""
         if file_path.lower().endswith('.pdf'):
             reader = PdfReader(file_path)
-            for page in reader.pages:
+            for page in reader.pages[:10]: # Process up to 10 pages to avoid timeouts
                 text += (page.extract_text() or "") + "\n"
         else:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -65,6 +77,8 @@ def process_document(file_path):
             return False
 
         chunks = split_text(text)
+        # Cap chunks to max 5 to prevent serverless function timeouts
+        chunks = chunks[:5]
         
         # Get embeddings for chunks
         new_entries = []
@@ -77,13 +91,16 @@ def process_document(file_path):
                     "embedding": result['embedding']
                 })
         
+        if not new_entries:
+            return False
+
         # Load existing or create new
         kb = []
         if os.path.exists(KNOWLEDGE_BASE_PATH):
             try:
-                with open(KNOWLEDGE_BASE_PATH, 'r') as f:
+                with open(KNOWLEDGE_BASE_PATH, 'r', encoding='utf-8') as f:
                     kb = json.load(f)
-            except:
+            except Exception:
                 kb = []
         
         kb.extend(new_entries)
@@ -92,8 +109,11 @@ def process_document(file_path):
         if len(kb) > 1000:
             kb = kb[-1000:]
             
-        with open(KNOWLEDGE_BASE_PATH, 'w') as f:
-            json.dump(kb, f)
+        try:
+            with open(KNOWLEDGE_BASE_PATH, 'w', encoding='utf-8') as f:
+                json.dump(kb, f)
+        except Exception as w_err:
+            print(f"[RAG] Warning: Could not save to {KNOWLEDGE_BASE_PATH}: {w_err}")
             
         return True
     except Exception as e:
