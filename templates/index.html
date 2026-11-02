@@ -95,11 +95,24 @@
 
                 <!-- Input Footer -->
                 <div class="p-3 border-top bg-white chat-input-footer" style="border-color: rgba(124, 58, 237, 0.1) !important;">
-                    <!-- File Attachment Preview -->
-                    <div id="file-preview" class="d-none mb-2 p-2 border bg-light position-relative align-items-center gap-2" style="width: fit-content; border-radius: 10px; border-color: rgba(124, 58, 237, 0.2) !important;">
-                        <i class="bi bi-file-earmark-text text-purple small"></i>
-                        <span id="file-name" class="text-slate small mono-font" style="font-size: 0.8rem;"></span>
-                        <button type="button" class="btn-close ms-2 small" aria-label="Close" onclick="clearFile()" style="font-size: 0.7rem;"></button>
+                    <!-- File Attachment Preview & Animated Upload Status -->
+                    <div id="file-preview" class="d-none mb-2 p-2 px-3 border position-relative align-items-center gap-2.5 shadow-sm" style="width: fit-content; max-width: 100%; border-radius: 12px; background: rgba(124, 58, 237, 0.04); border-color: rgba(124, 58, 237, 0.25) !important;">
+                        <div id="file-icon-box" class="d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; border-radius: 8px; background: rgba(124, 58, 237, 0.1);">
+                            <i id="file-icon" class="bi bi-file-earmark-pdf-fill text-danger fs-6"></i>
+                            <div id="file-spinner" class="spinner-border spinner-border-sm text-purple d-none" role="status" style="width: 1rem; height: 1rem;"></div>
+                        </div>
+                        <div class="d-flex flex-column" style="min-width: 150px;">
+                            <div class="d-flex align-items-center gap-2">
+                                <span id="file-name" class="text-slate small fw-semibold mono-font text-truncate" style="font-size: 0.8rem; max-width: 220px;"></span>
+                                <span id="file-status-badge" class="badge rounded-pill bg-warning-subtle text-warning-emphasis py-0.5 px-2" style="font-size: 0.65rem;">
+                                    <span class="spinner-grow spinner-grow-sm me-1" style="width: 6px; height: 6px;"></span>Uploading...
+                                </span>
+                            </div>
+                            <div id="file-progress-container" class="progress mt-1" style="height: 3px; background: rgba(124, 58, 237, 0.1);">
+                                <div id="file-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%; background: var(--primary-purple);"></div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close ms-2" aria-label="Close" onclick="clearFile()" style="font-size: 0.65rem;"></button>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
@@ -674,6 +687,20 @@
             font-size: 0.78rem !important;
         }
     }
+
+    @keyframes uploadPulse {
+        0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+        70% { box-shadow: 0 0 0 6px rgba(124, 58, 237, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+    }
+    .file-uploading-pill {
+        animation: uploadPulse 1.8s infinite !important;
+        border-color: rgba(124, 58, 237, 0.5) !important;
+    }
+    .file-ready-pill {
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        background: rgba(16, 185, 129, 0.05) !important;
+    }
 </style>
 
 <!-- MathJax & Markdown Libraries -->
@@ -689,6 +716,7 @@
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <!-- Interactive Logic -->
 <script>
@@ -712,7 +740,10 @@
         }
 
         document.getElementById("message").addEventListener("keypress", (e) => {
-            if (e.key === "Enter") send();
+            if (e.key === "Enter") {
+                if (typeof isProcessingFile !== 'undefined' && isProcessingFile) return;
+                send();
+            }
         });
     });
 
@@ -852,27 +883,171 @@
     }
 
     let selectedFile = null;
-    function handleFileSelect(input) {
-        if (input.files && input.files[0]) {
-            selectedFile = input.files[0];
-            document.getElementById('file-name').textContent = selectedFile.name;
-            document.getElementById('file-preview').classList.remove('d-none');
-            document.getElementById('file-preview').classList.add('d-flex');
+    let preloadedAttachment = null;
+    let isProcessingFile = false;
+
+    async function handleFileSelect(input) {
+        if (!input.files || !input.files[0]) return;
+        
+        selectedFile = input.files[0];
+        isProcessingFile = true;
+        preloadedAttachment = null;
+
+        const previewEl = document.getElementById('file-preview');
+        const fileNameEl = document.getElementById('file-name');
+        const fileIcon = document.getElementById('file-icon');
+        const fileSpinner = document.getElementById('file-spinner');
+        const fileBadge = document.getElementById('file-status-badge');
+        const fileProgress = document.getElementById('file-progress-container');
+        const sendBtn = document.querySelector('.send-pill-btn');
+
+        // Set UI to loading state
+        fileNameEl.textContent = selectedFile.name;
+        previewEl.classList.remove('d-none', 'file-ready-pill');
+        previewEl.classList.add('d-flex', 'file-uploading-pill');
+
+        if (fileIcon) fileIcon.classList.add('d-none');
+        if (fileSpinner) fileSpinner.classList.remove('d-none');
+        if (fileProgress) fileProgress.classList.remove('d-none');
+
+        if (fileBadge) {
+            fileBadge.className = 'badge rounded-pill bg-warning-subtle text-warning-emphasis py-0.5 px-2';
+            fileBadge.innerHTML = '<span class="spinner-grow spinner-grow-sm me-1" style="width: 6px; height: 6px;"></span>Reading & Optimizing...';
+        }
+
+        // Disable Send button while uploading/processing
+        if (sendBtn) {
+            sendBtn.disabled = true;
+            sendBtn.style.opacity = '0.6';
+            sendBtn.style.cursor = 'not-allowed';
+            sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span><span>Reading...</span>';
+        }
+
+        // Set appropriate icon based on file type
+        const isPdf = selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf');
+        const isText = selectedFile.type.startsWith('text/') || /\.(txt|py|js|html|css|json|md|c|cpp|java)$/i.test(selectedFile.name);
+        const isImg = selectedFile.type.startsWith('image/') || /\.(jpg|jpeg|png|webp)$/i.test(selectedFile.name);
+
+        if (fileIcon) {
+            fileIcon.className = isPdf ? 'bi bi-file-earmark-pdf-fill text-danger' : 
+                                 isImg ? 'bi bi-file-earmark-image-fill text-primary' : 
+                                 'bi bi-file-earmark-code-fill text-purple';
+        }
+
+        try {
+            if (isPdf) {
+                if (window.pdfjsLib) {
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                    const buffer = await selectedFile.arrayBuffer();
+                    const pdfDoc = await pdfjsLib.getDocument({ data: buffer }).promise;
+                    let text = '';
+                    const maxP = Math.min(pdfDoc.numPages, 12);
+                    for (let p = 1; p <= maxP; p++) {
+                        const page = await pdfDoc.getPage(p);
+                        const tc = await page.getTextContent();
+                        text += tc.items.map(it => it.str).join(' ') + '\n';
+                    }
+                    if (text.trim().length > 0) {
+                        preloadedAttachment = {
+                            type: 'pdf',
+                            filename: selectedFile.name,
+                            text: text.trim()
+                        };
+                    }
+                }
+            } else if (isImg) {
+                const b64 = await new Promise((resolve) => {
+                    const r = new FileReader();
+                    r.onload = () => resolve(r.result);
+                    r.onerror = () => resolve(null);
+                    r.readAsDataURL(selectedFile);
+                });
+                if (b64) {
+                    preloadedAttachment = {
+                        type: 'image',
+                        filename: selectedFile.name,
+                        base64: b64
+                    };
+                }
+            } else if (isText) {
+                const txt = await selectedFile.text();
+                if (txt) {
+                    preloadedAttachment = {
+                        type: 'text',
+                        filename: selectedFile.name,
+                        text: txt.substring(0, 30000)
+                    };
+                }
+            }
+
+            // Finished successfully
+            isProcessingFile = false;
+            if (fileSpinner) fileSpinner.classList.add('d-none');
+            if (fileIcon) fileIcon.classList.remove('d-none');
+            if (fileProgress) fileProgress.classList.add('d-none');
+            previewEl.classList.remove('file-uploading-pill');
+            previewEl.classList.add('file-ready-pill');
+
+            if (fileBadge) {
+                fileBadge.className = 'badge rounded-pill bg-success-subtle text-success py-0.5 px-2';
+                fileBadge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Ready';
+            }
+
+            // Re-enable Send button
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.style.opacity = '1';
+                sendBtn.style.cursor = 'pointer';
+                sendBtn.innerHTML = '<span>SEND</span> <i class="bi bi-send-fill ms-1 small"></i>';
+            }
+        } catch (err) {
+            console.warn('File processing error:', err);
+            isProcessingFile = false;
+            if (fileSpinner) fileSpinner.classList.add('d-none');
+            if (fileIcon) fileIcon.classList.remove('d-none');
+            if (fileProgress) fileProgress.classList.add('d-none');
+            previewEl.classList.remove('file-uploading-pill');
+
+            if (fileBadge) {
+                fileBadge.className = 'badge rounded-pill bg-info-subtle text-info py-0.5 px-2';
+                fileBadge.innerHTML = '<i class="bi bi-paperclip me-1"></i>Attached';
+            }
+
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.style.opacity = '1';
+                sendBtn.style.cursor = 'pointer';
+                sendBtn.innerHTML = '<span>SEND</span> <i class="bi bi-send-fill ms-1 small"></i>';
+            }
         }
     }
 
     function clearFile() {
         selectedFile = null;
+        preloadedAttachment = null;
+        isProcessingFile = false;
         document.getElementById('file-input').value = '';
-        document.getElementById('file-preview').classList.remove('d-flex');
-        document.getElementById('file-preview').classList.add('d-none');
+        const previewEl = document.getElementById('file-preview');
+        previewEl.classList.remove('d-flex', 'file-uploading-pill', 'file-ready-pill');
+        previewEl.classList.add('d-none');
+
+        const sendBtn = document.querySelector('.send-pill-btn');
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.style.opacity = '1';
+            sendBtn.style.cursor = 'pointer';
+            sendBtn.innerHTML = '<span>SEND</span> <i class="bi bi-send-fill ms-1 small"></i>';
+        }
     }
 
     async function send() {
+        if (isProcessingFile) {
+            return; // Block sending while upload/processing is in progress!
+        }
         const messageInput = document.getElementById('message');
         const sendBtn = document.querySelector('.send-pill-btn');
         const message = messageInput.value.trim();
-        if (!message && !selectedFile) return;
+        if (!message && !selectedFile && !preloadedAttachment) return;
 
         if (sendBtn) sendBtn.disabled = true;
         messageInput.disabled = true;
@@ -897,25 +1072,40 @@
         chatBox.appendChild(loadingContainer);
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        const formData = new FormData();
-        formData.append('message', message);
-        if (selectedFile) {
-            // Sanitize filename on client side to prevent WAF / edge firewall rejections (e.g. parens, spaces)
-            const cleanName = (selectedFile.name || 'upload.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
-            const safeFile = new File([selectedFile], cleanName, { type: selectedFile.type || 'application/octet-stream' });
-            formData.append('file', safeFile);
-        }
-        if (currentChatId) formData.append('chat_id', currentChatId);
+        let attachmentPayload = preloadedAttachment;
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000);
 
         try {
-            const response = await fetch('/api/chat', { 
-                method: 'POST', 
-                body: formData,
-                signal: controller.signal
-            });
+            let response;
+            // Send as JSON if attachment extracted or no file attached (completely bypasses Vercel WAF 403)
+            if (attachmentPayload || !selectedFile) {
+                response = await fetch('/api/chat', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        chat_id: currentChatId,
+                        attachment: attachmentPayload
+                    }),
+                    signal: controller.signal
+                });
+            } else {
+                // Fallback to FormData if client-side extraction wasn't supported
+                const formData = new FormData();
+                formData.append('message', message);
+                const cleanName = (selectedFile.name || 'upload.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+                const safeFile = new File([selectedFile], cleanName, { type: selectedFile.type || 'application/octet-stream' });
+                formData.append('file', safeFile);
+                if (currentChatId) formData.append('chat_id', currentChatId);
+
+                response = await fetch('/api/chat', { 
+                    method: 'POST', 
+                    body: formData,
+                    signal: controller.signal
+                });
+            }
             clearTimeout(timeoutId);
             
             let data;

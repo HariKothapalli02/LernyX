@@ -180,6 +180,7 @@ import re
 import json
 import random
 import string
+import time
 from youtube_transcript_api import YouTubeTranscriptApi
 from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -548,13 +549,13 @@ def clean_json_text(text):
         
     return text
 
-def ask_gemini(prompt, history=None, attachment_path=None):
+def ask_gemini(prompt, history=None, attachment_path=None, attachment_text=None, attachment_image=None, doc_name=None):
     # Greeting/Non-technical detection
     greeting_keywords = {"hi", "hello", "welcome", "hey", "greetings"}
     cleaned = prompt.strip().lower()
     # Only consider it a greeting if it's an exact match or very short and starts with a greeting
     # AND there is no attachment (if user uploads a file and says "hi", they probably want analysis)
-    is_greeting = (cleaned in greeting_keywords or (len(cleaned) < 10 and any(cleaned.startswith(w) for w in greeting_keywords))) and not attachment_path
+    is_greeting = (cleaned in greeting_keywords or (len(cleaned) < 10 and any(cleaned.startswith(w) for w in greeting_keywords))) and not (attachment_path or attachment_text or attachment_image)
 
     if is_greeting and not history: # Only return static greeting if it's the very first message
         html = "<b>Hi there! 👋</b><br>I am your LernyX Intelligence assistant. Ask me anything, request code, or type a command to get started!"
@@ -610,7 +611,29 @@ def ask_gemini(prompt, history=None, attachment_path=None):
     try:
         content_parts = [format_prompt]
         
-        if attachment_path and os.path.exists(attachment_path):
+        if attachment_text:
+            fname = doc_name or "Uploaded_Document"
+            try:
+                pinecone_utils.index_document_text("chat_documents", fname, attachment_text)
+                pine_results = pinecone_utils.query_vectors("chat_documents", prompt, top_k=4)
+                if pine_results:
+                    pine_context = "\n".join([f"- {r['text']}" for r in pine_results])
+                    content_parts[0] += f"\n\n[Pinecone Vector DB Context ({fname})]:\n{pine_context}"
+                else:
+                    content_parts[0] += f"\n\nAttached Document Content ({fname}):\n{attachment_text[:8000]}"
+            except Exception as t_err:
+                print(f"Error handling attachment text: {t_err}")
+                content_parts[0] += f"\n\nAttached Document Content ({fname}):\n{attachment_text[:8000]}"
+        elif attachment_image and PIL_AVAILABLE:
+            try:
+                import io, base64
+                header, encoded = attachment_image.split(",", 1) if "," in attachment_image else ("", attachment_image)
+                img_data = base64.b64decode(encoded)
+                img = Image.open(io.BytesIO(img_data))
+                content_parts.append(img)
+            except Exception as b64_err:
+                print(f"Error decoding base64 image: {b64_err}")
+        elif attachment_path and os.path.exists(attachment_path):
             ext = os.path.splitext(attachment_path)[1].lower()
             if ext in ['.png', '.jpg', '.jpeg', '.webp'] and PIL_AVAILABLE:
                 try:
@@ -5643,23 +5666,37 @@ def videoquiz():
 @login_required
 def chat():
     # Handle both JSON and Multipart/Form-Data
+    attachment_path = None
+    attachment_info = None
+    attachment_text = None
+    attachment_image = None
+    doc_name = "Uploaded_File"
+
     if request.is_json:
-        data = request.get_json()
+        data = request.get_json() or {}
         user_message = data.get("message", "")
         conversation_id = data.get("conversation_id") or data.get("chat_id")
         file = None
+        att = data.get("attachment")
+        if att:
+            doc_name = att.get("filename", "document.pdf")
+            attachment_info = {
+                "filename": doc_name,
+                "type": att.get("type", "file")
+            }
+            if att.get("text"):
+                attachment_text = att.get("text")
+            elif att.get("base64"):
+                attachment_image = att.get("base64")
     else:
         user_message = request.form.get("message", "")
         conversation_id = request.form.get("conversation_id") or request.form.get("chat_id")
         file = request.files.get("file")
 
-    if not user_message and not file:
+    if not user_message and not file and not attachment_text and not attachment_image:
         return jsonify({"error": "No message or file provided"}), 400
         
-    # Handle file upload
-    attachment_path = None
-    attachment_info = None
-    
+    # Handle file upload if sent via multipart
     if file and file.filename:
         try:
             # Create temp directory if not exists
@@ -5704,7 +5741,14 @@ def chat():
                 print(f"Error fetching history: {e}")
         
         # Call Gemini
-        answer = ask_gemini(user_message, history, attachment_path)
+        answer = ask_gemini(
+            user_message, 
+            history, 
+            attachment_path=attachment_path, 
+            attachment_text=attachment_text, 
+            attachment_image=attachment_image, 
+            doc_name=doc_name
+        )
         
         # Clean up temp file
         if attachment_path and os.path.exists(attachment_path):
